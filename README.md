@@ -5,7 +5,7 @@ The idea came to me when I was doing OSCP, even tho I have worked hard on it its
 
 I did use some lines from G0tmilk script however must of lines can be found on the web.
 
-Please feel free to do your own contribution.
+COnfiuration of the IRC bouncer its not perfect, Please feel free to do your own contribution.
 
 Just do: 
 
