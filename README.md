@@ -11,8 +11,11 @@ Express Install: Will install basic apps and configure your system for daily use
 
 Full Install: Will Install full package and let your system ready for Pentesting.
 
+Teste on VM x64
+
 Just do: 
 
 # git clone https://github.com/kawaxi/kali-setup
 
 # start -h
+
