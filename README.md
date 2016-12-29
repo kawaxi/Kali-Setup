@@ -7,6 +7,10 @@ I did use some lines from G0tmilk script however must of lines can be found on t
 
 COnfiuration of the IRC bouncer its not perfect, Please feel free to do your own contribution.
 
+Express Install: Will install basic apps and configure your system for daily use.
+
+Full Install: Will Install full package and let your system ready for Pentesting.
+
 Just do: 
 
 # git clone https://github.com/kawaxi/kali-setup
