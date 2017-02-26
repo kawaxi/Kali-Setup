@@ -1,26 +1,7 @@
-#! /bin/bash/
+#!/bin/bash
 
 
-configure--()
-{
-
-
-
-#--- Installing ntp tools # lets stay on time of thing would ya?
-
-(( STAGE++ )); echo -e " ${GREEN}[+]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Installing ntpdate ${ORANGE} ~ Keeping the Time in Sync ${RESET} "
-apt -y -qq install ntp ntpdate \
-  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
-#--- Update time
-ntpdate -b -s -u pool.ntp.org
-#--- Start service
-systemctl restart ntp
-#--- Remove from start up
-systemctl disable ntp 2>/dev/null
-#--- Only used for stats at the end
-start_time=$(date +%s)
-
-
+configure--(){
 
 TEXT=' Configuring GNOME 3  ....'
 notice --
@@ -29,21 +10,44 @@ if [[ $(which gnome-shell) ]]; then
   ##### Configure GNOME 3
   (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Configuring GNOME 3 ${ORANGE} ~ desktop environment ${RESET}"
   export DISPLAY=:0.0
+
+
+  gnome-shell-extension-tool -e dash-to-dock@micxgx.gmail.com
   gnome-shell-extension-tool -e window-list@gnome-shell-extensions.gcampax.github.com
-  gnome-shell-extension-tool -e Alternatetab                            #Alternate-tab (So it doesn't group the same windows up)
-  gnome-shell-extension-tool -e Easyscreencast				               		## Easy Screen Cast
-  gnome-shell-extension-tool -e drive-menu@gnome-shell-extensions.gcampax.github.com	#-- Gnome Extension - Drive Menu (Show USB devices in tray)
-  gsettings set org.gnome.desktop.interface clock-show-date true  			# Show date next to time in the top tool bar
-  gsettings set org.gnome.desktop.wm.preferences focus-mode 'mouse'			# Focus mode changed to mouse
-  ##### Configuring your Dash to Dock
+  #Alternate-tab (So it doesn't group the same windows up)
+  gnome-shell-extension-tool -e Alternatetab
+  ## Easy Screen Cast
+  gnome-shell-extension-tool -e Easyscreencast
+  #-- Gnome Extension - Drive Menu (Show USB devices in tray)
+  gnome-shell-extension-tool -e drive-menu@gnome-shell-extensions.gcampax.github.com
+  # Show date next to time in the top tool bar
+  gsettings set org.gnome.desktop.interface clock-show-date true
+  #Date and Time auto sync
+  gsettings set org.gnome.desktop.datetime automatic-timezone true
+  # Focus mode changed to mouse
+  gsettings set org.gnome.desktop.wm.preferences focus-mode 'mouse'
+
+  # Adding dash-to-dock to gsettings.
+  cp /usr/share/gnome-shell/extensions/dash-to-dock@micxgx.gmail.com/schemas/org.gnome.shell.extensions.dash-to-dock.gschema.xml \
+  /usr/share/glib-2.0/schemas/ && glib-compile-schemas /usr/share/glib-2.0/schemas/
+
+
+  ##### Configuring your Dash to Dock, you need to reboot to all efects to take place.
   gsettings set org.gnome.shell.extensions.dash-to-dock intellihide true
   gsettings set org.gnome.shell.extensions.dash-to-dock autohide true
   gsettings set org.gnome.shell.extensions.dash-to-dock dock-fixed false
   gsettings set org.gnome.shell.extensions.dash-to-dock intellihide-mode 'ALL_WINDOWS'
   gsettings set org.gnome.shell.extensions.dash-to-dock require-pressure-to-show false
   gsettings set org.gnome.shell.extensions.dash-to-dock background-color '#3465a4'
-  gsettings set org.gnome.shell.extensions.dash-to-dock show-delay 0.200
+  gsettings set org.gnome.shell.extensions.dash-to-dock show-delay 0.15000000000000002
   gsettings set org.gnome.shell.extensions.dash-to-dock hide-delay 0.200
+
+  # In case you need another options to gsettings
+  # dconf list /org/gnome/shell/extensions/dash-to-dock/
+  # dconf write /org/gnome/shell/extensions/dash-to-dock/autohide true
+  # dconf write /org/gnome/shell/extensions/dash-to-dock/intellihide-mode FOCUS_APPLICATION_WINDOWS
+  # dconf write /org/gnome/shell/extensions/dash-to-dock/require-pressure-to-show false
+  # dconf write /org/gnome/shell/extensions/dash-to-dock/hide-delay 0.200
 
 ##### Disable screensaver
   echo -e "\n\n ${GREEN}[i] ${GREEN}Lets Start Tweaking GNOME ...${RESET}"
@@ -52,41 +56,41 @@ if [[ $(which gnome-shell) ]]; then
   xset s off
   gsettings set org.gnome.desktop.session idle-delay 0
 else
-  echo -e "\n\n ${YELLOW}[i]${RESET} ${YELLOW}Skipping disabling package updater${RESET}..."
+  echo -e "\n\n ${YELLOW}[i]${RESET} ${YELLOW}Skipping  from disabling package updater${RESET}..."
 fi
 
 
 #adding favorites to our Gnome  FOR 64bits
-gsettings set org.gnome.shell favorite-apps "['firefox-esr.desktop', 'org.gnome.Nautilus.desktop', 'org.gnome.Terminal.desktop', 'terminator.desktop', 'kali-msfconsole.desktop', 'kali-armitage.desktop', 'kali-burpsuite.desktop', 'kali-beef.desktop', 'kali-faraday.desktop', 'leafpad.desktop', 'gnome-tweak-tool.desktop','atom.desktop', 'icedove.desktop', 'shutter.desktop' , 'hexchat.desktop']"
+gsettings set org.gnome.shell favorite-apps "['firefox-esr.desktop', 'org.gnome.Nautilus.desktop', 'org.gnome.Terminal.desktop', 'terminator.desktop', 'kali-msfconsole.desktop', 'kali-armitage.desktop', 'kali-burpsuite.desktop', 'kali-beef.desktop', 'kali-faraday.desktop', 'leafpad.desktop', 'gnome-tweak-tool.desktop','atom.desktop', 'keepnote.desktop', 'icedove.desktop', 'shutter.desktop' , 'hexchat.desktop']"
 
 #adding favorites to our Gnome  FOR 32bits
 #gsettings get org.gnome.shell favorite-apps "['firefox-esr.desktop', 'org.gnome.Nautilus.desktop', 'org.gnome.Terminal.desktop', 'terminator.desktop', 'kali-msfconsole.desktop', 'kali-armitage.desktop', 'kali-burpsuite.desktop', 'kali-beef.desktop', 'kali-faraday.desktop', 'leafpad.desktop', 'gnome-tweak-tool.desktop', 'icedove.desktop', 'shutter.desktop', 'hexchat.desktop']"
 
 
-##### Configure GNOME terminal   Note: need to restart xserver for effect
+##### Configure GNOME terminal ;  Note: need to restart xserver for effect
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Configuring GNOME terminal${ORANGE} ~ CLI interface"
 gconftool-2 -t bool -s /apps/gnome-terminal/profiles/Default/scrollback_unlimited true
 gconftool-2 -t string -s /apps/gnome-terminal/profiles/Default/background_type transparent
 gconftool-2 -t string -s /apps/gnome-terminal/profiles/Default/background_darkness 0.85611499999999996
 
 
-##### Configure bash - all users
+##### Configure bash - All users
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Configuring bash${ORANGE} ~ CLI shell"
 file=/etc/bash.bashrc; [ -e "${file}" ] && cp -n $file{,.bkup}   #~/.bashrc
 grep -q "cdspell" "${file}" \
-|| echo "shopt -sq cdspell" >> "${file}"             # Spell check 'cd' commands
+|| echo "shopt -sq cdspell" >> "${file}"               # Spell check 'cd' commands
 grep -q "autocd" "${file}" \
-|| echo "shopt -s autocd" >> "${file}"                # So you don't have to 'cd' before a folder
+|| echo "shopt -s autocd" >> "${file}"                 # So you don't have to 'cd' before a folder
 #grep -q "CDPATH" "${file}" \
 # || echo "CDPATH=/etc:/usr/share/:/opt" >> "${file}"  # Always CD into these folders
 grep -q "checkwinsize" "${file}" \
-|| echo "shopt -sq checkwinsize" >> "${file}"         # Wrap lines correctly after resizing
+|| echo "shopt -sq checkwinsize" >> "${file}"          # Wrap lines correctly after resizing
 grep -q "nocaseglob" "${file}" \
-|| echo "shopt -sq nocaseglob" >> "${file}"           # Case insensitive pathname expansion
+|| echo "shopt -sq nocaseglob" >> "${file}"            # Case insensitive pathname expansion
 grep -q "HISTSIZE" "${file}" \
-|| echo "HISTSIZE=10000" >> "${file}"                 # Bash history (memory scroll back)
+|| echo "HISTSIZE=10000" >> "${file}"                  # Bash history (memory scroll back)
 grep -q "HISTFILESIZE" "${file}" \
-|| echo "HISTFILESIZE=10000" >> "${file}"             # Bash history (file .bash_history)
+|| echo "HISTFILESIZE=10000" >> "${file}"              # Bash history (file .bash_history)
 #--- Apply new configs
 source "${file}" || source ~/.zshrc
 
@@ -296,33 +300,44 @@ SortOrder=ascending
 #StartupMode=recent
 EOF
 
-gsettings set org.gnome.nautilus.preferences always-use-location-entry true  # Show address bar on nautilus
-gsettings set org.gnome.nautilus.preferences sort-directories-first true  # Sort Directories First.
+#--- Show address bar on nautilus
+gsettings set org.gnome.nautilus.preferences always-use-location-entry true
+#--- Sort Directories First.
+gsettings set org.gnome.nautilus.preferences sort-directories-first true
+#--- Show hidden files
+gsettings set org.gnome.nautilus.preferences show-hidden-files true
+#--- Show Directory items count
+gsettings set org.gnome.nautilus.preferences show-directory-item-counts true
 
 
-#adding nautilus bookmark entries
-echo "[*] Setting up Bookmarks"
-   read -p "!!!Enter the path of each directory you would like bookmarked - EX:/usr/share and a name for the bookmark (Hit Enter to Continue)";
-   echo "[*] 3 Entries max, more can be manually entered. (FTP, TFTP, HTML, and Root Dir / done by default."
+#--- Adding nautilus bookmark entries
+echo "${GREEN}[*] ${ORANGE} Setting up Bookmarks ${RESET}"
+
+  #  read -p "!!!Enter the path of each directory you would like bookmarked - EX:/usr/share and a name for the bookmark (Hit Enter to Continue)";
+  #  echo "[*] 3 Entries max, more can be manually entered. (FTP, TFTP, HTML, and Root Dir / done by default."
    if [ ! -d "/root/.config/gtk-3.0" ]; then
         mkdir ~/.config/gtk-3.0
    fi
    echo file:/// / > ~/.config/gtk-3.0/bookmarks
-   echo file:///var/www/html www >> ~/.config/gtk-3.0/bookmarks
-   echo file:///tftpboot tftp >> ~/.config/gtk-3.0/bookmarks
+   echo file:///etc/ /etc >> ~/.config/gtk-3.0/bookmarks
    echo file:///usr/share Kali Tools >> ~/.config/gtk-3.0/bookmarks
+   echo file:///var/www/html www >> ~/.config/gtk-3.0/bookmarks
+   echo file:///var/ftp/ ftp >> ~/.config/gtk-3.0/bookmarks
+   echo file:///var/tftp tftp >> ~/.config/gtk-3.0/bookmarks
    echo file:///tmp  /tmp >> ~/.config/gtk-3.0/bookmarks
-   read -p "[*] Enter the FTP user you created to create the FTP bookmark: " ftpuser;
-   echo file:///var/ftp/"$ftpuser" ftp >> ~/.config/gtk-3.0/bookmarks
-   for a in $(seq 1 3); do
-        read -p "[*] Enter additional entries now EX:/usr/bin.  enter 'exit' when done: " loc;
-        if [ "$loc" == "exit" ]; then
-             break
-        else
-             read -p "[*] Enter a name for this bookmark entry EX: bin: " name;
-             echo file://"$loc" "$name" >> ~/.config/gtk-3.0/bookmarks
-        fi
-   done
+
+
+  #  read -p "[*] Enter the FTP user you created to create the FTP bookmark: " ftpuser;
+  #  echo file:///var/ftp/"$ftpuser" ftp >> ~/.config/gtk-3.0/bookmarks
+  #  for a in $(seq 1 3); do
+  #       read -p "[*] Enter additional entries now EX:/usr/bin.  enter 'exit' when done: " loc;
+  #       if [ "$loc" == "exit" ]; then
+  #            break
+  #       else
+  #            read -p "[*] Enter a name for this bookmark entry EX: bin: " name;
+  #            echo file://"$loc" "$name" >> ~/.config/gtk-3.0/bookmarks
+  #       fi
+  #  done
 
 
 
@@ -382,7 +397,7 @@ fi
 
 #--- Changing time zone
 if [[ -n "${timezone}" ]]; then
-  (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Updating location information${WHITE} ~ Time Zone (${BOLD}${timezone}${RESET})"
+  (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Updating location information${ORANGE} ~ Time Zone (${BOLD}${timezone}${RESET})"
   echo "${timezone}" > /etc/timezone
   ln -sf "/usr/share/zoneinfo/$(cat /etc/timezone)" /etc/localtime
   dpkg-reconfigure -f noninteractive tzdata
@@ -392,9 +407,10 @@ fi
 
 
 
-####--- Configure firefox
+#### Configure firefox
 export DISPLAY=:0.0
-timeout 5 firefox >/dev/null 2>&1                # Start and kill. Files needed for first time run
+#--- Start and kill. Files needed for first time run
+timeout 5 firefox >/dev/null 2>&1
 timeout 5 killall -9 -q -w firefox-esr >/dev/null
 file=$(find ~/.mozilla/firefox/*.default*/ -maxdepth 1 -type f -name 'prefs.js' -print -quit)
 [ -e "${file}" ] \
@@ -450,7 +466,7 @@ find ~/.mozilla/firefox/*.default*/ -maxdepth 1 -mindepth 1 -type f -name "place
 find ~/.mozilla/firefox/*.default*/bookmarkbackups/ -type f -delete
 
 ##### Setup firefox's plugins
-(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) Installing ${GREEN}Firefox's Plugins${ORANGE} ~ Useful Addons ${RESET}"
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Installing Firefox's Plugins${ORANGE} ~ Useful Addons ${RESET}"
 #--- Configure firefox
 export DISPLAY=:0.0
 #--- Download extensions
@@ -522,14 +538,18 @@ sleep 3s
 
 
 #--- Method for Newer versions
-file=$(find ~/.mozilla/firefox/*.default*/ -maxdepth 1 -type f -name 'extensions.json' -print -quit)   #&& [ -e "${file}" ] && cp -n $file{,.bkup}
+#---&& [ -e "${file}" ] && cp -n $file{,.bkup}
+file=$(find ~/.mozilla/firefox/*.default*/ -maxdepth 1 -type f -name 'extensions.json' -print -quit)
 if [[ -e "${file}" ]] || [[ -n "${file}" ]]; then
   echo -e " ${YELLOW}[i]${RESET} Enabled ${YELLOW}Firefox's extensions${RESET} (via method #2 - extensions.json)"
-  sed -i 's/"active":false,/"active":true,/g' "${file}"                # Force them all!
-  sed -i 's/"userDisabled":true,/"userDisabled":false,/g' "${file}"    # Force them all!
+  #--- Force them all!
+  sed -i 's/"active":false,/"active":true,/g' "${file}"
+  #--- Force them all!
+  sed -i 's/"userDisabled":true,/"userDisabled":false,/g' "${file}"
 fi
 #--- Remove cache
-file=$(find ~/.mozilla/firefox/*.default*/ -maxdepth 1 -type f -name 'prefs.js' -print -quit)   #&& [ -e "${file}" ] && cp -n $file{,.bkup}
+#---&& [ -e "${file}" ] && cp -n $file{,.bkup}
+file=$(find ~/.mozilla/firefox/*.default*/ -maxdepth 1 -type f -name 'prefs.js' -print -quit)
 [ -n "${file}" ] \
   && sed -i '/extensions.installCache/d' "${file}"
 #--- For extensions that just work without restarting
@@ -561,38 +581,21 @@ fi
 
 
 ##### Cosmetics (themes & wallpapers)
+
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Cosmetics ${ORANGE} ~ Giving it a personal touch ${RESET}"
 export DISPLAY=:0.0
 #--- axiom / axiomd (May 18 2010) XFCE4 theme ~ http://xfce-look.org/content/show.php/axiom+xfwm?content=90145
 mkdir -p ~/.themes/
-timeout 300 curl --progress -k -L -f "https://dl.opendesktop.org/api/files/download/id/1461767736/90145-axiom.tar.gz" > /tmp/axiom.tar.gz \
-  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading axiom.tar.gz" 1>&2    #***!!! hardcoded path!
-tar -zxf /tmp/axiom.tar.gz -C ~/.themes/
-xfconf-query -n -c xsettings -p /Net/ThemeName -s "axiomd"
-xfconf-query -n -c xsettings -p /Net/IconThemeName -s "Vibrancy-Kali-Dark"
+ timeout 300 curl --progress -k -L -f "https://dl.opendesktop.org/api/files/download/id/1461767736/90145-axiom.tar.gz" > /tmp/axiom.tar.gz \
+   || echo -e ' '${RED}'[!]'${RESET}" Issue downloading axiom.tar.gz" 1>&2    #***!!! hardcoded path!
+ tar -zxf /tmp/axiom.tar.gz -C ~/.themes/
+# xfconf-query -n -c xsettings -p /Net/ThemeName -s "axiomd"
+# xfconf-query -n -c xsettings -p /Net/IconThemeName -s "Vibrancy-Kali-Dark"
 #--- Get new desktop wallpaper      (All are #***!!! hardcoded paths!)
-mkdir -p /usr/share/wallpapers/
-echo -n '[1/10]'; timeout 300 curl --progress -k -L -f "https://www.kali.org/images/wallpapers-01/kali-wp-june-2014_1920x1080_A.png" > /usr/share/wallpapers/kali_blue_3d_a.png \
-  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading kali_blue_3d_a.png" 1>&2
-echo -n '[2/10]'; timeout 300 curl --progress -k -L -f "https://www.kali.org/images/wallpapers-01/kali-wp-june-2014_1920x1080_B.png" > /usr/share/wallpapers/kali_blue_3d_b.png \
-  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading kali_blue_3d_b.png" 1>&2
-echo -n '[3/10]'; timeout 300 curl --progress -k -L -f "https://www.kali.org/images/wallpapers-01/kali-wp-june-2014_1920x1080_G.png" > /usr/share/wallpapers/kali_black_honeycomb.png \
-  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading kali_black_honeycomb.png" 1>&2
-echo -n '[4/10]'; timeout 300 curl --progress -k -L -f "https://lh5.googleusercontent.com/-CW1-qRVBiqc/U7ARd2T9LCI/AAAAAAAAAGw/oantfR6owSg/w1920-h1080/vzex.png" > /usr/share/wallpapers/kali_blue_splat.png \
-  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading kali_blue_splat.png" 1>&2
-echo -n '[5/10]'; timeout 300 curl --progress -k -L -f "http://wallpaperstock.net/kali-linux_wallpapers_39530_1920x1080.jpg" > /usr/share/wallpapers/kali-linux_wallpapers_39530.png \
-  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading kali-linux_wallpapers_39530.png" 1>&2
-echo -n '[6/10]'; timeout 300 curl --progress -k -L -f "http://em3rgency.com/wp-content/uploads/2012/12/Kali-Linux-faded-no-Dragon-small-text.png" > /usr/share/wallpapers/kali_black_clean.png \
-  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading kali_black_clean.png" 1>&2
-#echo -n '[7/10]'; timeout 300 curl --progress -k -L -f "http://www.hdwallpapers.im/download/kali_linux-wallpaper.jpg" > /usr/share/wallpapers/kali_black_stripes.jpg \
-#  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading kali_black_stripes.jpg" 1>&2
-echo -n '[8/10]'; timeout 300 curl --progress -k -L -f "http://fc01.deviantart.net/fs71/f/2011/118/e/3/bt___edb_wallpaper_by_xxdigipxx-d3f4nxv.png" > /usr/share/wallpapers/kali_bt_edb.jpg \
-  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading kali_bt_edb.jpg" 1>&2
-echo -n '[9/10]'; timeout 300 curl --progress -k -L -f "http://pre07.deviantart.net/58d1/th/pre/i/2015/223/4/8/kali_2_0_alternate_wallpaper_by_xxdigipxx-d95800s.png" > /usr/share/wallpapers/kali_2_0_alternate_wallpaper.png \
-  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading kali_2_0_alternate_wallpaper.png" 1>&2
-echo -n '[10/10]'; timeout 300 curl --progress -k -L -f "http://pre01.deviantart.net/4210/th/pre/i/2015/195/3/d/kali_2_0__personal__wp_by_xxdigipxx-d91c8dq.png" > /usr/share/wallpapers/kali_2_0_personal.png \
-  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading kali_2_0_personal.png" 1>&2
-_TMP="$(find /usr/share/wallpapers/ -maxdepth 1 -type f -name 'kali_*' | xargs -n1 file | grep -i 'HTML\|empty' | cut -d ':' -f1)"
+echo -n '[1/10]'; timeout 300 curl --progress -k -L -f "https://github.com/kawaxi/Kali-Setup/raw/master/lib/kali.zip" > /tmp/kali.zip \
+  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading wallpapers" 1>&2
+unzip -joqd /usr/share/wallpapers/kali /tmp/kali.zip
+_TMP="$(find /usr/share/wallpapers/kali -maxdepth 1 -type f -name 'kali_*' | xargs -n1 file | grep -i 'HTML\|empty' | cut -d ':' -f1)"
 for FILE in $(echo ${_TMP}); do rm -f "${FILE}"; done
 #--- Kali 1 (Wallpaper)
 [ -e "/usr/share/wallpapers/kali_default-1440x900.jpg" ] \
@@ -608,21 +611,22 @@ mkdir -p /usr/local/bin/
 file=/usr/local/bin/rand-wallpaper; [ -e "${file}" ] && cp -n $file{,.bkup}
 cat <<EOF > "${file}" \
   || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
-#!/bin/bash
-wallpaper="\$(shuf -n1 -e \$(find /usr/share/wallpapers/ -maxdepth 1 -name 'kali_*'))"
-## XFCE - Desktop wallpaper
-/usr/bin/xfconf-query -n -c xfce4-desktop -p /backdrop/screen0/monitor0/image-show -t bool -s true
-/usr/bin/xfconf-query -n -c xfce4-desktop -p /backdrop/screen0/monitor0/image-path -t string -s "\${wallpaper}"
-/usr/bin/xfconf-query -n -c xfce4-desktop -p /backdrop/screen0/monitor0/workspace0/last-image -t string -s "\${wallpaper}"
-## GNOME - Desktop wallpaper
-#[[ $(which gnome-shell) ]] \
-#  && dconf write /org/gnome/desktop/background/picture-uri "'file://\${wallpaper}'"
-## Change lock wallpaper (before swipe) - kali 2 & rolling
-/usr/bin/dconf write /org/gnome/desktop/screensaver/picture-uri "'file://\${wallpaper}'"
-## Change login wallpaper (after swipe) - kali 2
-#cp -f "\${wallpaper}" /usr/share/gnome-shell/theme/KaliLogin.png
-/usr/bin/xfdesktop --reload 2>/dev/null &
+  #!/bin/bash
+  wallpaper="\$(shuf -n1 -e \$(find /usr/share/wallpapers/kali/ -maxdepth 1 -name 'kali_*'))"
+  ## XFCE - Desktop wallpaper
+  # /usr/bin/xfconf-query -n -c xfce4-desktop -p /backdrop/screen0/monitor0/image-show -t bool -s true
+  # /usr/bin/xfconf-query -n -c xfce4-desktop -p /backdrop/screen0/monitor0/image-path -t string -s "\${wallpaper}"
+  # /usr/bin/xfconf-query -n -c xfce4-desktop -p /backdrop/screen0/monitor0/workspace0/last-image -t string -s "\${wallpaper}"
+  ## GNOME - Desktop wallpaper
+  [[ $(which gnome-shell) ]] \
+    && dconf write /org/gnome/desktop/background/picture-uri "'file://\${wallpaper}'"
+  ## Change lock wallpaper (before swipe) - kali 2 & rolling
+  /usr/bin/dconf write /org/gnome/desktop/screensaver/picture-uri "'file://\${wallpaper}'"
+  ## Change login wallpaper (after swipe) - kali 2
+  cp -f "\${wallpaper}" /usr/share/gnome-shell/theme/KaliLogin.png
+  /usr/bin/xfdesktop --reload 2>/dev/null &
 EOF
+
 chmod -f 0500 "${file}"
 #--- Run now
 bash "${file}"
@@ -639,10 +643,5 @@ NoDisplay=false
 X-GNOME-Autostart-enabled=true
 Name=wallpaper
 EOF
-
-####
-
-
-
 
 }

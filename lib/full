@@ -5,11 +5,9 @@
 
 full--()
 {
-echo ' this is a full install setup'
 
 
-
-##### Install metasploit ~ http://docs.kali.org/general-use/starting-metasploit-framework-in-kali
+#### Install metasploit ~ http://docs.kali.org/general-use/starting-metasploit-framework-in-kali
 if [[ "${openVAS}" != "false" ]]; then
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing metasploit ${ORANGE} ~ Exploit Framework ${RESET} "
 apt -y -qq install metasploit-framework \
@@ -73,6 +71,8 @@ grep -q '^alias msfc=' "${file}" 2>/dev/null \
   || echo -e 'alias msfc="systemctl start postgresql; msfdb start; msfconsole -q \"\$@\""' >> "${file}"
 grep -q '^alias msfconsole=' "${file}" 2>/dev/null \
   || echo -e 'alias msfconsole="systemctl start postgresql; msfdb start; msfconsole \"\$@\""\n' >> "${file}"
+grep -q '^alias msf=' "${file}" 2>/dev/null \
+    || echo -e 'alias msfconsole="systemctl start postgresql; msfdb start; msfconsole \"\$@\""\n' >> "${file}"
 #--- Aliases to speed up msfvenom (create static output)
 grep -q "^alias msfvenom-list-all" "${file}" 2>/dev/null \
   || echo "alias msfvenom-list-all='cat ~/.msf4/msfvenom/all'" >> "${file}"
@@ -115,7 +115,7 @@ msfdb start
 msfconsole -q -x 'version;db_status;sleep 310;exit'
 
 
-##### Configuring armitage
+#### Configuring armitage
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) Configuring ${GREEN}armitage${ORANGE} ~ GUI Metasploit UI ${RESET}"
 export MSF_DATABASE_CONFIG=/usr/share/metasploit-framework/config/database.yml
 for file in /etc/bash.bashrc ~/.zshrc; do     #~/.bashrc
@@ -131,22 +131,25 @@ done
 fi
 
 
-##### Install Python (Windows via WINE)
-(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Installing Python (Windows) ${RESET}"
-echo -n '[1/2]'; timeout 300 curl --progress -k -L -f "https://www.python.org/ftp/python/2.7.9/python-2.7.9.msi" > /tmp/python.msi \
-  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading python.msi" 1>&2       #***!!! hardcoded path!
-echo -n '[2/2]'; timeout 300 curl --progress -k -L -f "http://sourceforge.net/projects/pywin32/files/pywin32/Build%20219/pywin32-219.win32-py2.7.exe/download" > /tmp/pywin32.exe \
-  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading pywin32.exe" 1>&2      #***!!! hardcoded path!
-wine msiexec /i /tmp/python.msi /qb 2>&1 | grep -v 'If something goes wrong, please rerun with\|for more detailed debugging output'
-pushd /tmp/ >/dev/null
-rm -rf "PLATLIB/" "SCRIPTS/"
-unzip -q -o /tmp/pywin32.exe
-cp -rf PLATLIB/* ~/.wine/drive_c/Python27/Lib/site-packages/
-cp -rf SCRIPTS/* ~/.wine/drive_c/Python27/Scripts/
-rm -rf "PLATLIB/" "SCRIPTS/"
-popd >/dev/null
+#### Install Python (Windows via WINE)
+#--- Add options for 64 bits.
+if [[ "$(uname -m)" == 'i686' ]]; then
+  (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Installing Python (Windows) ${RESET}"
+  echo -n '[1/2]'; timeout 300 curl --progress -k -L -f "https://www.python.org/ftp/python/2.7.9/python-2.7.9.msi" > /tmp/python.msi \
+    || echo -e ' '${RED}'[!]'${RESET}" Issue downloading python.msi" 1>&2       #***!!! hardcoded path!
+  echo -n '[2/2]'; timeout 300 curl --progress -k -L -f "http://sourceforge.net/projects/pywin32/files/pywin32/Build%20219/pywin32-219.win32-py2.7.exe/download" > /tmp/pywin32.exe \
+    || echo -e ' '${RED}'[!]'${RESET}" Issue downloading pywin32.exe" 1>&2      #***!!! hardcoded path!
+  wine msiexec /i /tmp/python.msi /qb 2>&1 | grep -v 'If something goes wrong, please rerun with\|for more detailed debugging output'
+  pushd /tmp/ >/dev/null
+  rm -rf "PLATLIB/" "SCRIPTS/"
+  unzip -q -o /tmp/pywin32.exe
+  cp -rf PLATLIB/* ~/.wine/drive_c/Python27/Lib/site-packages/
+  cp -rf SCRIPTS/* ~/.wine/drive_c/Python27/Scripts/
+  rm -rf "PLATLIB/" "SCRIPTS/"
+  popd >/dev/null
+fi
 
-##### Install PyCharm (Community Edition)
+#### Install PyCharm (Community Edition)
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing PyCharm (Community Edition) ${ORANGE} ~ Python IDE ${RESET} "
 timeout 300 curl --progress -k -L -f "https://download.jetbrains.com/python/pycharm-community-2016.2.3.tar.gz" > /tmp/pycharms-community.tar.gz \
   || echo -e ' '${RED}'[!]'${RESET}" Issue downloading pycharms-community.tar.gz" 1>&2       #***!!! hardcoded version!
@@ -159,13 +162,13 @@ if [ -e /tmp/pycharms-community.tar.gz ]; then
 fi
 
 
-##### Install wdiff - this is a word comparer , it would tell you the differences between 2 files.
+#### Install wdiff - this is a word comparer , it would tell you the differences between 2 files.
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Installing Wdiff ${ORANGE} ~ Compares Two Files Word by Word ${RESET}"
 apt -y -qq install wdiff wdiff-doc \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 
-##### Install meld - visual diff and merge tool
-(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing Meld  ${ORANGE} ~ GUI text Compare ${RESET}"
+#### Install meld - visual diff and merge tool
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing Meld  ${ORANGE} ~ GUI Text Compare ${RESET}"
 apt -y -qq install meld \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 #--- Configure meld
@@ -176,13 +179,13 @@ gconftool-2 -t int -s /apps/meld/edit_wrap_lines 2
 
 
 
-##### Install vbindiff - Binary File Comparer
+#### Install vbindiff - Binary File Comparer
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Installing ${GREEN} vbindiff  ${ORANGE} ~ Visually Compare Binary Files ${RESET} "
 apt -y -qq install vbindiff \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 
 
-##### Install OpenVAS
+#### Install OpenVAS
 if [[ "${openVAS}" != "false" ]]; then
   (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Installing ${GREEN}OpenVAS  ${ORANGE} ~ Vulnerability Scanner ${RESET}"
   apt -y -qq install openvas \
@@ -222,13 +225,13 @@ else
 fi
 
 
-##### Install vFeed  - Vulnerability Database
+#### Install vFeed  - Vulnerability Database
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Installing vFeed ${ORANGE} ~ Vulnerability Database ${RESET}"
 apt -y -qq install vfeed \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 
 
-##### Install rips
+#### Install rips
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Installing Rips  ${ORANGE} ~ Source Code Scanner ${RESET}"
 apt -y -qq install apache2 php git \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
@@ -254,7 +257,7 @@ ln -sf /etc/apache2/conf-available/rips.conf /etc/apache2/conf-enabled/rips.conf
 systemctl restart apache2
 
 
-##### Install graudit
+#### Install Graudit
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}  Installing Graudit ${ORANGE} ~ Source Code Auditing ${RESET}"
 apt -y -qq install git \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
@@ -274,15 +277,13 @@ EOF
 chmod +x "${file}"
 
 
-######
 
-
-##### Install daemonfs - GUI file monitor
+#### Install Daemonfs - GUI file monitor
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Installing daemonfs ${ORANGE} ~ GUI File Monitor ${RESET}"
 apt -y -qq install daemonfs \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 
-##### Install VPN support
+#### Install VPN support
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Installing VPN Support for Network-Manager ${RESET}"
 for FILE in network-manager-openvpn network-manager-pptp network-manager-vpnc network-manager-openconnect network-manager-iodine; do
   apt -y -qq install "${FILE}" \
@@ -290,8 +291,8 @@ for FILE in network-manager-openvpn network-manager-pptp network-manager-vpnc ne
 done
 
 
-##### Install vulscan script for nmap
-(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Installing ${GREEN}Vulscan Script for Nmap ${ORANGE} ~ Vulnerability Scanner Add-on ${RESET}"
+#### Install vulscan script for nmap
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Installing ${GREEN}Vulscan Script for Nmap ${ORANGE} ~ Vulnerability Scanner Add-On ${RESET}"
 apt -y -qq install nmap curl \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 mkdir -p /usr/share/nmap/scripts/vulscan/
@@ -303,8 +304,8 @@ tar -xf /tmp/nmap_nse_vulscan.tar -C /usr/share/nmap/scripts/
 chmod -R 0755 /usr/share/nmap/scripts/; find /usr/share/nmap/scripts/ -type f -exec chmod 0644 {} \;
 
 
-##### Install proxychains-ng (https://bugs.kali.org/view.php?id=2037)
-(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Installing proxychains-ng ${ORANGE} ~ Proxifier   ${RESET}"
+#### Install proxychains-ng (https://bugs.kali.org/view.php?id=2037)
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Installing Proxychains-ng ${ORANGE} ~ Proxifier   ${RESET}"
 apt -y -qq install git gcc \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 git clone -q -b master https://github.com/rofl0r/proxychains-ng.git /opt/proxychains-ng-git/ \
@@ -319,13 +320,13 @@ popd >/dev/null
 ln -sf /usr/bin/proxychains4 /usr/local/bin/proxychains-ng
 
 
-##### Install httptunnel
+#### Install httptunnel
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing ${GREEN}httptunnel ${ORANGE} ~ Tunnels Data Streams in HTTP requests ${RESET}"
 apt -y -qq install http-tunnel \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 
 
-##### Install sshuttle
+#### Install sshuttle
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing ${GREEN}sshuttle ${ORANGE}  ~ VPN over SSH ${RESET}"
 apt -y -qq install sshuttle \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
@@ -333,7 +334,7 @@ apt -y -qq install sshuttle \
 #sshuttle --dns --remote root@123.9.9.9 0/0 -vv
 
 
-##### Install pfi -- Port Forwarding Interceptor
+#### Install pfi -- Port Forwarding Interceptor
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing ${GREEN}pfi ${ORANGE} ~ Port Forwarding Interceptor${RESET}"
 apt -y -qq install git \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
@@ -345,7 +346,7 @@ popd >/dev/null
 
 
 
-##### Downloading AccessChk.exe
+#### Downloading AccessChk.exe
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Downloading ${GREEN}AccessChk.exe ${ORANGE} ~ Windows Environment Tester ${RESET}"
 apt -y -qq install curl windows-binaries unzip \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
@@ -357,18 +358,18 @@ unzip -q -o -d /usr/share/windows-binaries/ /usr/share/windows-binaries/AccessCh
 rm -f /usr/share/windows-binaries/{AccessChk.zip,Eula.txt}
 
 
-##### Downloading PsExec.exe
+#### Downloading PsExec.exe
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Downloading PsExec.exe ${ORANGE} ~ Pass The Hash 'phun' ${RESET}"
 apt -y -qq install curl windows-binaries unzip unrar \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 echo -n '[1/2]'; timeout 300 curl --progress -k -L -f "https://download.sysinternals.com/files/PSTools.zip" > /tmp/pstools.zip \
   || echo -e ' '${RED}'[!]'${RESET}" Issue downloading pstools.zip" 1>&2
-echo -n '[2/2]'; timeout 300 curl --progress -k -L -f "http://www.coresecurity.com/system/files/pshtoolkit_v1.4.rar" > /tmp/pshtoolkit.rar \
+echo -n '[2/2]'; timeout 300 curl --progress -k -L -f "http://www.coresecurity.com/system/files/pshtoolkit_v1.4-src.rar" > /tmp/pshtoolkit.rar \
   || echo -e ' '${RED}'[!]'${RESET}" Issue downloading pshtoolkit.rar" 1>&2  #***!!! hardcoded path!
 unzip -q -o -d /usr/share/windows-binaries/pstools/ /tmp/pstools.zip
 unrar x -y /tmp/pshtoolkit.rar /usr/share/windows-binaries/ >/dev/null
 
-##### Install veil framework
+#### Install veil framework
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Veil-Evasion Framework ${ORANGE} ~ Bypassing Anti-Virus ${RESET}"
 apt -y -qq install veil-evasion \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
@@ -378,8 +379,8 @@ touch /etc/veil/settings.py
 sed -i 's/TERMINAL_CLEAR=".*"/TERMINAL_CLEAR="false"/' /etc/veil/settings.py
 
 
-##### Install OP packers
-(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing OP packers ${ORANGE} ~ Bypassing Anti-virus ${RESET} "
+#### Install OP Packers
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing OP packers ${ORANGE} ~ Bypassing Anti-Virus ${RESET} "
 apt -y -qq install upx-ucl curl \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 mkdir -p /opt/packers/
@@ -396,21 +397,21 @@ ln -sf /opt/packers/ /usr/share/windows-binaries/packers
 
 
 
-##### Install gcc & multilib
+#### Install gcc & multilib
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing ${GREEN}gcc${RESET} & ${GREEN}multilibc ${ORANGE} ~ Compiling Libraries ${RESET} "
 for FILE in cc gcc g++ gcc-multilib make automake libc6 libc6-dev libc6-amd64 libc6-dev-amd64 libc6-i386 libc6-dev-i386 libc6-i686 libc6-dev-i686 build-essential dpkg-dev; do
   apt -y -qq install "${FILE}" 2>/dev/null
 done
 
 
-##### Install MinGW ~ cross compiling suite
+#### Install MinGW ~ cross compiling suite
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing MinGW ${ORANGE} ~ Cross Compiling Suite${RESET}"
 for FILE in mingw-w64 binutils-mingw-w64 gcc-mingw-w64 cmake   mingw-w64-dev mingw-w64-tools   gcc-mingw-w64-i686 gcc-mingw-w64-x86-64   mingw32; do
   apt -y -qq install "${FILE}" 2>/dev/null
 done
 
 
-##### Install WINE
+#### Install WINE
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing WINE${ORANGE} ~ Run Windows Programs on *nix${RESET}"
 apt -y -qq install wine winetricks \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
@@ -430,7 +431,7 @@ file=~/.local/share/applications/mimeapps.list; [ -e "${file}" ] && cp -n $file{
 echo -e 'application/x-ms-dos-executable=wine.desktop' >> "${file}"
 
 
-##### Install MinGW (Windows) ~ cross compiling suite
+#### Install MinGW (Windows) ~ cross compiling suite
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing MinGW (Windows) ${ORANGE} ~ Cross Compiling Suite ${RESET}"
 apt -y -qq install wine curl unzip \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
@@ -450,7 +451,7 @@ grep -q '^"PATH"=.*C:\\\\MinGW\\\\bin' ~/.wine/system.reg \
 
 
 
-##### Install hyperion
+#### Install hyperion
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing hyperion ${ORANGE} ~ Bypassing Anti-Virus ${RESET}"
 apt -y -qq install unzip windows-binaries \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
@@ -493,14 +494,14 @@ EOF
 chmod +x "${file}"
 
 
-##### Install Backdoor Factory Proxy (BDFProxy)
+#### Install Backdoor Factory Proxy (BDFProxy)
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Backdoor Factory Proxy (BDFProxy) ${ORANGE} ~ Patches Binaries Files DSuring a MITM ${RESET}"
 apt -y -qq install bdfproxy \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 
 
-##### Install BetterCap
-(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing BetterCap ${ORANGE} ~ MITM framework ${RESET} "
+#### Install BetterCap
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing BetterCap ${ORANGE} ~ MITM Framework ${RESET} "
 apt -y -qq install git ruby-dev libpcap-dev \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 git clone -q -b master https://github.com/evilsocket/bettercap.git /opt/bettercap-git/ \
@@ -512,13 +513,13 @@ gem install bettercap*.gem
 popd >/dev/null
 
 
-##### Install mitmf
+#### Install mitmf
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing MITMf ${ORANGE} ~ Framework for MITM Attacks ${RESET}"
 apt -y -qq install mitmf \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 
 
-##### Install seclist
+#### Install seclist
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Seclist ${ORANGE} ~ Multiple Types of Word lists and similar ${RESET}"
 apt -y -qq install seclists \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
@@ -529,7 +530,7 @@ apt -y -qq install wordlists \
   && ln -sf /usr/share/seclists /usr/share/wordlists/seclists
 
 
-##### Update wordlists
+#### Update wordlists
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Updating Wordlists ${ORANGE} ~ Collection of Wordlists ${RESET}"
 apt -y -qq install wordlists curl \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
@@ -553,7 +554,7 @@ ln -sf /usr/share/sqlmap/txt/wordlist.txt /usr/share/wordlists/sqlmap.txt
 #apt search wordlist
 #find / \( -iname '*wordlist*' -or -iname '*passwords*' \) #-exec ls -l {} \;
 
-##### Install Babel scripts
+#### Install Babel scripts
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing Babel Scripts ${ORANGE} ~ Post Exploitation Scripts ${RESET}"
 apt -y -qq install git \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
@@ -563,7 +564,7 @@ pushd /opt/babel-sf-git/ >/dev/null
 git pull -q
 popd >/dev/null
 
-##### Install smbspider
+#### Install smbspider
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing smbspider ${ORANGE} ~ Search Network Shares - SMB ${RESET}"
 apt -y -qq install git \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
@@ -573,7 +574,7 @@ pushd /opt/smbspider-git/ >/dev/null
 git pull -q
 popd >/dev/null
 
-##### Install CrackMapExec
+#### Install CrackMapExec
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing CrackMapExec ${ORANGE} ~ Swiss Army Knife for Windows Environments ${RESET}"
 apt -y -qq install git \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
@@ -584,7 +585,7 @@ git pull -q
 popd >/dev/null
 
 
-##### Install credcrack
+#### Install credcrack
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing credcrack  ${ORANGE} ~ Credential Harvester Via Samba ${RESET}"
 apt -y -qq install git \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
@@ -595,8 +596,8 @@ git pull -q
 popd >/dev/null
 
 
-##### Install Empire
-(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing empire ${ORANGE} ~ PowerShell post-exploitation ${RESET}"
+#### Install Empire
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Empire ${ORANGE} ~ PowerShell Post-Exploitation Tool ${RESET}"
 apt -y -qq install git \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 git clone -q -b master https://github.com/PowerShellEmpire/Empire.git /opt/empire-git/ \
@@ -606,8 +607,8 @@ git pull -q
 popd >/dev/null
 
 
-##### Install wig (https://bugs.kali.org/view.php?id=1932)
-(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing wig ${ORANGE} ~ Web Application Detection ${RESET}"
+#### Install wig (https://bugs.kali.org/view.php?id=1932)
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Wig ${ORANGE} ~ Web Application Detection ${RESET}"
 apt -y -qq install git \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 git clone -q -b master https://github.com/jekyc/wig.git /opt/wig-git/ \
@@ -625,7 +626,7 @@ EOF
 chmod +x "${file}"
 
 
-##### Install CMSmap --  CMS detection
+#### Install CMSmap --  CMS detection
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing CMSmap ${ORANGE} ~ CMS Detection ${RESET}"
 apt -y -qq install git \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
@@ -644,8 +645,8 @@ EOF
 chmod +x "${file}"
 
 
-##### Install droopescan
-(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing droopeScan ${ORANGE} ~ Drupal Vulnerability Scanner ${RESET}"
+#### Install droopescan
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing DroopeScan ${ORANGE} ~ Drupal Vulnerability Scanner ${RESET}"
 apt -y -qq install git \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 git clone -q -b master https://github.com/droope/droopescan.git /opt/droopescan-git/ \
@@ -663,7 +664,7 @@ EOF
 chmod +x "${file}"
 
 
-##### Install Crowbar -- brute force"
+#### Install Crowbar -- brute force"
 
 rm -r /opt/crowbar-git # in Case its already installed
 
@@ -685,7 +686,7 @@ cd /opt/crowbar-git/ && python crowbar.py "\$@"
 EOF
 chmod +x "${file}"
 
-##### Install xprobe  -- OS fingerprinting
+#### Install xprobe  -- OS fingerprinting
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing xprobe ${ORANGE} ~ OS Fingerprinting ${RESET}"
 apt -y -qq install xprobe \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
@@ -693,7 +694,7 @@ apt -y -qq install xprobe \
 
 
 
-##### Install UACScript
+#### Install UACScript
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing UACScript ${ORANGE} ~ UAC Bypass for Windows 7 ${RESET}"
 apt -y -qq install git windows-binaries \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
@@ -706,18 +707,18 @@ ln -sf /usr/share/windows-binaries/uac-win7 /opt/uacscript-git/
 
 
 
-##### Install virtualenvwrapper
-(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing virtualenvwrapper ${ORANGE} ~ Virtual Environment Wrapper ${RESET}"
+#### Install virtualenvwrapper
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing Virtualenvwrapper ${ORANGE} ~ Virtual Environment Wrapper ${RESET}"
 apt -y -qq install virtualenvwrapper \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 
 
-##### Install go
+#### Install go
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Go ${ORANGE} ~ Programming Language ${RESET}"
 apt -y -qq install golang \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 
-##### Install gitg
+#### Install gitg
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Gitg ${ORANGE} ~ GUI Git Client ${RESET}"
 apt -y -qq install gitg \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
@@ -725,7 +726,7 @@ apt -y -qq install gitg \
 
 
 
-##### Install Gnmap-Parser (fork)
+#### Install Gnmap-Parser (fork)
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Gnmap-Parser (fork) ${ORANGE} ~ Parse Nmap Exports into various plain-text formats ${RESET}"
 apt -y -qq install git \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
@@ -740,8 +741,8 @@ mkdir -p /usr/local/bin/
 ln -sf /opt/gnmap-parser-git/gnmap-parser.sh /usr/local/bin/gnmap-parser-git
 
 
-##### Install udp-proto-scanner
-(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Udp-Proto-Scanner ${ORANGE} ~ Common UDP Port Scanner ${RESET}"
+#### Install udp-proto-scanner
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing UDP-Proto-Scanner ${ORANGE} ~ Common UDP Port Scanner ${RESET}"
 apt -y -qq install curl \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 timeout 300 curl --progress -k -L -f "https://labs.portcullis.co.uk/download/udp-proto-scanner-1.1.tar.gz" -o /tmp/udp-proto-scanner.tar.gz \
@@ -760,13 +761,13 @@ EOF
 chmod +x "${file}"
 
 
-##### Install clusterd
-(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Clusterd ${ORANGE} ~ Clustered Attack toolkit (JBoss, ColdFusion, WebLogic, Tomcat etc) ${RESET}"
+#### Install clusterd
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Clusterd ${ORANGE} ~ Clustered Attack Toolkit (JBoss, ColdFusion, WebLogic, Tomcat etc) ${RESET}"
 apt -y -qq install clusterd \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 
 
-##### Install webhandler
+#### Install webhandler
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Webhandler ${ORANGE} ~ Shell TTY Handler ${RESET}"
 apt -y -qq install webhandler \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
@@ -775,7 +776,7 @@ mkdir -p /usr/local/bin/
 ln -sf /usr/bin/webhandler /usr/local/bin/wh
 
 
-##### Install azazel
+#### Install Azazel
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Azazel ${ORANGE} ~ Linux Userland Rootkit ${RESET}"
 apt -y -qq install git \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
@@ -785,13 +786,13 @@ pushd /opt/azazel-git/ >/dev/null
 git pull -q
 popd >/dev/null
 
-##### Install gobuster
-(( STAGE++ )); echo -e "\n\n${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Gobuster ${ORANGE} ~ Directory/File/DNS busting tool ${RESET}"
+#### Install gobuster
+(( STAGE++ )); echo -e "\n\n${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Gobuster ${ORANGE} ~ Directory/File/DNS Busting tool ${RESET}"
 apt -y -qq install git gobuster \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 
 
-##### Install reGeorg
+#### Install reGeorg
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing ReGeorg ${ORANGE} ~ Pivot Via Web Shells ${RESET}"
 git clone -q -b master https://github.com/sensepost/reGeorg.git /opt/regeorg-git \
   || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
@@ -804,19 +805,19 @@ apt -y -qq install webshells \
 ln -sf /opt/reGeorg-git /usr/share/webshells/reGeorg
 
 
-##### Install Subterfuge  - GIT
+#### Install Subterfuge  - GIT
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Subterfuge ${ORANGE} ~ MITM ${RESET}"
 git clone -q -b master https://github.com/Subterfuge-Framework/Subterfuge.git /opt/subterfuge-git \
   || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
-xdotool key y Return 
+xdotool key Y Return
 python /opt/subterfuge-git/setup.py \
   || echo -e ' '${RED}'[!] Issue whith apt-install'${RESET} 1>&2
 
-##### Install Bettercap
+#### Install Bettercap
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Bettarcap ${ORANGE} ~ MITM  ${RESET}"
 apt-get -y -q install bettercap
 
-##### Install patator (GIT)
+#### Install patator (GIT)
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Patator  (GIT) ${ORANGE} ~ Brute Forcer ${RESET}"
 apt -y -qq install git \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
@@ -836,10 +837,5 @@ EOF
 chmod +x "${file}"
 
 
-
-
-##### Time taken
-finish_time=$(date +%s)
-echo -e "\n\n ${YELLOW}[i]${RESET} Time (roughly) taken: ${YELLOW}$(( $(( finish_time - start_time )) / 60 )) minutes${RESET}"
 
 }
