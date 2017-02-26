@@ -1,21 +1,77 @@
 # Kali-Setup
-Bash script to fully setup your kali system.
 
-The idea came to me when I was doing OSCP, even tho I have worked hard on it its far from perfection, I used this script as learning process as well wich is the reason on why I do several things on several ways.
+#Fully automated bash script to setup your Kali system, Tested on Kali 2016.2 Vmware x64.
 
-I did use some lines from G0tmilk script however must of lines can be found on the web.
+This idea came to me while taking the OSCP.  I took my own initiative to create this script, though it's far from perfect,I created this script as part of continuing my education, as a result I applied several different methodologies in creating it.
 
-COnfiuration of the IRC bouncer its not perfect, Please feel free to do your own contribution.
+I borrowed several lines from g0tmi1ks script though most of the lines are available open source on the net.
 
-Express Install: Will install basic apps and configure your system for daily use.
 
-Full Install: Will Install full package and let your system ready for Pentesting.
+Some of the repos are included in the full Kali Distro, I also added additional software in order to fix several known issues with Kali
 
-Teste on VM x64
+
+Express Install: It will install basic apps and configure services and your system for daily use.
+
+	Atom   		          				 Asciinema       							Pure-FTPd
+	Hexchat         					 Shutter         							Apache2
+	Terminator        					 htop           							Mysql
+	Conky             			 		 psmisc         							SSH
+	Icedove           					 Pipe Vievwer   			 				Tftp
+	LibreOffice       			 		 Filezilla
+
+
+Full Install: It will Install Express module apps, full package repos and let your system ready for Pentesting.
+
+	MSF				OpenVas			Sshuttle			GCC			MITMf			Wig				GoBuster
+	Armitage		VFeed			Pfi					MinGW		Wordlists		CMSmap			reGeorg	
+	Python			Graudit			AccessChk			Wine		Smbspider		Droopescan		Patetor
+	Pycharm			Daemonfs		PsExec.exe			Hyperion	CrackMapExec	Crowbar			Clusterd
+	Wdiff			Proxychains		Veil-framework		BDFProxy	Credcrack		Subterfuge		Webhandler
+	Vbindiff		HttpTunnel		OP-Packers			BetterCap	Empire			Azazel			Gnmap-Parser
+	
+
 
 Just do: 
 
 # git clone https://github.com/kawaxi/kali-setup
 
-# start -h
+For help do:
 
+# Start -h
+
+
+
+Pending Ideas: 
+* Working with counters inside modules
+* Fix IRC Bouncer Configuration ( it fails to replace one line)
+* Need to Include personalized exploits to exploit DB.
+* Add Off the record messaging plug in -otr
+* Set key macros for programming.  
+* Make script to trap TERM signal.
+
+# Change Log
+
+Feb 25th 
+* Fixed time sync problem
+* Wordked on comment standard 
+* Add msf alias for Msfconsole
+* Cleaning Module Created.
+* Moved Colors definition to Visual Module.
+* Added Tilda to express Installation Module.
+
+Feb 22nd 
+* Copied Windows-binaries to FTP, TFTP, and Apache services folder.
+
+Feb 20th 
+* Fixed Little Issue with Irc peventsfile.
+
+Feb 19th 2017
+* Fixed problem with  gsettings and Dash to Dock
+* Fixed linked for pshtoolkit
+* Added Bookmarks for nautilus
+* Added Wallpapers
+* Random Wallpapers for Gnome enabled
+
+Feb 1st 2017
+* Fixed Commenting format in Start File.
+* Fixed Several minor issues.
