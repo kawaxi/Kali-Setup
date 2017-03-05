@@ -1,0 +1,655 @@
+#! /bin/bash
+
+
+express--(){
+
+#--- Using x64?
+if [[ "$(uname -m)" == 'x86_64' ]]; then
+  #### Install Atom   - A Hackable Text Editor  ----    Use your Own Configuration
+  (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing ${GREEN} Atom ${ORANGE} ~ GUI text editor ${RESET}"
+  timeout 300 curl --progress -k -L -f "https://atom.io/download/deb" > /tmp/atom.deb \
+    || echo -e ' '${RED}'[!]'${RESET}" Issue downloading atom.deb" 1>&2
+  if [ -e /tmp/atom.deb ]; then
+    dpkg -i /tmp/atom.deb
+    #--- Create config file
+    mkdir -p ~/.atom/
+    file=~/.atom/config.cson
+    if [[ -f "${file}" ]]; then
+      echo -e ' '${RED}'[!]'${RESET}" ${file} detected. Skipping..." 1>&2
+    else
+      cat <<EOF > "${file}"
+        "*":
+          core:
+            telemetryConsent: "no"
+            themes: [
+              "one-dark-ui"
+              "atom-dark-syntax"
+            ]
+          editor:
+            scrollSensitivity: 65
+            showIndentGuide: true
+          welcome:
+            showOnStartup: false
+
+EOF
+    fi
+
+  fi
+else
+  (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing ${GREEN} Sublime Text ${ORANGE} ~ GUI text editor ${RESET}"
+  timeout 300 curl --progress -k -L -f "https://download.sublimetext.com/sublime-text_build-3126_i386.deb" > /tmp/sublime.deb \
+    || echo -e ' '${RED}'[!]'${RESET}" Issue downloading sublime.deb" 1>&2
+    if [ -e /tmp/sublime.deb ]; then
+      dpkg -i /tmp/sublime.deb
+    fi
+
+fi
+
+
+#### Installing Hexchat
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Installing (GNOME) Hexchat ${ORANGE} ~ IRC Client ${RESET}"
+apt-get install hexchat -y
+#--- Add Hexchat to panel (GNOME)
+# export DISPLAY=:0.0${RESET}
+
+####CONFIGURING HEXCHAT
+# export DISPLAY=:0.0
+
+echo -e "\n ${GREEN} [*] ${ORANGE}Let's Configure Hexchat ${RESET}"
+
+apt-get -y -qq install xdotool  \
+  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+
+
+#--- making sure to open the app to so the app can creat the folder with the files
+hexchat & HEXPID=$! >/dev/null 2>&1
+
+#--- Initiating Hexchat and saving the pid.
+echo -e "${ORANGE}[*]Our PID for Hexchat is $HEXPID ${RESET}"
+
+
+#---founding our windows ID for our PID
+HEXWINID=$(xdotool search --onlyvisible --sync --pid ${HEXPID} | tail -1)
+echo -e "${ORANGE}[*]We found our window ID for Hexchat PID : $HEXWINID ${RESET}\n"
+
+xdotool key --window $HEXWINID Return
+
+HEXWINID=$(xdotool search --onlyvisible --sync --pid ${HEXPID} | tail -1)
+xdotool windowactivate --sync ${HEXWINID} key --clearmodifiers --delay 100 alt+o
+sleep 15
+
+timeout 5 killall -9 -q -w hexchat
+
+#--- HEXCHAT GENERAL CONFIGURATION; YOU COULD ALSO LET HEXCHAT TO GENERATE IT.
+file=~/.config/hexchat/hexchat.conf; [ -e "${file}" ] && cp -n $file{,.bkup}
+if [[ -f "${file}" ]]; then
+  echo -e ' '${GREEN}'[*]'${WHITE}" ${file} ${ORANGE} Detected. Replacing ..." ${RESET} 1>&2
+  timeout 300 curl --progress -k -L -f "https://raw.githubusercontent.com/kawaxi/Kali-Setup/master/hexchat.conf" > "${file}" \
+  || echo -e ' '${RED}'[!] Issue Downloading file'${RESET} 1>&2
+else
+  timeout 300 curl --progress -k -L -f "https://raw.githubusercontent.com/kawaxi/Kali-Setup/master/hexchat.conf" > "${file}" \
+  || echo -e ' '${RED}'[!] Issue Downloading file'${RESET} 1>&2
+fi
+
+#--- HEXCHAT Friends Lst     ### PLACE YOUR FRINDS LIST IN THIS SECTION
+file=~/.config/hexchat/notify.conf; [ -e "${file}" ] && cp -n $file{,.bkup}
+if [[ -f "${file}" ]]; then
+  echo -e ' '${GREEN}'[!]'${WHITE}" ${file} ${ORANGE} detected. Skipping..." ${RESET} 1>&2
+else
+  cat <<EOF > "${file}" \
+	|| echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
+
+friend1
+friend2
+friend3
+
+EOF
+fi
+
+#--- Add your own Servers  List, you can either add lines, create or download the file.
+
+#--- Please remember to change this so you can clone it instead.
+
+#--- Dont forget to review this lines and fill it with your own info.
+file=~/.config/hexchat/servlist.conf; [ -e "${file}" ] && cp -n $file{,.bkup}
+if [[ -f "${file}" ]]; then
+  ([[ -e "${file}" && "$(tail -c 1 ${file})" != "" ]]) && echo >> "${file}"
+  grep -q '^N=Bouncer Elite=' "${file}" 2>/dev/null \
+  echo -e ' '${GREEN}'[!]'${WHITE}" ServList.conf Detected. ${ORANGE} Replacing Lines..." ${RESET} 1>&2
+  file=/tmp/servlist.py
+  cat <<EOF > "${file}" \
+	|| echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
+
+#! /bin/python
+
+with open('/root/.config/hexchat/servlist.conf', 'r') as iFile:
+    x = iFile.read().splitlines()
+
+x[2] = """
+
+N=Bouncer Elite
+I =imadummy
+U=IMDUMMUY
+P=123456
+E=UTF-8 (Unicode)
+F=53
+D=1
+S=sigma.elitebnc.org/1338
+C=NickServ
+Identify HI
+J=#metasploit
+J=#kali-linux
+J=##security
+J=##ha
+
+"""
+
+with open('/root/.config/hexchat/servlist.conf', 'w') as oFile:
+    for i in x:
+        oFile.write(i + '\n')
+
+EOF
+fi
+
+chmod 755 $file
+python $file
+rm $file
+
+#--- Create your colors files
+file=~/.config/hexchat/colors.conf; [ -e "${file}" ] && cp -n $file{,.bkup}
+if [[ -f "${file}" ]]; then
+  echo -e ' '${GREEN}'[!]'${RESET}" ${file} ${ORANGE} Detected. Skipping..."  ${RESET} 1>&2
+else
+  cat <<EOF > "${file}" \
+	|| echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
+
+color_0 = d3d3 d7d7 cfcf
+color_1 = 2e2e 3434 3636
+color_2 = 3434 6565 a4a4
+color_3 = 4e4e 9a9a 0606
+color_4 = cccc 0000 0000
+color_5 = 8f8f 3939 0202
+color_6 = 5c5c 3535 6666
+color_7 = cece 5c5c 0000
+color_8 = c4c4 a0a0 0000
+color_9 = 7373 d2d2 1616
+color_10 = 1111 a8a8 7979
+color_11 = 5858 a1a1 9d9d
+color_12 = 5757 7979 9e9e
+color_13 = a0d0 42d4 6562
+color_14 = 5555 5757 5353
+color_15 = 8888 8a8a 8585
+color_16 = d3d3 d7d7 cfcf
+color_17 = 2e2e 3434 3636
+color_18 = 3434 6565 a4a4
+color_19 = 4e4e 9a9a 0606
+color_20 = cccc 0000 0000
+color_21 = 8f8f 3939 0202
+color_22 = 5c5c 3535 6666
+color_23 = cece 5c5c 0000
+color_24 = c4c4 a0a0 0000
+color_25 = 7373 d2d2 1616
+color_26 = 1111 a8a8 7979
+color_27 = 5858 a1a1 9d9d
+color_28 = 5757 7979 9e9e
+color_29 = a0d0 42d4 6562
+color_30 = 5555 5757 5353
+color_31 = 8888 8a8a 8585
+color_256 = d3d3 d7d7 cfcf
+color_257 = 2020 4a4a 8787
+color_258 = e1e1 e1e1 e1e1
+color_259 = 0d0d 2d2d 5b5b
+color_260 = 8f8f 3939 0202
+color_261 = 7474 a9a9 eaea
+color_262 = 4e4e 9a9a 0606
+color_263 = cece 5c5c 0000
+color_264 = 8888 8a8a 8585
+color_265 = a4a4 0000 0000
+
+EOF
+fi
+
+
+#--- Configure your Pevents File by replacing lines of the file or downloading your own file.
+
+file=~/.config/hexchat/pevents.conf
+if [[ -f "${file}" ]]; then
+  file=/tmp/pevents.py
+  echo -e ' '${GREEN}'[!]'${WHITE}" ${file} ${ORANGE}  Detected. Replacing Lines..." ${RESET} 1>&2
+  cat <<EOF > "${file}" \
+	|| echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
+
+#! /bin/python
+
+
+with open('/root/.config/hexchat/pevents.conf', 'r') as iFile:
+    x = iFile.read().splitlines()
+
+x[451] = 'event_text=%C18%C26$3$1%O$t$2'
+
+with open('/root/.config/hexchat/pevents.conf', 'w') as oFile:
+    for i in x:
+        oFile.write(i + '\n')
+
+EOF
+
+
+chmod 755 $file
+python $file
+rm $file
+
+else
+  #--- We download the files or we create them, creating them will add more than 400  lines.
+  file=~/.config/hexchat/pevents.conf
+  echo -e "${GREEN} [*] ${WHITE}Downloading pevents.conf ${ORANGE} File  Downloaded ${RESET}"
+  timeout 300 curl --progress -k -L -f "https://raw.githubusercontent.com/kawaxi/Kali-Setup/master/pevents.conf" > "${file}" \
+  || echo -e ' '${RED}'[!] Issue Downloading file'${RESET} 1>&2
+fi
+
+
+TEXT='  Configuration Files For Hexchat Have Been Created'
+notice--
+
+
+
+##### Install Terminator (GNOME)
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})  ${GREEN} Installing (GNOME)Terminator ${ORANGE} ~ Multiple terminals in a single window ${RESET}"
+apt -y -qq install terminator \
+  || echo -e ' '${RED}'[!] Issue with apt install'  1>&2
+#--- Configure terminator
+mkdir -p ~/.config/terminator/
+file=~/.config/terminator/config; [ -e "${file}" ] && cp -n $file{,.bkup}
+cat <<EOF > "${file}" \
+  || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
+[global_config]
+  enabled_plugins = TerminalShot, LaunchpadCodeURLHandler, APTURLHandler, LaunchpadBugURLHandler
+  focus = mouse
+[keybindings]
+  copy = <Primary>c
+  paste = <Primary>v
+[profiles]
+  [[default]]
+    audible_bell = True
+    background_darkness = 0.9
+    scroll_on_output = False
+    copy_on_selection = True
+    font = Monospace 10
+    background_type = transparent
+    scrollback_infinite = True
+    show_titlebar = False
+[[oscp]]
+    audible_bell = True
+    background_image = None
+    scroll_on_output = False
+    copy_on_selection = True
+    font = Monospace 10
+    scrollback_infinite = True
+    scrollback_lines = 2000
+    visible_bell = True
+[layouts]
+  [[default]]
+    [[[child1]]]
+      type = Terminal
+      parent = window0
+    [[[window0]]]
+      type = Window
+      parent = ""
+[plugins]
+EOF
+#--- Set terminator for Gnomes default
+gsettings set org.gnome.desktop.default-applications.terminal exec /usr/bin/terminator
+gsettings set org.gnome.desktop.default-applications.terminal exec-arg "-x"
+
+
+##### Install Conky
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Installing Conky ${ORANGE} ~ GUI desktop monitor ${RESET} "
+export DISPLAY=:0.0
+apt -y -qq install conky \
+  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+#--- Configure conky
+file=~/.conkyrc; [ -e "${file}" ] && cp -n $file{,.bkup}
+if [[ -f "${file}" ]]; then
+  echo -e ' '${RED}'[!]'${RESET}" ${file} detected. Skipping..." 1>&2
+else
+  cat <<EOF > "${file}"
+conky.config = {
+    background = false,
+    font = 'monospace:size=8:weight=bold',
+    use_xft = true,
+    update_interval = 2.0,
+    own_window = true,
+    own_window_type = 'normal',
+    own_window_transparent = true,
+    own_window_class = 'conky-semi',
+    own_window_argb_visual = false,
+    own_window_colour = 'brown',
+    own_window_hints = 'undecorated,below,sticky,skip_taskbar,skip_pager',
+    double_buffer = true,
+    maximum_width = 260,
+    draw_shades = true,
+    draw_outline = false,
+    draw_borders = false,
+    stippled_borders = 3,
+    border_inner_margin = 9,
+    border_width = 10,
+    default_color = 'grey',
+    alignment = 'bottom_right',
+    gap_x = 5,
+    gap_y = 0,
+    uppercase = false,
+    use_spacer = 'right',
+};
+conky.text = [[
+\${color dodgerblue3}SYSTEM \${hr 2}\$color
+#\${color white}\${time %A},\${time %e} \${time %B} \${time %G}\${alignr}\${time %H:%M:%S}
+\${color white}Host\$color: \$nodename  \${alignr}\${color white}Uptime\$color: \$uptime
+\${color dodgerblue3}CPU \${hr 2}\$color
+#\${font Arial:bold:size=8}\${execi 99999 grep "model name" -m1 /proc/cpuinfo | cut -d":" -f2 | cut -d" " -f2- | sed "s#Processor ##"}\$font\$color
+\${color white}MHz\$color: \${freq} \${alignr}\${color white}Load\$color: \${exec uptime | awk -F "load average: "  '{print \$2}'}
+\${color white}Tasks\$color: \$running_processes/\$processes \${alignr}\${color white}CPU0\$color: \${cpu cpu0}% \${color white}CPU1\$color: \${cpu cpu1}%
+#\${color #c0ff3e}\${acpitemp}C
+#\${execi 20 sensors |grep "Core0 Temp" | cut -d" " -f4}\$font\$color\${alignr}\${freq_g 2} \${execi 20 sensors |grep "Core1 Temp" | cut -d" " -f4}
+\${cpugraph cpu0 25,120 000000 white} \${alignr}\${cpugraph cpu1 25,120 000000 white}
+\${color white}\${cpubar cpu1 3,120} \${alignr}\${color white}\${cpubar cpu2 3,120}\$color
+\${color dodgerblue3}PROCESSES \${hr 2}\$color
+\${color white}NAME             PID     CPU     MEM
+\${color white}\${top name 1}\${top pid 1}  \${top cpu 1}  \${top mem 1}\$color
+\${top name 2}\${top pid 2}  \${top cpu 2}  \${top mem 2}
+\${top name 3}\${top pid 3}  \${top cpu 3}  \${top mem 3}
+\${top name 4}\${top pid 4}  \${top cpu 4}  \${top mem 4}
+\${top name 5}\${top pid 5}  \${top cpu 5}  \${top mem 5}
+\${color dodgerblue3}MEMORY & SWAP \${hr 2}\$color
+\${color white}RAM\$color  \$alignr\$memperc%  \${membar 6,170}\$color
+\${color white}Swap\$color  \$alignr\$swapperc%  \${swapbar 6,170}\$color
+\${color dodgerblue3}FILESYSTEM \${hr 2}\$color
+\${color white}root\$color \${fs_free_perc /}% free\${alignr}\${fs_free /}/ \${fs_size /}
+\${fs_bar 3 /}\$color
+#\${color white}home\$color \${fs_free_perc /home}% free\${alignr}\${fs_free /home}/ \${fs_size /home}
+#\${fs_bar 3 /home}\$color
+\${color dodgerblue3}LAN eth0 (\${addr eth0}) \${hr 2}\$color
+\${color white}Down\$color:  \${downspeed eth0} KB/s\${alignr}\${color white}Up\$color: \${upspeed eth0} KB/s
+\${color white}Downloaded\$color: \${totaldown eth0} \${alignr}\${color white}Uploaded\$color: \${totalup eth0}
+\${downspeedgraph eth0 25,120 000000 00ff00} \${alignr}\${upspeedgraph eth0 25,120 000000 ff0000}\$color
+EOF
+ip addr show eth1 &>/dev/null \
+  && cat <<EOF >> "${file}"
+\${color dodgerblue3}LAN eth1 (\${addr eth1}) \${hr 2}\$color
+\${color white}Down\$color:  \${downspeed eth1} KB/s\${alignr}\${color white}Up\$color: \${upspeed eth1} KB/s
+\${color white}Downloaded\$color: \${totaldown eth1} \${alignr}\${color white}Uploaded\$color: \${totalup eth1}
+\${downspeedgraph eth1 25,120 000000 00ff00} \${alignr}\${upspeedgraph eth1 25,120 000000 ff0000}\$color
+EOF
+cat <<EOF >> "${file}"
+\${color dodgerblue3}Wi-Fi (\${addr wlan0}) \${hr 2}\$color
+\${color white}Down\$color:  \${downspeed wlan0} KB/s\${alignr}\${color white}Up\$color: \${upspeed wlan0} KB/s
+\${color white}Downloaded\$color: \${totaldown wlan0} \${alignr}\${color white}Uploaded\$color: \${totalup wlan0}
+\${downspeedgraph wlan0 25,120 000000 00ff00} \${alignr}\${upspeedgraph wlan0 25,120 000000 ff0000}\$color
+\${color dodgerblue3}CONNECTIONS \${hr 2}\$color
+\${color white}Inbound: \$color\${tcp_portmon 1 32767 count}  \${alignc}\${color white}Outbound: \$color\${tcp_portmon 32768 61000 count}\${alignr}\${color white}Total: \$color\${tcp_portmon 1 65535 count}
+\${color white}Inbound \${alignr}Local Service/Port\$color
+\$color \${tcp_portmon 1 32767 rhost 0} \${alignr}\${tcp_portmon 1 32767 lservice 0}
+\$color \${tcp_portmon 1 32767 rhost 1} \${alignr}\${tcp_portmon 1 32767 lservice 1}
+\$color \${tcp_portmon 1 32767 rhost 2} \${alignr}\${tcp_portmon 1 32767 lservice 2}
+\${color white}Outbound \${alignr}Remote Service/Port\$color
+\$color \${tcp_portmon 32768 61000 rhost 0} \${alignr}\${tcp_portmon 32768 61000 rservice 0}
+\$color \${tcp_portmon 32768 61000 rhost 1} \${alignr}\${tcp_portmon 32768 61000 rservice 1}
+\$color \${tcp_portmon 32768 61000 rhost 2} \${alignr}\${tcp_portmon 32768 61000 rservice 2}
+]]
+EOF
+fi
+#--- Create start script
+file=/usr/local/bin/start-conky; [ -e "${file}" ] && cp -n $file{,.bkup}
+cat <<EOF > "${file}" \
+  || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
+#!/bin/bash
+[[ -z \${DISPLAY} ]] && export DISPLAY=:0.0
+$(which timeout) 10 $(which killall) -9 -q -w conky
+$(which sleep) 20s
+$(which conky) &
+EOF
+chmod -f 0500 "${file}"
+#--- Run now
+bash /usr/local/bin/start-conky >/dev/null 2>&1 &
+#--- Add to startup (each login)
+mkdir -p ~/.config/autostart/
+file=~/.config/autostart/conkyscript.desktop; [ -e "${file}" ] && cp -n $file{,.bkup}
+cat <<EOF > "${file}" \
+  || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
+[Desktop Entry]
+Name=conky
+Exec=/usr/local/bin/start-conky
+Hidden=false
+NoDisplay=false
+X-GNOME-Autostart-enabled=true
+Type=Application
+Comment=
+EOF
+#--- Add keyboard shortcut (CTRL+r) to run the conky refresh script
+file=~/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-keyboard-shortcuts.xml   #; [ -e "${file}" ] && cp -n $file{,.bkup}
+if [ -e "${file}" ]; then
+  grep -q '<property name="&lt;Primary&gt;r" type="string" value="/usr/local/bin/start-conky"/>' "${file}" \
+    || sed -i 's#<property name="\&lt;Alt\&gt;F2" type="string" value="xfrun4"/>#<property name="\&lt;Alt\&gt;F2" type="string" value="xfrun4"/>\n      <property name="\&lt;Primary\&gt;r" type="string" value="/usr/local/bin/start-conky"/>#' "${file}"
+fi
+
+#### Installing Tilda
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Tilda ${ORANGE} ~ Pop Up Terminal Emulator ${RESET}"
+apt-get -y -q install tilda
+#Adding Tilda to startup
+cp /usr/share/applications/tilda.desktop ~/.config/autostart/
+
+#### Installing  Icedove (Thunderbird)
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Installing Icedove ${ORANGE} ~ Email Client ${RESET} "
+#apt -y -qq install thunderbird
+apt -y -qq install icedove-enigmail \
+  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+
+
+#### Install libreoffice
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing LibreOffice${ORANGE} ~ GUI Office Suite${RESET}"
+apt -y -qq install libreoffice \
+  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+
+#### Install asciinema  -- Terminal Recorder
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing asciinema ${ORANGE} ~ CLI Terminal Recorder${RESET}"
+curl -s -L https://asciinema.org/install | sh
+
+#### Install Shutter   -- Take snapshots.
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing Shutter ${ORANGE} ~ GUI Static Screen Capture ${RESET}"
+apt -y -qq install shutter \
+  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+
+#### Install htop  - an interactive process viewer for Unix
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing Htop ${ORANGE} ~ CLI Process Viewer ${RESET}"
+apt -y -qq install htop \
+  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+
+
+#### Install psmisc ~ allows for 'killall command' to be used
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing psmisc ${ORANGE} ~ Suite to Help With Running Processes ${RESET}"
+apt -y -qq install psmisc \
+  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+
+
+#### Setup pipe viewer
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing Pipe viewer ${ORANGE} ~ CLI progress bar ${RESET}"
+apt -y -qq install pv \
+  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+
+
+#### Install filezilla
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing FileZilla ${ORANGE} ~ GUI file transfer ${RESET}"
+apt -y -qq install filezilla \
+  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+#--- Configure filezilla${RESET}
+export DISPLAY=:0.0
+timeout 5 filezilla >/dev/null 2>&1     # Start and kill. Files needed for first time run
+mkdir -p ~/.config/filezilla/
+file=~/.config/filezilla/filezilla.xml; [ -e "${file}" ] && cp -n $file{,.bkup}
+[ ! -e "${file}" ] && cat <<EOF> "${file}"
+<?xml version="1.0" encoding="UTF-8"?>
+<FileZilla3 version="3.15.0.2" platform="*nix">
+  <Settings>
+    <Setting name="Default editor">0</Setting>
+    <Setting name="Always use default editor">0</Setting>
+  </Settings>
+</FileZilla3>
+fi
+EOF
+sed -i 's#^.*"Default editor".*#\t<Setting name="Default editor">2/usr/bin/gedit</Setting>#' "${file}"
+[ -e /usr/bin/atom ] && sed -i 's#^.*"Default editor".*#\t<Setting name="Default editor">2/usr/bin/atom</Setting>#' "${file}"
+sed -i 's#^.*"Always use default editor".*#\t<Setting name="Always use default editor">1</Setting>#' "${file}"
+
+
+#### Setup SSH
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Setting up ${GREEN}SSH ${ORANGE} ~ CLI access ${RESET} "
+apt -y -qq install openssh-server \
+  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+#--- Wipe current keys
+rm -f /etc/ssh/ssh_host_*
+find ~/.ssh/ -type f ! -name authorized_keys -delete 2>/dev/null
+#--- Generate new keys
+ssh-keygen -b 4096 -t rsa1 -f /etc/ssh/ssh_host_key -P "" >/dev/null
+ssh-keygen -b 4096 -t rsa -f /etc/ssh/ssh_host_rsa_key -P "" >/dev/null
+ssh-keygen -b 1024 -t dsa -f /etc/ssh/ssh_host_dsa_key -P "" >/dev/null
+ssh-keygen -b 521 -t ecdsa -f /etc/ssh/ssh_host_ecdsa_key -P "" >/dev/null
+ssh-keygen -b 4096 -t rsa -f ~/.ssh/id_rsa -P "" >/dev/null
+#--- Change MOTD
+apt -y -qq install cowsay \
+  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+echo "I see you" | /usr/games/cowsay -f eyes > /etc/motd
+#--- Change SSH settings
+file=/etc/ssh/sshd_config; [ -e "${file}" ] && cp -n $file{,.bkup}
+sed -i 's/^PermitRootLogin .*/PermitRootLogin yes/g' "${file}"      # Accept password login (overwrite Debian 8+'s more secure default option...)
+sed -i 's/^#AuthorizedKeysFile /AuthorizedKeysFile /g' "${file}"    # Allow for key based login
+#sed -i 's/^Port .*/Port 2222/g' "${file}"
+#--- Enable ssh at startup
+#systemctl enable ssh
+#--- Setup alias (handy for 'zsh: correct 'ssh' to '.ssh' [nyae]? n')
+file=~/.bash_aliases; [ -e "${file}" ] && cp -n $file{,.bkup}   #/etc/bash.bash_aliases
+([[ -e "${file}" && "$(tail -c 1 ${file})" != "" ]]) && echo >> "${file}"
+grep -q '^## ssh' "${file}" 2>/dev/null \
+  || echo -e '## ssh\nalias ssh-start="systemctl restart ssh"\nalias ssh-stop="systemctl stop ssh"\n' >> "${file}"
+#--- Apply new alias
+source "${file}" || source ~/.zshrc
+
+
+#### Install mysql
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Installing MySQL ${ORANGE} ~ Database ${RESET} "
+apt -y -qq install mysql-server \
+  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+echo -e " ${YELLOW}[i]${GREEN} MySQL username: ${ORANGE} root"
+echo -e " ${YELLOW}[i]${GREEN} MySQL password: ${ORANGE} <blank>   ***${BOLD}CHANGE THIS ASAP${RESET}***"
+[[ -e ~/.my.cnf ]] \
+  || cat <<EOF > ~/.my.cnf
+[client]
+user=root
+host=localhost
+password=
+EOF
+
+
+#### Install apache2 & php
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Installing Apache2${RESET} & ${GREEN} PHP ${ORANGE} ~ Web Server ${RESET} "
+apt -y -qq install apache2 php php-cli php-curl \
+  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+touch /var/www/html/favicon.ico
+grep -q '<title>Apache2 Debian Default Page: It works</title>' /var/www/html/index.html 2>/dev/null \
+  && rm -f /var/www/html/index.html \
+  && echo '<?php echo "Access denied for " . $_SERVER["REMOTE_ADDR"]; ?>' > /var/www/html/index.php \
+  && echo -e 'User-agent: *n\Disallow: /\n' > /var/www/html/robots.txt
+#--- Setup alias
+file=~/.bash_aliases; [ -e "${file}" ] && cp -n $file{,.bkup}   #/etc/bash.bash_aliases
+([[ -e "${file}" && "$(tail -c 1 ${file})" != "" ]]) && echo >> "${file}"
+grep -q '^## www' "${file}" 2>/dev/null \
+  || echo -e '## www\nalias wwwroot="cd /var/www/html/"\n' >> "${file}"
+#--- Apply new alias
+source "${file}" || source ~/.zshrc
+
+#--- Copying Windows-binaries to Apache folder
+cp -r /usr/share/windows-binaries /var/www/html
+
+
+
+#### Setup tftp client & server
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Setting up tftp client${RESET} & ${GREEN}Server${ORANGE} ~ File Transfer Methods ${RESET} "
+apt -y -qq install tftp atftpd \
+  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+#--- Configure atftpd
+file=/etc/default/atftpd; [ -e "${file}" ] && cp -n $file{,.bkup}
+echo -e 'USE_INETD=false\nOPTIONS="--tftpd-timeout 300 --retry-timeout 5 --maxthread 100 --verbose=5 --daemon --port 69 /var/tftp"' > "${file}"
+mkdir -p /var/tftp/
+chown -R nobody\:root /var/tftp/
+chmod -R 0755 /var/tftp/
+#--- Setup alias
+file=~/.bash_aliases; [ -e "${file}" ] && cp -n $file{,.bkup}   #/etc/bash.bash_aliases
+([[ -e "${file}" && "$(tail -c 1 ${file})" != "" ]]) && echo >> "${file}"
+grep -q '^## tftp' "${file}" 2>/dev/null \
+  || echo -e '## tftp\nalias tftproot="cd /var/tftp/"\n' >> "${file}"
+#--- Apply new alias
+source "${file}" || source ~/.zshrc
+#--- Remove from start up
+systemctl disable atftpd
+#--- Disabling IPv6 can help
+#echo 1 > /proc/sys/net/ipv6/conf/all/disable_ipv6
+#echo 1 > /proc/sys/net/ipv6/conf/default/disable_ipv6
+
+#--- Copying Windows-binaries to tftp folder
+cp -r /usr/share/windows-binaries /var/tftp/
+
+
+
+#### Install Pure-FTPd
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Installing Pure-FTPd${ORANGE} ~ FTP server/file transfer method ${RESET} "
+apt -y -qq install pure-ftpd \
+  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+#--- Setup pure-ftpd
+mkdir -p /var/ftp/
+groupdel ftpgroup 2>/dev/null;
+groupadd ftpgroup
+userdel ftp 2>/dev/null;
+useradd -r -M -d /var/ftp/ -s /bin/false -c "FTP user" -g ftpgroup ftp
+chown -R ftp\:ftpgroup /var/ftp/
+chmod -R 0755 /var/ftp/
+pure-pw userdel ftp 2>/dev/null;
+echo -e '\n' | pure-pw useradd ftp -u ftp -d /var/ftp/
+pure-pw mkdb
+#--- Configure pure-ftpd
+echo "no" > /etc/pure-ftpd/conf/UnixAuthentication
+echo "no" > /etc/pure-ftpd/conf/PAMAuthentication
+echo "yes" > /etc/pure-ftpd/conf/NoChmod
+echo "yes" > /etc/pure-ftpd/conf/ChrootEveryone
+#echo "yes" > /etc/pure-ftpd/conf/AnonymousOnly
+echo "no" > /etc/pure-ftpd/conf/NoAnonymous
+echo "yes" > /etc/pure-ftpd/conf/AnonymousCanCreateDirs
+echo "yes" > /etc/pure-ftpd/conf/AllowAnonymousFXP
+echo "no" > /etc/pure-ftpd/conf/AnonymousCantUpload
+echo "30768 31768" > /etc/pure-ftpd/conf/PassivePortRange              #cat /proc/sys/net/ipv4/ip_local_port_range
+echo "/etc/pure-ftpd/welcome.msg" > /etc/pure-ftpd/conf/FortunesFile   #/etc/motd
+echo "FTP" > /etc/pure-ftpd/welcome.msg
+ln -sf /etc/pure-ftpd/conf/PureDB /etc/pure-ftpd/auth/50pure
+#--- 'Better' MOTD
+apt -y -qq install cowsay \
+  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+echo "Viva Mexico!" | /usr/games/cowsay -f turkey > /etc/pure-ftpd/welcome.msg
+echo -e " ${YELLOW}[i]${GREEN} Pure-FTPd username: ${ORANGE} anonymous ${RESET} "
+echo -e " ${YELLOW}[i]${GREEN} Pure-FTPd password: ${ORANGE} anonymous ${RESET} "
+#--- Apply settings
+systemctl restart pure-ftpd
+#--- Setup alias
+file=~/.bash_aliases; [ -e "${file}" ] && cp -n $file{,.bkup}   #/etc/bash.bash_aliases
+([[ -e "${file}" && "$(tail -c 1 ${file})" != "" ]]) && echo >> "${file}"
+grep -q '^## ftp' "${file}" 2>/dev/null \
+  || echo -e '## ftp\nalias ftproot="cd /var/ftp/"\n' >> "${file}"
+#--- Apply new alias
+source "${file}" || source ~/.zshrc
+#--- Remove from start up
+systemctl disable pure-ftpd
+
+#--- Copying Windows-binaries to ftp folder
+cp -r /usr/share/windows-binaries /var/ftp/
+
+
+TEXT='  FTP, Aapache & TFTP have been enabled'
+notice--
+
+
+}
