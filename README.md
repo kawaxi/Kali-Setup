@@ -51,6 +51,14 @@ Pending Ideas:
 
 # Change Log
 
+March 4th 
+* Fxed time sync problem by adding another safety layer by changging daemon behavior.
+* Added Sublime text as an option for the 32 bits version
+* Enabled favorites for gnome dash to dock for 32 bits OS.
+* Condition added to check for MingW Libs in order to save time when Installing.
+* Condition added to check for Wine in order to save time.
+* Condition added to skip installed for Veil-Evasion.
+
 Feb 25th 
 * Fixed time sync problem
 * Wordked on comment standard 
