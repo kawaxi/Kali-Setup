@@ -390,41 +390,13 @@ ln -sf /opt/packers/ /usr/share/windows-binaries/packers
 #### Install gcc & multilib
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing ${GREEN}gcc${RESET} & ${GREEN}multilibc ${ORANGE} ~ Compiling Libraries ${RESET} "
 for FILE in cc gcc g++ gcc-multilib make automake libc6 libc6-dev libc6-amd64 libc6-dev-amd64 libc6-i386 libc6-dev-i386 libc6-i686 libc6-dev-i686 build-essential dpkg-dev; do
-  if [ $(dpkg-query -W -f='${Status}' "${FILE}" 2>/dev/null | grep -c "ok installed") -eq 0 ];
+ if dpkg-query -l "${FILE}" 2>/dev/null | grep ^ii >/dev/null;
   then
-    apt -y -qq install "${FILE}" 2>/dev/null
+     echo -e "\n\n ${GREEN}[*]${RESET} ${WHITE} "${FILE}" is already installed ${ORANGE} ${RESET}\n"
   else
-    echo -e "\n\n ${GREEN}[*]${RESET} ${WHITE} "${FILE}" is already installed ${ORANGE} ${RESET}\n"
+    apt install -y -qq "${FILE}"
   fi
 done
-
-
-#
-# (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing ${GREEN}gcc${RESET} & ${GREEN}multilibc ${ORANGE} ~ Compiling Libraries ${RESET} "
-# for FILE in cc gcc g++ gcc-multilib make automake libc6 libc6-dev libc6-amd64 libc6-dev-amd64 libc6-i386 libc6-dev-i386 libc6-i686 libc6-dev-i686 build-essential dpkg-dev; do
-#  if dpkg-query -l "$FILE" > /dev/null 2>&1;
-#   then
-#     echo -e "\n\n ${GREEN}[*]${RESET} ${ORANGE} "${FILE}" is already installed ${ORANGE} ${RESET}";
-#   else
-#     echo -e "\n\n ${GREEN}[*]${RESET} ${ORANGE} Installing  "${FILE}"  ${ORANGE} ${RESET}";
-#      apt -y -qq install "$FILE"; \
-#     	 echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
-#   fi
-# done
-
-
-
-# (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing ${GREEN}gcc${RESET} & ${GREEN}multilibc ${ORANGE} ~ Compiling Libraries ${RESET} "
-# for FILE in cc gcc g++ gcc-multilib make automake libc6 libc6-dev libc6-amd64 libc6-dev-amd64 libc6-i386 libc6-dev-i386 libc6-i686 libc6-dev-i686 build-essential dpkg-dev; do
-#  PKG_OK=$(dpkg-query -W --showformat='${Status}\n' "${FILE}"|grep "install ok installed")
-#  if [ "" == "${PKG_OK}" ]; then
-#    apt-get -y -qq install "${FILE}"
-#  else
-#    echo -e "\n\n ${GREEN}[*]${RESET} ${ORANGE} "${FILE}" is already installed ${ORANGE} ${RESET}\n\n";
-#  fi
-#
-# done
-
 
 
 #### Install MinGW ~ cross compiling suite
