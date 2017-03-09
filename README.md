@@ -23,15 +23,15 @@ Express Install: It will install basic apps and configure services and your syst
 Full Install: It will Install Express module apps, full package repos and let your system ready for Pentesting.
 
 	MSF				OpenVas			Sshuttle			GCC			MITMf			Wig				GoBuster
-	Armitage		VFeed			Pfi					MinGW		Wordlists		CMSmap			reGeorg	
+	Armitage		VFeed			Pfi					MinGW		Wordlists		CMSmap			reGeorg
 	Python			Graudit			AccessChk			Wine		Smbspider		Droopescan		Patetor
 	Pycharm			Daemonfs		PsExec.exe			Hyperion	CrackMapExec	Crowbar			Clusterd
 	Wdiff			Proxychains		Veil-framework		BDFProxy	Credcrack		Subterfuge		Webhandler
 	Vbindiff		HttpTunnel		OP-Packers			BetterCap	Empire			Azazel			Gnmap-Parser
-	
 
 
-Just do: 
+
+Just do:
 
 # git clone https://github.com/kawaxi/kali-setup
 
@@ -41,7 +41,7 @@ For help do:
 
 
 
-Pending Ideas: 
+Pending Ideas:
 * Working with counters inside modules
 * Fix IRC Bouncer Configuration ( it fails to replace one line)
 * Need to Include personalized exploits to exploit DB.
@@ -51,7 +51,11 @@ Pending Ideas:
 
 # Change Log
 
-March 4th 
+March 8th
+* Config file for Tilda created and applied personal Configuration.
+* Changed filter for installing MingW and GCC libs.
+
+March 4th
 * Fxed time sync problem by adding another safety layer by changging daemon behavior.
 * Added Sublime text as an option for the 32 bits version
 * Enabled favorites for gnome dash to dock for 32 bits OS.
@@ -59,18 +63,18 @@ March 4th
 * Condition added to check for Wine in order to save time.
 * Condition added to skip installed for Veil-Evasion.
 
-Feb 25th 
+Feb 25th
 * Fixed time sync problem
-* Wordked on comment standard 
+* Worked on comment standard
 * Add msf alias for Msfconsole
 * Cleaning Module Created.
 * Moved Colors definition to Visual Module.
 * Added Tilda to express Installation Module.
 
-Feb 22nd 
+Feb 22nd
 * Copied Windows-binaries to FTP, TFTP, and Apache services folder.
 
-Feb 20th 
+Feb 20th
 * Fixed Little Issue with Irc peventsfile.
 
 Feb 19th 2017
