@@ -402,11 +402,11 @@ done
 #### Install MinGW ~ cross compiling suite
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing MinGW ${ORANGE} ~ Cross Compiling Suite${RESET}"
 for FILE in mingw-w64 binutils-mingw-w64 gcc-mingw-w64 cmake   mingw-w64-dev mingw-w64-tools   gcc-mingw-w64-i686 gcc-mingw-w64-x86-64   mingw32; do
-  if [ ! $(dpkg-query -W -f='${Status}' "${FILE}" 2>/dev/null | grep -c "ok installed") -eq 0 ];
+  if dpkg-query -l "${FILE}" 2>/dev/null | grep ^ii >/dev/null;
   then
-    apt -y -qq install "${FILE}" 2>/dev/null
+    echo -e "\n\n ${GREEN}[*]${RESET} ${WHITE} "${FILE}" is already installed ${ORANGE} ${RESET}\n"
   else
-    echo -e "\n\n ${GREEN}[*]${RESET} ${GREEN} Cross Compiling Suite MinGW ${ORANGE} is Already Installed.... Skipping  ${RESET}"
+      apt install -y -qq "${FILE}"
   fi
 done
 

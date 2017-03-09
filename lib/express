@@ -435,6 +435,21 @@ fi
 apt-get -y -q install tilda
 #Adding Tilda to startup
 cp /usr/share/applications/tilda.desktop ~/.config/autostart/
+#--- Creating Config File
+nohup /usr/bin/tilda &
+sleep 1
+pkill -f tilda
+#-- Editing Config File
+file=~/.config/tilda/config_0; [ -e "${file}" ] && cp -n $file{,.bkup}
+sed -i 's/key=".*"/key="F2"/' "${file}"
+sed -i 's/double_buffer=.*/double_buffer=true/' "${file}"
+sed -i 's/hidden=.*/hidden=true/' "${file}"
+sed -i 's/copy_key=".*"/copy_key="<Control>c"/' "${file}"
+sed -i 's/scroll_history_infinite=.*/scroll_history_infinite=true/' "${file}"
+sed -i 's/max_height=.*/max_height=200/' "${file}"
+sed -i 's/max_witdh=.*/max_witdh=600/' "${file}"
+# --
+nohup /usr/bin/tilda &
 
 #### Installing  Icedove (Thunderbird)
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Installing Icedove ${ORANGE} ~ Email Client ${RESET} "
