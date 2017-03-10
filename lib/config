@@ -338,6 +338,7 @@ echo -e "${GREEN}[*] ${ORANGE} Setting up Bookmarks ${RESET}"
    echo file:///var/www/html www >> ~/.config/gtk-3.0/bookmarks
    echo file:///var/ftp/ ftp >> ~/.config/gtk-3.0/bookmarks
    echo file:///var/tftp tftp >> ~/.config/gtk-3.0/bookmarks
+   echo file:///root/Dropbox  /Dropbox >> ~/.config/gtk-3.0/bookmarks
    echo file:///tmp  /tmp >> ~/.config/gtk-3.0/bookmarks
 
 

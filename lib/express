@@ -49,24 +49,17 @@ fi
 #### Installing Hexchat
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Installing (GNOME) Hexchat ${ORANGE} ~ IRC Client ${RESET}"
 apt-get install hexchat -y
-#--- Add Hexchat to panel (GNOME)
-# export DISPLAY=:0.0${RESET}
-
-####CONFIGURING HEXCHAT
-# export DISPLAY=:0.0
 
 echo -e "\n ${GREEN} [*] ${ORANGE}Let's Configure Hexchat ${RESET}"
 
 apt-get -y -qq install xdotool  \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 
-
 #--- making sure to open the app to so the app can creat the folder with the files
 hexchat & HEXPID=$! >/dev/null 2>&1
 
 #--- Initiating Hexchat and saving the pid.
 echo -e "${ORANGE}[*]Our PID for Hexchat is $HEXPID ${RESET}"
-
 
 #---founding our windows ID for our PID
 HEXWINID=$(xdotool search --onlyvisible --sync --pid ${HEXPID} | tail -1)
@@ -249,8 +242,6 @@ fi
 
 TEXT='  Configuration Files For Hexchat Have Been Created'
 notice--
-
-
 
 ##### Install Terminator (GNOME)
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})  ${GREEN} Installing (GNOME)Terminator ${ORANGE} ~ Multiple terminals in a single window ${RESET}"
@@ -450,6 +441,17 @@ sed -i 's/max_height=.*/max_height=200/' "${file}"
 sed -i 's/max_witdh=.*/max_witdh=600/' "${file}"
 # --
 nohup /usr/bin/tilda &
+
+
+#### Installing Dropbox
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Installing Dropbox ${ORANGE} ~ Keep up your files on the cloud ${RESET} "
+if [[ "$(uname -m)" == 'x86_64' ]]; then
+  cd ~ && wget -O - "https://www.dropbox.com/download?plat=lnx.x86_64" | tar xzf -
+else
+  cd ~ && wget -O - "https://www.dropbox.com/download?plat=lnx.x86" | tar xzf -
+fi
+nohup ~/.dropbox-dist/dropboxd &
+pkill -f firefox-esr
 
 #### Installing  Icedove (Thunderbird)
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Installing Icedove ${ORANGE} ~ Email Client ${RESET} "
