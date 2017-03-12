@@ -11,6 +11,21 @@ if [[ $(which gnome-shell) ]]; then
   (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Configuring GNOME 3 ${ORANGE} ~ desktop environment ${RESET}"
   export DISPLAY=:0.0
 
+  #--- Installing Caffeine Extension ---#
+  git clone git://github.com/eonpatapon/gnome-shell-extension-caffeine.git && cd gnome-shell-extension-caffeine
+  ./update-locale.sh
+  #cp -r caffeine@patapon.info ~/.local/share/gnome-shell/extensions
+  #--- Adding to Gsettings
+  cp -r caffeine@patapon.info /usr/share/gnome-shell/extensions/
+  cp ~/gnome-shell-extension-caffeine/caffeine@patapon.info/schemas/org.gnome.shell.extensions.caffeine.gschema.xml \
+  /usr/share/glib-2.0/schemas/ && glib-compile-schemas /usr/share/glib-2.0/schemas/
+  #glib-compile-schemas --strict --targetdir=caffeine@patapon.info/schemas/ caffeine@patapon.info/schemas
+  rm -r /root/gnome-shell-extension-caffeine
+  gnome-shell-extension-tool -e caffeine@patapon.info
+  gnome-shell --replace &
+  gsettings set org.gnome.shell.extensions.caffeine user-enabled true
+
+
 
   #--- Windows List Extension
   gnome-shell-extension-tool -e window-list@gnome-shell-extensions.gcampax.github.com
@@ -54,32 +69,33 @@ if [[ $(which gnome-shell) ]]; then
   # dconf write /org/gnome/shell/extensions/dash-to-dock/require-pressure-to-show false
   # dconf write /org/gnome/shell/extensions/dash-to-dock/hide-delay 0.200
 
-##### Disable screensaver
-  echo -e "\n\n ${GREEN}[i] ${GREEN}Lets Start Tweaking GNOME ...${RESET}"
-  (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Disabling screensaver${RESET}"
-  xset s 0 0
-  xset s off
-  gsettings set org.gnome.desktop.session idle-delay 0
+
+  # Let's Control it using Caffeine for now
+  #--- Disable screensaver
+  # echo -e "\n\n ${GREEN}[i] ${GREEN}Lets Start Tweaking GNOME ...${RESET}"
+  # (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Disabling screensaver${RESET}"
+  # xset s 0 0
+  # xset s off
+  # gsettings set org.gnome.desktop.session idle-delay 0
+
+  #--- Adding favorites to our Gnome Dash-to-dock   x64
+  if [[ "$(uname -m)" == 'x86_64' ]]; then
+      gsettings set org.gnome.shell favorite-apps "['firefox-esr.desktop', 'org.gnome.Nautilus.desktop', 'org.gnome.Terminal.desktop', 'terminator.desktop', 'kali-msfconsole.desktop', 'kali-armitage.desktop', 'kali-burpsuite.desktop', 'kali-beef.desktop', 'kali-faraday.desktop', 'leafpad.desktop', 'gnome-tweak-tool.desktop','atom.desktop', 'keepnote.desktop', 'icedove.desktop', 'shutter.desktop' , 'hexchat.desktop']"
+  else
+  #--- Adding favorites to our Gnome Dash-to-dock  x64
+      gsettings set org.gnome.shell favorite-apps "['firefox-esr.desktop', 'org.gnome.Nautilus.desktop', 'org.gnome.Terminal.desktop', 'terminator.desktop', 'kali-msfconsole.desktop', 'kali-armitage.desktop', 'kali-burpsuite.desktop', 'kali-beef.desktop', 'kali-faraday.desktop', 'leafpad.desktop', 'gnome-tweak-tool.desktop','sublime_text.desktop', 'keepnote.desktop', 'icedove.desktop', 'shutter.desktop' , 'hexchat.desktop']"
+  fi
+
+  ##### Configure GNOME terminal ;  Note: need to restart xserver for effect
+  (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Configuring GNOME terminal${ORANGE} ~ CLI interface"
+  gconftool-2 -t bool -s /apps/gnome-terminal/profiles/Default/scrollback_unlimited true
+  gconftool-2 -t string -s /apps/gnome-terminal/profiles/Default/background_type transparent
+  gconftool-2 -t string -s /apps/gnome-terminal/profiles/Default/background_darkness 0.85611499999999996
+
+
 else
-  echo -e "\n\n ${YELLOW}[i]${RESET} ${YELLOW}Skipping  from disabling package updater${RESET}..."
+  echo -e "\n\n ${YELLOW}[i]${RESET} ${YELLOW}Skipping Gnome it's not installed ${RESET}..."
 fi
-
-
-#--- Adding favorites to our Gnome   x64
-
-if [[ "$(uname -m)" == 'x86_64' ]]; then
-  gsettings set org.gnome.shell favorite-apps "['firefox-esr.desktop', 'org.gnome.Nautilus.desktop', 'org.gnome.Terminal.desktop', 'terminator.desktop', 'kali-msfconsole.desktop', 'kali-armitage.desktop', 'kali-burpsuite.desktop', 'kali-beef.desktop', 'kali-faraday.desktop', 'leafpad.desktop', 'gnome-tweak-tool.desktop','atom.desktop', 'keepnote.desktop', 'icedove.desktop', 'shutter.desktop' , 'hexchat.desktop']"
-else
-#--- Adding favorites to our Gnome   x64
-
-  gsettings set org.gnome.shell favorite-apps "['firefox-esr.desktop', 'org.gnome.Nautilus.desktop', 'org.gnome.Terminal.desktop', 'terminator.desktop', 'kali-msfconsole.desktop', 'kali-armitage.desktop', 'kali-burpsuite.desktop', 'kali-beef.desktop', 'kali-faraday.desktop', 'leafpad.desktop', 'gnome-tweak-tool.desktop','sublime_text.desktop', 'keepnote.desktop', 'icedove.desktop', 'shutter.desktop' , 'hexchat.desktop']"
-fi
-
-##### Configure GNOME terminal ;  Note: need to restart xserver for effect
-(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Configuring GNOME terminal${ORANGE} ~ CLI interface"
-gconftool-2 -t bool -s /apps/gnome-terminal/profiles/Default/scrollback_unlimited true
-gconftool-2 -t string -s /apps/gnome-terminal/profiles/Default/background_type transparent
-gconftool-2 -t string -s /apps/gnome-terminal/profiles/Default/background_darkness 0.85611499999999996
 
 
 ##### Configure bash - All users
@@ -338,8 +354,8 @@ echo -e "${GREEN}[*] ${ORANGE} Setting up Bookmarks ${RESET}"
    echo file:///var/www/html www >> ~/.config/gtk-3.0/bookmarks
    echo file:///var/ftp/ ftp >> ~/.config/gtk-3.0/bookmarks
    echo file:///var/tftp tftp >> ~/.config/gtk-3.0/bookmarks
-   echo file:///root/Dropbox  /Dropbox >> ~/.config/gtk-3.0/bookmarks
    echo file:///tmp  /tmp >> ~/.config/gtk-3.0/bookmarks
+   echo file:///root/Dropbox  /Dropbox >> ~/.config/gtk-3.0/bookmarks
 
 
   #  read -p "[*] Enter the FTP user you created to create the FTP bookmark: " ftpuser;

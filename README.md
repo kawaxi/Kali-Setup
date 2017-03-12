@@ -15,7 +15,8 @@ Express Install: It will install basic apps and configure services and your syst
 	Atom   		          				 Asciinema       							Pure-FTPd
 	Hexchat         					 Shutter         							Apache2
 	Terminator        					 htop           							Mysql
-	Conky             			 		 psmisc         							SSH
+	Conky
+	Dropbox             			 		 psmisc         							SSH
 	Icedove           					 Pipe Vievwer   			 				Tftp
 	LibreOffice       			 		 Filezilla
 

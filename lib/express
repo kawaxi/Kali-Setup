@@ -451,6 +451,7 @@ else
   cd ~ && wget -O - "https://www.dropbox.com/download?plat=lnx.x86" | tar xzf -
 fi
 nohup ~/.dropbox-dist/dropboxd &
+sleep 1
 pkill -f firefox-esr
 
 #### Installing  Icedove (Thunderbird)
