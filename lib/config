@@ -14,16 +14,16 @@ if [[ $(which gnome-shell) ]]; then
   #--- Installing Caffeine Extension ---#
   git clone git://github.com/eonpatapon/gnome-shell-extension-caffeine.git && cd gnome-shell-extension-caffeine
   ./update-locale.sh
+  glib-compile-schemas --strict --targetdir=caffeine@patapon.info/schemas/ caffeine@patapon.info/schemas
   #cp -r caffeine@patapon.info ~/.local/share/gnome-shell/extensions
   #--- Adding to Gsettings
   cp -r caffeine@patapon.info /usr/share/gnome-shell/extensions/
   cp ~/gnome-shell-extension-caffeine/caffeine@patapon.info/schemas/org.gnome.shell.extensions.caffeine.gschema.xml \
   /usr/share/glib-2.0/schemas/ && glib-compile-schemas /usr/share/glib-2.0/schemas/
-  #glib-compile-schemas --strict --targetdir=caffeine@patapon.info/schemas/ caffeine@patapon.info/schemas
   rm -r /root/gnome-shell-extension-caffeine
   gnome-shell-extension-tool -e caffeine@patapon.info
-  gnome-shell --replace &
   gsettings set org.gnome.shell.extensions.caffeine user-enabled true
+  nohup gnome-shell --replace &
 
 
 
