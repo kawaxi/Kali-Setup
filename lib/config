@@ -327,14 +327,14 @@ EOF
 
 #--- Show address bar on nautilus
 gsettings set org.gnome.nautilus.preferences always-use-location-entry true
-#--- Sort Directories First.
-gsettings set org.gnome.nautilus.preferences sort-directories-first true
 #--- Show hidden files
 gsettings set org.gnome.nautilus.preferences show-hidden-files true
 gsettings set org.gtk.Settings.FileChooser show-hidden true
 #--- Show Directory items count & Folder Order
 gsettings set org.gnome.nautilus.preferences show-directory-item-counts true
 gsettings set org.gtk.Settings.FileChooser sort-directories-first true
+# #--- Sort Directories First.
+# gsettings set org.gnome.nautilus.preferences sort-directories-first true
 #-- Default Sort Order by type , options are:  name, type ,
 gsettings set org.gnome.nautilus.preferences default-sort-order type
 #-- Enable Trash Icon on Desktop

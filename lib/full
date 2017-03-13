@@ -303,7 +303,8 @@ pushd /opt/proxychains-ng-git/ >/dev/null
 git pull -q
 make -s clean
 ./configure --prefix=/usr --sysconfdir=/etc >/dev/null
-make -s 2>/dev/null && make -s install   # bad, but it gives errors which might be confusing (still builds)
+make -s 2>/dev/null && make -s install   # baif ! foobar_loc="$(type -p "wine")" || [ -z "$foobar_loc" ]; then
+d, but it gives errors which might be confusing (still builds)
 popd >/dev/null
 #--- Add to path (with a 'better' name)
 ln -sf /usr/bin/proxychains4 /usr/local/bin/proxychains-ng
@@ -344,7 +345,8 @@ unzip -q -o -d /usr/share/windows-binaries/ /usr/share/windows-binaries/AccessCh
 rm -f /usr/share/windows-binaries/{AccessChk.zip,Eula.txt}
 
 
-#### Downloading PsExec.exe
+#### Downloading PsExec.exeif ! foobar_loc="$(type -p "wine")" || [ -z "$foobar_loc" ]; then
+
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Downloading PsExec.exe ${ORANGE} ~ Pass The Hash 'phun' ${RESET}"
 apt -y -qq install windows-binaries \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
@@ -402,6 +404,7 @@ done
 #### Install MinGW ~ cross compiling suite
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing MinGW ${ORANGE} ~ Cross Compiling Suite${RESET}"
 for FILE in mingw-w64 binutils-mingw-w64 gcc-mingw-w64 cmake   mingw-w64-dev mingw-w64-tools   gcc-mingw-w64-i686 gcc-mingw-w64-x86-64   mingw32; do
+  #---  Just install what's missing
   if dpkg-query -l "${FILE}" 2>/dev/null | grep ^ii >/dev/null;
   then
     echo -e "\n\n ${GREEN}[*]${RESET} ${WHITE} "${FILE}" is already installed ${ORANGE} ${RESET}\n"
@@ -537,7 +540,7 @@ apt -y -qq install wordlists \
 
 #### Update wordlists
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Updating Wordlists ${ORANGE} ~ Collection of Wordlists ${RESET}"
-apt -y -qq install wordlists curl \
+apt -y -qq install wordlists \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 #--- Extract rockyou wordlist
 [ -e /usr/share/wordlists/rockyou.txt.gz ] \
@@ -655,10 +658,11 @@ chmod +x "${file}"
 
 #### Install Crowbar -- brute force"
 
-rm -r /opt/crowbar-git # in Case its already installed
-
+if ! foobar_loc="$(type -p "crowbar-git")" || [ -z "$foobar_loc" ]; then
+  rm -r /opt/crowbar-git # in Case its already installed
+else
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing crowbar ${ORANGE} ~ Brute Force Tool ${RESET}"
-apt -y -qq install git openvpn freerdp-x11 tigervnc-viewer \
+apt -y -qq install freerdp-x11 tigervnc-viewer \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 git clone -q -b master https://github.com/galkan/crowbar.git /opt/crowbar-git/ \
   || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
@@ -683,7 +687,7 @@ apt -y -qq install xprobe \
 
 #### Install UACScript
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing UACScript ${ORANGE} ~ UAC Bypass for Windows 7 ${RESET}"
-apt -y -qq install git windows-binaries \
+apt -y -qq install windows-binaries \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 git clone -q -b master https://github.com/Vozzie/uacscript.git /opt/uacscript-git/ \
   || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
@@ -727,8 +731,6 @@ ln -sf /opt/gnmap-parser-git/gnmap-parser.sh /usr/local/bin/gnmap-parser-git
 
 #### Install udp-proto-scanner
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing UDP-Proto-Scanner ${ORANGE} ~ Common UDP Port Scanner ${RESET}"
-apt -y -qq install curl \
-  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 timeout 300 curl --progress -k -L -f "https://labs.portcullis.co.uk/download/udp-proto-scanner-1.1.tar.gz" -o /tmp/udp-proto-scanner.tar.gz \
   || echo -e ' '${RED}'[!]'${RESET}" Issue downloading udp-proto-scanner.tar.gz" 1>&2
 gunzip /tmp/udp-proto-scanner.tar.gz

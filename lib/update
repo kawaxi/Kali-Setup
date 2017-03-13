@@ -28,7 +28,7 @@ update--()
 
   #### Time taken for Update
   finishtime=$(date +%s)
-  echo -e "\n\n ${YELLOW}[i]${RESET} Time (roughly) taken: ${YELLOW}$(( $(( finishtime - time )) / 60 )) minutes"
+  echo -e "\n\n ${YELLOW}[i]${RESET} Time (roughly) taken: ${YELLOW}$(( $(( finishtime - time )) / 60 )) minutes ${RESET}"
 
 
 
