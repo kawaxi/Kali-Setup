@@ -272,9 +272,14 @@ chmod +x "${file}"
 
 
 #### Install Daemonfs - GUI file monitor
+if ! foobar_loc="$(type -p "daemonfs")" || [ -z "$foobar_loc" ]; then
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Installing daemonfs ${ORANGE} ~ GUI File Monitor ${RESET}"
 apt -y -qq install daemonfs \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+else
+  echo -e "\n\n ${GREEN}[*]${RESET} ${ORANGE} daemonfs is already installed.... Skipping ${ORANGE} ${RESET}"
+fi
+
 
 #### Install VPN support
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Installing VPN Support for Network-Manager ${RESET}"
@@ -284,7 +289,7 @@ for FILE in network-manager-openvpn network-manager-pptp network-manager-vpnc ne
 done
 
 
-#### Install vulscan script for nmap
+#### Install Vulscan script for nmap
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Installing ${GREEN}Vulscan Script for Nmap ${ORANGE} ~ Vulnerability Scanner Add-On ${RESET}"
 mkdir -p /usr/share/nmap/scripts/vulscan/
 timeout 300 curl --progress -k -L -f "http://www.computec.ch/projekte/vulscan/download/nmap_nse_vulscan-2.0.tar.gz" > /tmp/nmap_nse_vulscan.tar.gz \
@@ -660,23 +665,23 @@ chmod +x "${file}"
 if ! foobar_loc="$(type -p "crowbar-git")" || [ -z "$foobar_loc" ]; then
   rm -r /opt/crowbar-git # in Case its already installed
 else
-(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing crowbar ${ORANGE} ~ Brute Force Tool ${RESET}"
-apt -y -qq install freerdp-x11 tigervnc-viewer \
-  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
-git clone -q -b master https://github.com/galkan/crowbar.git /opt/crowbar-git/ \
-  || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
-pushd /opt/crowbar-git/ >/dev/null
-git pull -q
-popd >/dev/null
-#--- Add to path
-mkdir -p /usr/local/bin/
-file=/usr/local/bin/crowbar-git
-cat <<EOF > "${file}" \
-  || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
-#!/bin/bash
-cd /opt/crowbar-git/ && python crowbar.py "\$@"
+  (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing crowbar ${ORANGE} ~ Brute Force Tool ${RESET}"
+  apt -y -qq install freerdp-x11 tigervnc-viewer \
+    || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+  git clone -q -b master https://github.com/galkan/crowbar.git /opt/crowbar-git/ \
+    || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
+  pushd /opt/crowbar-git/ >/dev/null
+  git pull -q
+  popd >/dev/null
+  #--- Add to path
+  mkdir -p /usr/local/bin/
+  file=/usr/local/bin/crowbar-git
+  cat <<EOF > "${file}" \
+    || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
+  #!/bin/bash
+  cd /opt/crowbar-git/ && python crowbar.py "\$@"
 EOF
-chmod +x "${file}"
+  chmod +x "${file}"
 fi
 
 #### Install xprobe  -- OS fingerprinting
@@ -714,8 +719,6 @@ apt -y -qq install gitg \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 
 
-
-
 #### Install Gnmap-Parser (fork)
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Gnmap-Parser (fork) ${ORANGE} ~ Parse Nmap Exports into various plain-text formats ${RESET}"
 git clone -q -b master https://github.com/nullmode/gnmap-parser.git /opt/gnmap-parser-git/ \
@@ -748,9 +751,13 @@ chmod +x "${file}"
 
 
 #### Install clusterd
-(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Clusterd ${ORANGE} ~ Clustered Attack Toolkit (JBoss, ColdFusion, WebLogic, Tomcat etc) ${RESET}"
-apt -y -qq install clusterd \
-  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+if ! foobar_loc="$(type -p "clusterd")" || [ -z "$foobar_loc" ]; then
+  (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Clusterd ${ORANGE} ~ Clustered Attack Toolkit (JBoss, ColdFusion, WebLogic, Tomcat etc) ${RESET}"
+  apt -y -qq install clusterd \
+    || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+else
+  echo -e "\n\n ${GREEN}[*]${RESET} ${ORANGE} Cluster is already installed.... Skipping ${ORANGE} ${RESET}"
+fi
 
 
 #### Install webhandler

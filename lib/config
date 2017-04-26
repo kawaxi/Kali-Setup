@@ -23,7 +23,7 @@ if [[ $(which gnome-shell) ]]; then
   rm -r /root/gnome-shell-extension-caffeine
   gnome-shell-extension-tool -e caffeine@patapon.info
   gsettings set org.gnome.shell.extensions.caffeine user-enabled true
-  nohup gnome-shell --replace &
+
 
 
 
@@ -78,12 +78,15 @@ if [[ $(which gnome-shell) ]]; then
   # xset s off
   # gsettings set org.gnome.desktop.session idle-delay 0
 
+  # Applying Changes to gnome
+  nohup gnome-shell --replace &
+
   #--- Adding favorites to our Gnome Dash-to-dock   x64
   if [[ "$(uname -m)" == 'x86_64' ]]; then
-      gsettings set org.gnome.shell favorite-apps "['firefox-esr.desktop', 'org.gnome.Nautilus.desktop', 'org.gnome.Terminal.desktop', 'terminator.desktop', 'kali-msfconsole.desktop', 'kali-armitage.desktop', 'kali-burpsuite.desktop', 'kali-beef.desktop', 'kali-faraday.desktop', 'leafpad.desktop', 'gnome-tweak-tool.desktop','atom.desktop', 'keepnote.desktop', 'icedove.desktop', 'shutter.desktop' , 'hexchat.desktop']"
+      gsettings set org.gnome.shell favorite-apps "['chromium.desktop', 'firefox-esr.desktop', 'org.gnome.Nautilus.desktop', 'org.gnome.Terminal.desktop', 'terminator.desktop', 'kali-msfconsole.desktop', 'kali-armitage.desktop', 'kali-burpsuite.desktop', 'kali-beef.desktop', 'kali-faraday.desktop', 'leafpad.desktop', 'gnome-tweak-tool.desktop', 'atom.desktop', 'keepnote.desktop', 'icedove.desktop', 'shutter.desktop', 'hexchat.desktop']"
   else
   #--- Adding favorites to our Gnome Dash-to-dock  x64
-      gsettings set org.gnome.shell favorite-apps "['firefox-esr.desktop', 'org.gnome.Nautilus.desktop', 'org.gnome.Terminal.desktop', 'terminator.desktop', 'kali-msfconsole.desktop', 'kali-armitage.desktop', 'kali-burpsuite.desktop', 'kali-beef.desktop', 'kali-faraday.desktop', 'leafpad.desktop', 'gnome-tweak-tool.desktop','sublime_text.desktop', 'keepnote.desktop', 'icedove.desktop', 'shutter.desktop' , 'hexchat.desktop']"
+      gsettings set org.gnome.shell favorite-apps "['chromium.desktop', 'firefox-esr.desktop', 'org.gnome.Nautilus.desktop', 'org.gnome.Terminal.desktop', 'terminator.desktop', 'kali-msfconsole.desktop', 'kali-armitage.desktop', 'kali-burpsuite.desktop', 'kali-beef.desktop', 'kali-faraday.desktop', 'leafpad.desktop', 'gnome-tweak-tool.desktop','sublime_text.desktop', 'keepnote.desktop', 'icedove.desktop', 'shutter.desktop' , 'hexchat.desktop']"
   fi
 
   ##### Configure GNOME terminal ;  Note: need to restart xserver for effect
@@ -371,14 +374,16 @@ echo -e "${GREEN}[*] ${ORANGE} Setting up Bookmarks ${RESET}"
   #  done
 
 
+
+# Bash completion is in every kali....
 ##### Install bash completion - all users
-(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Installing Bash Completion${ORANGE} ~ Tab Complete CLI Commands ${RESET}"
-apt -y -qq install bash-completion \
-|| echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
-file=/etc/bash.bashrc; [ -e "${file}" ] && cp -n $file{,.bkup}   #~/.bashrc
-sed -i '/# enable bash completion in/,+7{/enable bash completion/!s/^#//}' "${file}"
-#--- Apply new configs
-source "${file}" || source ~/.zshrc
+# (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Installing Bash Completion${ORANGE} ~ Tab Complete CLI Commands ${RESET}"
+# #apt -y -qq install bash-completion \
+# || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+# file=/etc/bash.bashrc; [ -e "${file}" ] && cp -n $file{,.bkup}   #~/.bashrc
+# sed -i '/# enable bash completion in/,+7{/enable bash completion/!s/^#//}' "${file}"
+# #--- Apply new configs
+# source "${file}" || source ~/.zshrc
 
 
 ###### Configure login screen- To always log as root
@@ -674,6 +679,7 @@ EOF
 
 echo -e "\n ${GREEN} [*] ${ORANGE}Let's create simlinks for WordLists ${RESET}"
 ln -s /usr/share/wordlists/rockyou.txt /root/rockyou.txt
+ln -s /usr/share/wordlists/dirb/common.txt /root/common.txt
 ln -s /usr/share/wordlists/dirbuster /root/
 
 

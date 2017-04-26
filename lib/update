@@ -22,7 +22,14 @@ update--()
   #--- Update
   # Clean up      clean remove autoremove autoclean
 
+  #Saving some Config Files we will need.
+  file=/etc/ssh/sshd_config; [ -e "${file}" ] && cp -n $file{,.bkup}
+
+  apt-mark hold openssh-server bash-completion cc gcc g++ gcc-multilib make automake libc6 libc6-dev libc6-amd64 libc6-dev-amd64 libc6-i386 libc6-dev-i386 libc6-i686 libc6-dev-i686 build-essential dpkg-dev
+
   apt-get update && apt-get upgrade -yq
+
+  apt-mark hold openssh-server
 
 
 

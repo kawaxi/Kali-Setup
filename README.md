@@ -44,20 +44,30 @@ For help do:
 
 Pending Ideas:
 * Working with counters inside modules
-* Fix IRC Bouncer Configuration ( it fails to replace one line)
 * Need to Include personalized exploits to exploit DB.
-* Add Off the record messaging plug in -otr
 * Set key macros for programming.  
 * Make script to trap TERM signal.
 
 # Change Log
+
+April 26th
+* common List link added to root folder
+* Chromium added to Kali
+* Changed method for Dropbox installation & Added to Startup
+* OTR plug-in  enabled on Hexchat
+* Hold on openssh-server & bash-completion to avoid configuration issues.
+* Some IF conditions added to save time.
+* Fixed Issue when installing Caffeine Extension.
+* Added Time sync for stats during installation.
+* Dropbox added to Express Install module.
+* General code cleaning.
 
 March 8th
 * Config file for Tilda created and applied personal Configuration.
 * Changed filter for installing MingW and GCC libs.
 
 March 4th
-* Fxed time sync problem by adding another safety layer by changging daemon behavior.
+* Fixed time sync problem by adding another safety layer by changging daemon behavior.
 * Added Sublime text as an option for the 32 bits version
 * Enabled favorites for gnome dash to dock for 32 bits OS.
 * Condition added to check for MingW Libs in order to save time when Installing.
@@ -76,7 +86,7 @@ Feb 22nd
 * Copied Windows-binaries to FTP, TFTP, and Apache services folder.
 
 Feb 20th
-* Fixed Little Issue with Irc peventsfile.
+* Fixed Little Issue with IRC peventsfile.
 
 Feb 19th 2017
 * Fixed problem with  gsettings and Dash to Dock
