@@ -303,8 +303,7 @@ pushd /opt/proxychains-ng-git/ >/dev/null
 git pull -q
 make -s clean
 ./configure --prefix=/usr --sysconfdir=/etc >/dev/null
-make -s 2>/dev/null && make -s install   # baif ! foobar_loc="$(type -p "wine")" || [ -z "$foobar_loc" ]; then
-d, but it gives errors which might be confusing (still builds)
+make -s 2>/dev/null && make -s install   # bad, but it gives errors which might be confusing (still builds)
 popd >/dev/null
 #--- Add to path (with a 'better' name)
 ln -sf /usr/bin/proxychains4 /usr/local/bin/proxychains-ng
@@ -678,6 +677,7 @@ cat <<EOF > "${file}" \
 cd /opt/crowbar-git/ && python crowbar.py "\$@"
 EOF
 chmod +x "${file}"
+fi
 
 #### Install xprobe  -- OS fingerprinting
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing xprobe ${ORANGE} ~ OS Fingerprinting ${RESET}"
