@@ -12,17 +12,21 @@ Some of the repos are included in the full Kali Distro, I also added additional 
 
 Express Install: It will install basic apps and configure services and your system for daily use.
 
-	Atom  	          		Asciinema				Pure-FTPd						Chromium 			Hexchat     				Shutter         					Apache2				Tilda 					Terminator        					htop 				Mysql					Conky 		
-	Dropbox             		psmisc         				SSH							Icedove         		Pipe Vievwer   			 	Tft							LibreOffice       		Filezilla
+	Atom  	    	Asciinema		Pure-FTPd		Chromium 		Hexchat   		Shutter
+	Apache2			Tilda			Terminator 		htop 			Mysql			Conky 		
+	Dropbox 		psmisc 			SSH				Icedove     	Pipe Vievwer 	Tft
+	LibreOffice     Filezilla
 
 
 Full Install: It will Install Express module apps, full package repos and let your system ready for Pentesting.
 
-	MSF		OpenVas		Sshuttle		GCC		MITMf 		Wig		GoBuster		Armitage	VFeed 		Pfi 			MinGW 		Wordlists	CMSmap 		reGeorg
-	Python		Graudit 	AccessChk		Wine		Smbspider	Droopescan	Patetor
-	Pycharm		Daemonfs 	PsExec.exe 		Hyperion 	CrackMapExec	Crowbar	 	Clusterd
-	Wdiff		Proxychains	Veil-framework		BDFProxy	Credcrack 	Subterfuge 	Webhandler
-	Vbindiff	HttpTunnel	OP-Packers 		BetterCap	Empire		Azazel		Gnmap-Parser
+	MSF				OpenVas			Sshuttle		GCC			MITMf 			Wig
+	GoBuster		Armitage		VFeed 			Pfi 		MinGW 		Wordlists	
+	CMSmap 			reGeorg 		Python			Graudit 	AccessChk		Wine		
+	Smbspider		Droopescan		Patetor			Pycharm		Daemonfs 	PsExec.exe 		
+	Hyperion 		CrackMapExec	Crowbar	 		Clusterd 	wdiff		Proxychains	
+	Veil-framework	BDFProxy		Credcrack	 	Subterfuge 	Webhandler 	Vbindiff		
+	HttpTunnel		OP-Packers 		BetterCap		Empire		Azazel		Gnmap-Parser
 
 
 
