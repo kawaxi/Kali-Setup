@@ -425,7 +425,7 @@ if ! foobar_loc="$(type -p "winetricks")" || [ -z "$foobar_loc" ]; then
     || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
   #--- Using x64?
   if [[ "$(uname -m)" == 'x86_64' ]]; then
-    (( STAGE++ )); echo -e " ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Configuring ${ORANGE}WINE (x64) ${RESET}"
+    (( STAGE++ )); echo -e " ${ORANGE}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Configuring ${ORANGE}WINE ${RESET}(x64) "
     dpkg --add-architecture i386
     apt -qq update
     apt -y -qq install wine32 \
@@ -502,14 +502,14 @@ chmod +x "${file}"
 
 
 #### Install Backdoor Factory Proxy (BDFProxy)
-(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Backdoor Factory Proxy (BDFProxy) ${ORANGE} ~ Patches Binaries Files DSuring a MITM ${RESET}"
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Backdoor Factory Proxy (BDFProxy) ${ORANGE} ~ Patches Binaries Files During a MITM ${RESET}"
 apt -y -qq install bdfproxy \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 
 
 #### Install BetterCap
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing BetterCap ${ORANGE} ~ MITM Framework ${RESET} "
-apt -y -qq install git ruby-dev libpcap-dev \
+apt -y -qq install ruby-dev libpcap-dev \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 git clone -q -b master https://github.com/evilsocket/bettercap.git /opt/bettercap-git/ \
   || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
@@ -751,7 +751,7 @@ if ! foobar_loc="$(type -p "clusterd")" || [ -z "$foobar_loc" ]; then
   apt -y -qq install clusterd \
     || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 else
-  echo -e "\n\n ${BLUE}[*]${RESET} ${GREEN} Cluster is already installed.... ${YELLOW} Skipping  ${RESET}"
+  echo -e "\n\n ${ORANGE}[i]${RESET} ${GREEN} Cluster is already installed.... ${YELLOW} Skipping  ${RESET}"
 fi
 
 
@@ -773,7 +773,7 @@ git pull -q
 popd >/dev/null
 
 #### Install gobuster
-(( STAGE++ )); echo -e "\n\n ${GREEN} [*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Gobuster ${ORANGE} ~ Directory/File/DNS Busting tool ${RESET}"
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Gobuster ${ORANGE} ~ Directory/File/DNS Busting tool ${RESET}"
 apt -y -qq install gobuster \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 

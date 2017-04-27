@@ -50,7 +50,7 @@ fi
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Installing (GNOME) Hexchat ${ORANGE} ~ IRC Client ${RESET}"
 apt-get install hexchat -y
 
-echo -e "\n ${GREEN}[*]${YELLOW}Let's Configure Hexchat ${RESET}"
+echo -e "\n ${ORANGE}[*]${ORANGE} Let's Configure Hexchat ${RESET}"
 
 apt-get -y -qq install xdotool  \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
@@ -59,11 +59,11 @@ apt-get -y -qq install xdotool  \
 hexchat & HEXPID=$! >/dev/null 2>&1
 
 #--- Initiating Hexchat and saving the pid.
-echo -e "${GREEN} [*]${ORANGE}Our PID for Hexchat is: ${RESET}$HEXPID "
+echo -e "${ORANGE} [i]${ORANGE} Our PID for Hexchat is: ${RESET}$HEXPID "
 
 #---founding our windows ID for our PID
 HEXWINID=$(xdotool search --onlyvisible --sync --pid ${HEXPID} | tail -1)
-echo -e "${GREEN} [*]${ORANGE}We found our window ID for Hexchat PID : ${RESET}$HEXWINID ${RESET}\n"
+echo -e "${ORANGE} [i]${ORANGE} We found our window ID for Hexchat PID : ${RESET}$HEXWINID ${RESET}\n"
 
 xdotool key --window $HEXWINID Return
 
@@ -76,7 +76,7 @@ timeout 5 killall -9 -q -w hexchat
 #--- HEXCHAT GENERAL CONFIGURATION; YOU COULD ALSO LET HEXCHAT TO GENERATE IT.
 file=~/.config/hexchat/hexchat.conf; [ -e "${file}" ] && cp -n $file{,.bkup}
 if [[ -f "${file}" ]]; then
-  echo -e ' '${GREEN}'[*]'${WHITE}" ${file} ${YELLOW} Detected. Replacing ..." ${RESET} 1>&2
+  echo -e ' '${ORANGE}'[i]'${WHITE}" ${file} ${YELLOW} Detected. Replacing ..." ${RESET} 1>&2
   timeout 300 curl --progress -k -L -f "https://raw.githubusercontent.com/kawaxi/Kali-Setup/master/hexchat.conf" > "${file}" \
   || echo -e ' '${RED}'[!] Issue Downloading file'${RESET} 1>&2
 else
@@ -87,7 +87,7 @@ fi
 #--- HEXCHAT Friends Lst     ### PLACE YOUR FRINDS LIST IN THIS SECTION
 file=~/.config/hexchat/notify.conf; [ -e "${file}" ] && cp -n $file{,.bkup}
 if [[ -f "${file}" ]]; then
-  echo -e ' '${GREEN}'[!]'${WHITE}" ${file} ${YELLOW} detected. Skipping..." ${RESET} 1>&2
+  echo -e ' '${ORANGE}'[i]'${WHITE}" ${file} ${YELLOW} Detected. Skipping..." ${RESET} 1>&2
 else
   cat <<EOF > "${file}" \
 	|| echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
@@ -108,7 +108,7 @@ file=~/.config/hexchat/servlist.conf; [ -e "${file}" ] && cp -n $file{,.bkup}
 if [[ -f "${file}" ]]; then
   ([[ -e "${file}" && "$(tail -c 1 ${file})" != "" ]]) && echo >> "${file}"
   grep -q '^N=Bouncer Elite=' "${file}" 2>/dev/null \
-  echo -e ' '${GREEN}'[!]'${WHITE}" ServList.conf Detected. ${ORANGE} Replacing Lines..." ${RESET} 1>&2
+  echo -e ' '${ORANGE}'[i]'${WHITE}" ServList.conf Detected. ${ORANGE} Replacing Lines..." ${RESET} 1>&2
   file=/tmp/servlist.py
   cat <<EOF > "${file}" \
 	|| echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
@@ -151,7 +151,7 @@ rm $file
 #--- Create your colors files
 file=~/.config/hexchat/colors.conf; [ -e "${file}" ] && cp -n $file{,.bkup}
 if [[ -f "${file}" ]]; then
-  echo -e ' '${GREEN}'[!]'${RESET}" ${file} ${ORANGE} Detected. Skipping..."  ${RESET} 1>&2
+  echo -e ' '${ORANGE}'[i]'${RESET}" ${file} ${ORANGE} Detected. Skipping..."  ${RESET} 1>&2
 else
   cat <<EOF > "${file}" \
 	|| echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
@@ -208,7 +208,7 @@ fi
 file=~/.config/hexchat/pevents.conf
 if [[ -f "${file}" ]]; then
   file=/tmp/pevents.py
-  echo -e ' '${GREEN}'[!]'${WHITE}" ${file} ${ORANGE}  Detected. Replacing Lines..." ${RESET} 1>&2
+  echo -e ' '${ORANGE}'[!]'${WHITE}" ${file} ${ORANGE}  Detected. Replacing Lines..." ${RESET} 1>&2
   cat <<EOF > "${file}" \
 	|| echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
 
@@ -234,7 +234,7 @@ rm $file
 else
   #--- We download the files or we create them, creating them will add more than 400  lines.
   file=~/.config/hexchat/pevents.conf
-  echo -e "${GREEN} [*] ${WHITE}Downloading pevents.conf ${ORANGE}      File  Downloaded ${RESET}"
+  echo -e "${ORANGE} [i] ${WHITE}Downloading pevents.conf ${YELLOW}          File  Downloaded ${RESET}"
   timeout 300 curl --progress -k -L -f "https://raw.githubusercontent.com/kawaxi/Kali-Setup/master/pevents.conf" > "${file}" \
   || echo -e ' '${RED}'[!] Issue Downloading file'${RESET} 1>&2
 fi
@@ -455,7 +455,7 @@ if ! foobar_loc="$(type -p "killall")" || [ -z "$foobar_loc" ]; then
   apt -y -qq install psmisc \
     || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 else
-  echo -e "\n\n ${BLUE}[*]${RESET} ${GREEN} psmisc is already installed.... ${YELLOW} Skipping  ${RESET}"
+  echo -e "\n\n ${ORANGE}[*]${RESET} ${GREEN} psmisc is already installed.... ${YELLOW} Skipping  ${RESET}"
 fi
 
 
@@ -654,7 +654,7 @@ nohup /usr/bin/tilda tilda &
 echo $! > save_pid.txt
 sleep 1
 kill -15 `cat save_pid.txt`
-echo -e "${BLUE} [*]Our PID for Tilda was: ${RESET}`cat save_pid.txt` ${RESET}"
+echo -e "${ORANGE} [i]${ORANGE} Our PID for Tilda was: ${RESET}`cat save_pid.txt` ${RESET}"
 rm save_pid.txt
 #-- Editing Config File
 file=~/.config/tilda/config_0; [ -e "${file}" ] && cp -n $file{,.bkup}
@@ -712,7 +712,7 @@ else
   file=/etc/chromium.d/default-flags; [ -e "${file}" ] && cp -n $file{,.bkup}
   echo -e "# Run as root Kali" >> "${file}"
   echo -e 'export CHROMIUM_FLAGS="$CHROMIUM_FLAGS --password-store=detect --no-sandbox --user-data-dir --start-maximized" ' >> "${file}"
-  echo -e "${BLUE}[*]${GREEN} Chromium is installed ${RESET}"
+  echo -e "${ORANGE}[i]${GREEN} Chromium is installed ${RESET}"
 fi
 
 
