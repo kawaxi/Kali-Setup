@@ -13,8 +13,7 @@ Some of the repos are included in the full Kali Distro, I also added additional 
 Express Install: It will install basic apps and configure services and your system for daily use.
 
 	Atom  	    	Asciinema		Pure-FTPd		Chromium 		Hexchat   		Shutter
-	Apache2			Tilda			Terminator 		htop 			Mysql			Conky 		
-	Dropbox 		psmisc 			SSH				Icedove     	Pipe Vievwer 	Tft
+	Apache2		Tilda			Terminator 		htop 			Mysql			Conky 		Dropbox 	psmisc 			SSH			Icedove     		Pipe Vievwer 		Tft
 	LibreOffice     Filezilla
 
 
