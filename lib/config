@@ -341,7 +341,7 @@ gsettings set org.gnome.nautilus.desktop trash-icon-visible true
 
 #--- Adding nautilus bookmark entries
 
-echo -e "${BLUE} [*] ${YELLOW} Setting up Bookmarks ${RESET}"
+echo -e "${ORANGE} [*]${YELLOW} Setting up Bookmarks ${RESET}"
 
   #  read -p "!!!Enter the path of each directory you would like bookmarked - EX:/usr/share and a name for the bookmark (Hit Enter to Continue)";
   #  echo "[*] 3 Entries max, more can be manually entered. (FTP, TFTP, HTML, and Root Dir / done by default."
@@ -674,7 +674,7 @@ X-GNOME-Autostart-enabled=true
 Name=wallpaper
 EOF
 
-echo -e "\n ${BLUE}[*]${RESET} Let's create simlinks for: ${YELLOW}WordLists ${RESET}"
+echo -e "\n ${GREEN}[*] ${RESET}Let's create simlinks for: ${YELLOW}WordLists ${RESET}"
 ln -s /usr/share/wordlists/rockyou.txt /root/rockyou.txt
 ln -s /usr/share/wordlists/dirb/common.txt /root/common.txt
 ln -s /usr/share/wordlists/dirbuster /root/

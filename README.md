@@ -1,6 +1,6 @@
 # Kali-Setup
 
-#Fully automated bash script to setup your Kali system, Tested on Kali 2016.2 Vmware x64.
+# Fully automated bash script to setup your Kali system, Tested on Kali 2017.1 Vmware x64.
 
 This idea came to me while taking the OSCP.  I took my own initiative to create this script, though it's far from perfect,I created this script as part of continuing my education, as a result I applied several different methodologies in creating it.
 
@@ -21,10 +21,10 @@ Express Install: It will install basic apps and configure services and your syst
 Full Install: It will Install Express module apps, full package repos and let your system ready for Pentesting.
 
 	MSF			OpenVas			Sshuttle	GCC		MITMf 		Wig
-	GoBuster		Armitage		VFeed 		Pfi 		MinGW 		Wordlists	
+	GoBuster		Armitage		VFeed 		Pfi 		MinGW 		Wordlists
 	CMSmap 			reGeorg 		Python		Graudit 	AccessChk	Wine
 	Smbspider		Droopescan		Patetor		Pycharm		Daemonfs 	PsExec.exe
-	Hyperion 		CrackMapExec		Crowbar	 	Clusterd 	wdiff		Proxychains	
+	Hyperion 		CrackMapExec		Crowbar	 	Clusterd 	wdiff		Proxychains
 	Veil-framework		BDFProxy		Credcrack	Subterfuge 	Webhandler 	Vbindiff
 	HttpTunnel		OP-Packers 		BetterCap	Empire		Azazel		Gnmap-Parser
 
