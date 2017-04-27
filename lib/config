@@ -8,14 +8,13 @@ notice--
 
 if [[ $(which gnome-shell) ]]; then
   ##### Configure GNOME 3
-  (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Configuring GNOME 3 ${ORANGE} ~ desktop environment ${RESET}"
+  (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Configuring GNOME 3 ${ORANGE} ~ Desktop environment ${RESET}"
   export DISPLAY=:0.0
 
   #--- Installing Caffeine Extension ---#
   git clone git://github.com/eonpatapon/gnome-shell-extension-caffeine.git && cd gnome-shell-extension-caffeine
   ./update-locale.sh
   glib-compile-schemas --strict --targetdir=caffeine@patapon.info/schemas/ caffeine@patapon.info/schemas
-  #cp -r caffeine@patapon.info ~/.local/share/gnome-shell/extensions
   #--- Adding to Gsettings
   cp -r caffeine@patapon.info /usr/share/gnome-shell/extensions/
   cp ~/gnome-shell-extension-caffeine/caffeine@patapon.info/schemas/org.gnome.shell.extensions.caffeine.gschema.xml \
@@ -23,9 +22,6 @@ if [[ $(which gnome-shell) ]]; then
   rm -r /root/gnome-shell-extension-caffeine
   gnome-shell-extension-tool -e caffeine@patapon.info
   gsettings set org.gnome.shell.extensions.caffeine user-enabled true
-
-
-
 
   #--- Windows List Extension
   gnome-shell-extension-tool -e window-list@gnome-shell-extensions.gcampax.github.com
@@ -148,7 +144,7 @@ source "${file}" || source ~/.zshrc
 
 
 ##### Install grc
-(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Installing grc   ${ORANGE} ~ Colours Shell Output${WHITE}"
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Installing grc   ${ORANGE} ~ Colours Shell Output${RESET}"
 apt -y -qq install grc \
 || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 #--- Setup aliases
@@ -334,7 +330,7 @@ gsettings set org.gnome.nautilus.preferences always-use-location-entry true
 gsettings set org.gnome.nautilus.preferences show-hidden-files true
 gsettings set org.gtk.Settings.FileChooser show-hidden true
 #--- Show Directory items count & Folder Order
-gsettings set org.gnome.nautilus.preferences show-directory-item-counts true
+gsettings set org.gnome.nautilus.preferences show-directory-item-counts local-only
 gsettings set org.gtk.Settings.FileChooser sort-directories-first true
 # #--- Sort Directories First.
 # gsettings set org.gnome.nautilus.preferences sort-directories-first true
@@ -344,7 +340,8 @@ gsettings set org.gnome.nautilus.preferences default-sort-order type
 gsettings set org.gnome.nautilus.desktop trash-icon-visible true
 
 #--- Adding nautilus bookmark entries
-echo -e "${GREEN}[*] ${ORANGE} Setting up Bookmarks ${RESET}"
+
+echo -e "${GREEN} [*] ${YELLOW} Setting up Bookmarks ${RESET}"
 
   #  read -p "!!!Enter the path of each directory you would like bookmarked - EX:/usr/share and a name for the bookmark (Hit Enter to Continue)";
   #  echo "[*] 3 Entries max, more can be manually entered. (FTP, TFTP, HTML, and Root Dir / done by default."
@@ -677,7 +674,7 @@ X-GNOME-Autostart-enabled=true
 Name=wallpaper
 EOF
 
-echo -e "\n ${GREEN} [*] ${ORANGE}Let's create simlinks for WordLists ${RESET}"
+echo -e "\n ${GREEN}[*]${RESET}Let's create simlinks for: ${YELLOW}WordLists ${RESET}"
 ln -s /usr/share/wordlists/rockyou.txt /root/rockyou.txt
 ln -s /usr/share/wordlists/dirb/common.txt /root/common.txt
 ln -s /usr/share/wordlists/dirbuster /root/

@@ -50,7 +50,7 @@ fi
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Installing (GNOME) Hexchat ${ORANGE} ~ IRC Client ${RESET}"
 apt-get install hexchat -y
 
-echo -e "\n ${GREEN} [*] ${ORANGE}Let's Configure Hexchat ${RESET}"
+echo -e "\n ${GREEN}[*]${YELLOW}Let's Configure Hexchat ${RESET}"
 
 apt-get -y -qq install xdotool  \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
@@ -59,11 +59,11 @@ apt-get -y -qq install xdotool  \
 hexchat & HEXPID=$! >/dev/null 2>&1
 
 #--- Initiating Hexchat and saving the pid.
-echo -e "${ORANGE}[*]Our PID for Hexchat is $HEXPID ${RESET}"
+echo -e "${GREEN} [*]${ORANGE}Our PID for Hexchat is: ${RESET}$HEXPID "
 
 #---founding our windows ID for our PID
 HEXWINID=$(xdotool search --onlyvisible --sync --pid ${HEXPID} | tail -1)
-echo -e "${ORANGE}[*]We found our window ID for Hexchat PID : $HEXWINID ${RESET}\n"
+echo -e "${GREEN} [*]${ORANGE}We found our window ID for Hexchat PID : ${RESET}$HEXWINID ${RESET}\n"
 
 xdotool key --window $HEXWINID Return
 
@@ -76,7 +76,7 @@ timeout 5 killall -9 -q -w hexchat
 #--- HEXCHAT GENERAL CONFIGURATION; YOU COULD ALSO LET HEXCHAT TO GENERATE IT.
 file=~/.config/hexchat/hexchat.conf; [ -e "${file}" ] && cp -n $file{,.bkup}
 if [[ -f "${file}" ]]; then
-  echo -e ' '${GREEN}'[*]'${WHITE}" ${file} ${ORANGE} Detected. Replacing ..." ${RESET} 1>&2
+  echo -e ' '${GREEN}'[*]'${WHITE}" ${file} ${YELLOW} Detected. Replacing ..." ${RESET} 1>&2
   timeout 300 curl --progress -k -L -f "https://raw.githubusercontent.com/kawaxi/Kali-Setup/master/hexchat.conf" > "${file}" \
   || echo -e ' '${RED}'[!] Issue Downloading file'${RESET} 1>&2
 else
@@ -87,7 +87,7 @@ fi
 #--- HEXCHAT Friends Lst     ### PLACE YOUR FRINDS LIST IN THIS SECTION
 file=~/.config/hexchat/notify.conf; [ -e "${file}" ] && cp -n $file{,.bkup}
 if [[ -f "${file}" ]]; then
-  echo -e ' '${GREEN}'[!]'${WHITE}" ${file} ${ORANGE} detected. Skipping..." ${RESET} 1>&2
+  echo -e ' '${GREEN}'[!]'${WHITE}" ${file} ${YELLOW} detected. Skipping..." ${RESET} 1>&2
 else
   cat <<EOF > "${file}" \
 	|| echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
@@ -234,7 +234,7 @@ rm $file
 else
   #--- We download the files or we create them, creating them will add more than 400  lines.
   file=~/.config/hexchat/pevents.conf
-  echo -e "${GREEN} [*] ${WHITE}Downloading pevents.conf ${ORANGE} File  Downloaded ${RESET}"
+  echo -e "${GREEN} [*] ${WHITE}Downloading pevents.conf ${ORANGE}      File  Downloaded ${RESET}"
   timeout 300 curl --progress -k -L -f "https://raw.githubusercontent.com/kawaxi/Kali-Setup/master/pevents.conf" > "${file}" \
   || echo -e ' '${RED}'[!] Issue Downloading file'${RESET} 1>&2
 fi
@@ -435,7 +435,8 @@ apt -y -qq install libreoffice \
 
 #### Install asciinema  -- Terminal Recorder
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing asciinema ${ORANGE} ~ CLI Terminal Recorder${RESET}"
-curl -s -L https://asciinema.org/install | sh
+apt -y -qq install asciinema  \
+  || echo -e ' '${RED}'[!] Issue with apt install'  1>&2
 
 #### Install Shutter   -- Take snapshots.
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing Shutter ${ORANGE} ~ GUI Static Screen Capture ${RESET}"
@@ -454,7 +455,7 @@ if ! foobar_loc="$(type -p "killall")" || [ -z "$foobar_loc" ]; then
   apt -y -qq install psmisc \
     || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 else
-  echo -e "\n\n ${GREEN}[*]${RESET} ${ORANGE} psmisc is already installed.... Skipping ${ORANGE} ${RESET}"
+  echo -e "\n\n ${BLUE}[*]${RESET} ${GREEN} psmisc is already installed.... ${YELLOW} Skipping  ${RESET}"
 fi
 
 
@@ -525,18 +526,22 @@ else
 fi
 
 #### Install mysql
-(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Installing MySQL ${ORANGE} ~ Database ${RESET} "
-apt -y -qq install mysql-server \
-  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
-echo -e " ${YELLOW}[i]${GREEN} MySQL username: ${ORANGE} root"
-echo -e " ${YELLOW}[i]${GREEN} MySQL password: ${ORANGE} <blank>   ***${BOLD}CHANGE THIS ASAP${RESET}***"
-[[ -e ~/.my.cnf ]] \
-  || cat <<EOF > ~/.my.cnf
-[client]
-user=root
-host=localhost
-password=
+if ! foobar_loc="$(type -p "mysql")" || [ -z "$foobar_loc" ]; then
+  (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Installing MySQL ${ORANGE} ~ Database ${RESET} "
+  apt -y -qq install mariadb-server \
+    || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+else
+  (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Configuration for MySQL has been changed ${ORANGE} ~ Database ${RESET} "
+  echo -e " ${YELLOW}[i]${GREEN} MySQL username: ${ORANGE} root"
+  echo -e " ${YELLOW}[i]${GREEN} MySQL password: ${ORANGE} <blank>   ***${BOLD}CHANGE THIS ASAP${RESET}***"
+  [[ -e ~/.my.cnf ]] \
+    || cat <<EOF > ~/.my.cnf
+  [client]
+  user=root
+  host=localhost
+  password=
 EOF
+fi
 
 
 #### Install apache2 & php
@@ -649,7 +654,7 @@ nohup /usr/bin/tilda tilda &
 echo $! > save_pid.txt
 sleep 1
 kill -15 `cat save_pid.txt`
-echo -e "${ORANGE}[*]Our PID for Tilda was `cat save_pid.txt` ${RESET}"
+echo -e "${BLUE} [*]Our PID for Tilda was: ${RESET}`cat save_pid.txt` ${RESET}"
 rm save_pid.txt
 #-- Editing Config File
 file=~/.config/tilda/config_0; [ -e "${file}" ] && cp -n $file{,.bkup}
@@ -707,7 +712,7 @@ else
   file=/etc/chromium.d/default-flags; [ -e "${file}" ] && cp -n $file{,.bkup}
   echo -e "# Run as root Kali" >> "${file}"
   echo -e 'export CHROMIUM_FLAGS="$CHROMIUM_FLAGS --password-store=detect --no-sandbox --user-data-dir --start-maximized" ' >> "${file}"
-  echo -e "${ORANGE}[*] Chromium is installed ${RESET}"
+  echo -e "${BLUE}[*]${GREEN} Chromium is installed ${RESET}"
 fi
 
 

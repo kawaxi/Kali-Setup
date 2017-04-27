@@ -3,7 +3,6 @@
 full--()
 {
 
-
 #### Install metasploit ~ http://docs.kali.org/general-use/starting-metasploit-framework-in-kali
 if [[ "${openVAS}" != "false" ]]; then
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing metasploit ${ORANGE} ~ Exploit Framework ${RESET} "
@@ -420,13 +419,13 @@ done
 
 #### Install WINE
 #--- Already Installed?
-if ! foobar_loc="$(type -p "wine")" || [ -z "$foobar_loc" ]; then
+if ! foobar_loc="$(type -p "winetricks")" || [ -z "$foobar_loc" ]; then
   (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing WINE${ORANGE} ~ Run Windows Programs on *nix${RESET}"
   apt -y -qq install wine winetricks \
     || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
   #--- Using x64?
   if [[ "$(uname -m)" == 'x86_64' ]]; then
-    (( STAGE++ )); echo -e " ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Configuring ${GREEN}WINE (x64) ${RESET}"
+    (( STAGE++ )); echo -e " ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Configuring ${ORANGE}WINE (x64) ${RESET}"
     dpkg --add-architecture i386
     apt -qq update
     apt -y -qq install wine32 \
@@ -445,8 +444,6 @@ fi
 
 #### Install MinGW (Windows) ~ cross compiling suite
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing MinGW (Windows) ${ORANGE} ~ Cross Compiling Suite ${RESET}"
-# apt -y -qq install wine \
-#   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 timeout 300 curl --progress -k -L -f "http://sourceforge.net/projects/mingw/files/Installer/mingw-get/mingw-get-0.6.2-beta-20131004-1/mingw-get-0.6.2-mingw32-beta-20131004-1-bin.zip/download" > /tmp/mingw-get.zip \
   || echo -e ' '${RED}'[!]'${RESET}" Issue downloading mingw-get.zip" 1>&2       #***!!! hardcoded path!
 mkdir -p ~/.wine/drive_c/MinGW/bin/
@@ -459,8 +456,6 @@ popd >/dev/null
 #--- Add to windows path
 grep -q '^"PATH"=.*C:\\\\MinGW\\\\bin' ~/.wine/system.reg \
   || sed -i '/^"PATH"=/ s_"$_;C:\\\\MinGW\\\\bin"_' ~/.wine/system.reg
-
-
 
 
 #### Install hyperion
@@ -756,7 +751,7 @@ if ! foobar_loc="$(type -p "clusterd")" || [ -z "$foobar_loc" ]; then
   apt -y -qq install clusterd \
     || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 else
-  echo -e "\n\n ${GREEN}[*]${RESET} ${ORANGE} Cluster is already installed.... Skipping ${ORANGE} ${RESET}"
+  echo -e "\n\n ${BLUE}[*]${RESET} ${GREEN} Cluster is already installed.... ${YELLOW} Skipping  ${RESET}"
 fi
 
 
@@ -778,7 +773,7 @@ git pull -q
 popd >/dev/null
 
 #### Install gobuster
-(( STAGE++ )); echo -e "\n\n${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Gobuster ${ORANGE} ~ Directory/File/DNS Busting tool ${RESET}"
+(( STAGE++ )); echo -e "\n\n ${GREEN} [*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Gobuster ${ORANGE} ~ Directory/File/DNS Busting tool ${RESET}"
 apt -y -qq install gobuster \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 
@@ -800,8 +795,8 @@ ln -sf /opt/reGeorg-git /usr/share/webshells/reGeorg
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Subterfuge ${ORANGE} ~ MITM ${RESET}"
 git clone -q -b master https://github.com/Subterfuge-Framework/Subterfuge.git /opt/subterfuge-git \
   || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
-sleep 6
-xdotool key y Return
+# sleep 6
+# xdotool key y Return
 python /opt/subterfuge-git/setup.py \
   || echo -e ' '${RED}'[!] Issue whith apt-install'${RESET} 1>&2
 

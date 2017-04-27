@@ -12,23 +12,22 @@ Some of the repos are included in the full Kali Distro, I also added additional 
 
 Express Install: It will install basic apps and configure services and your system for daily use.
 
-	Atom   		          				 Asciinema       							Pure-FTPd
-	Hexchat         					 Shutter         							Apache2
-	Terminator        					 htop           							Mysql
-	Conky
-	Dropbox             			 		 psmisc         							SSH
-	Icedove           					 Pipe Vievwer   			 				Tftp
-	LibreOffice       			 		 Filezilla
+	Atom   		          			Asciinema       						Pure-FTPd							Chromium
+	Hexchat         					Shutter         						Apache2								Tilda
+	Terminator        				htop 												Mysql
+	Conky 										Dropbox             		 		psmisc         							
+	SSH												Icedove           					Pipe Vievwer   			 				
+	Tft												LibreOffice       		 		 	Filezilla
 
 
 Full Install: It will Install Express module apps, full package repos and let your system ready for Pentesting.
 
-	MSF				OpenVas			Sshuttle			GCC			MITMf			Wig				GoBuster
-	Armitage		VFeed			Pfi					MinGW		Wordlists		CMSmap			reGeorg
-	Python			Graudit			AccessChk			Wine		Smbspider		Droopescan		Patetor
-	Pycharm			Daemonfs		PsExec.exe			Hyperion	CrackMapExec	Crowbar			Clusterd
-	Wdiff			Proxychains		Veil-framework		BDFProxy	Credcrack		Subterfuge		Webhandler
-	Vbindiff		HttpTunnel		OP-Packers			BetterCap	Empire			Azazel			Gnmap-Parser
+	MSF					OpenVas				Sshuttle				GCC					MITMf					Wig					GoBuster
+	Armitage		VFeed					Pfi							MinGW				Wordlists			CMSmap			reGeorg
+	Python			Graudit				AccessChk				Wine				Smbspider			Droopescan	Patetor
+	Pycharm			Daemonfs			PsExec.exe			Hyperion		CrackMapExec	Crowbar			Clusterd
+	Wdiff				Proxychains		Veil-framework	BDFProxy		Credcrack			Subterfuge	Webhandler
+	Vbindiff		HttpTunnel		OP-Packers			BetterCap		Empire				Azazel			Gnmap-Parser
 
 
 
@@ -47,8 +46,16 @@ Pending Ideas:
 * Need to Include personalized exploits to exploit DB.
 * Set key macros for programming.  
 * Make script to trap TERM signal.
+* Fix bash-completion bug in kali.
 
 # Change Log
+
+April 27th
+* Some tweaks made for Kali 2017.1
+* Removed fix for vmtools since is not longer needed.
+*	We cleaned code to install caffeine extension
+* Fixed some colors for warnings and notices
+
 
 April 26th
 * common List link added to root folder
