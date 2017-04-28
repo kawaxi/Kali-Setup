@@ -714,15 +714,18 @@ else
   file=/etc/chromium.d/default-flags; [ -e "${file}" ] && cp -n $file{,.bkup}
   echo -e "# Run as root Kali" >> "${file}"
   echo -e 'export CHROMIUM_FLAGS="$CHROMIUM_FLAGS --password-store=detect --no-sandbox --user-data-dir --start-maximized" ' >> "${file}"
-  echo -e "${ORANGE}[i]${GREEN} Chromium is installed ${RESET}"
+  echo -e "${ORANGE} [i]${GREEN} Chromium is installed ${RESET}"
 fi
 
-#### Installing gitkraken
-(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing gitkraken ${ORANGE} ~ Git GUI ${RESET}"
-cd ~ && wget "https://www.gitkraken.com/download/linux-deb" -O gitkraken.deb \
-  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading file" 1>&2
-dpkg -i gitkraken.deb
-rm gitkraken.deb
+#### if x64
+if [[ "$(uname -m)" == 'x86_64' ]]; then
+  #### Installing gitkraken
+  (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing gitkraken ${ORANGE} ~ GIT GUI client ${RESET}"
+  cd ~ && wget "https://release.gitkraken.com/linux/gitkraken-amd64.deb" -O gitkraken.deb \
+    || echo -e ' '${RED}'[!]'${RESET}" Issue downloading file" 1>&2
+  dpkg -i gitkraken.deb
+  rm gitkraken.deb
+fi
 
 #--- Copying Windows-binaries to ftp folder
 cp -r /usr/share/windows-binaries /var/ftp/
