@@ -674,13 +674,15 @@ nohup /usr/bin/tilda &
 #--- If running 64 bits
 if [[ "$(uname -m)" == 'x86_64' ]]; then
   #  Hardcoded Links
-  cd ~ && wget "https://www.dropbox.com/download?dl=packages/debian/dropbox_2015.10.28_amd64.deb" -O dropbox_2015_64.deb
+  cd ~ && wget "https://www.dropbox.com/download?dl=packages/debian/dropbox_2015.10.28_amd64.deb" -O dropbox_2015_64.deb \
+    || echo -e ' '${RED}'[!]'${RESET}" Issue downloading file" 1>&2
   dpkg -i dropbox_2015_64.deb
   rm dropbox_2015_64.deb
   else
-  cd ~ && wget "https://www.dropbox.com/download?dl=packages/debian/dropbox_2015.10.28_i386.deb" -O dropbox_2015_x86.deb
+  cd ~ && wget "https://www.dropbox.com/download?dl=packages/debian/dropbox_2015.10.28_i386.deb" -O dropbox_2015_x86.deb \
+    || echo -e ' '${RED}'[!]'${RESET}" Issue downloading file" 1>&2
   dpkg -i dropbox_2015_x86.deb
-  rm rm dropbox_2015_x86.deb
+  rm dropbox_2015_x86.deb
 fi
 
 #--- Create start script
@@ -715,6 +717,12 @@ else
   echo -e "${ORANGE}[i]${GREEN} Chromium is installed ${RESET}"
 fi
 
+#### Installing gitkraken
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing gitkraken ${ORANGE} ~ Git GUI ${RESET}"
+cd ~ && wget "https://www.gitkraken.com/download/linux-deb" -O gitkraken.deb \
+  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading file" 1>&2
+dpkg -i gitkraken.deb
+rm gitkraken.deb
 
 #--- Copying Windows-binaries to ftp folder
 cp -r /usr/share/windows-binaries /var/ftp/
