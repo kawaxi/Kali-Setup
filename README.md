@@ -27,6 +27,7 @@ Full Install: It will Install Express module apps, full package repos and let yo
 	Hyperion 		CrackMapExec		Crowbar	 	Clusterd 	wdiff		Proxychains
 	Veil-framework		BDFProxy		Credcrack	Subterfuge 	Webhandler 	Vbindiff
 	HttpTunnel		OP-Packers 		BetterCap	Empire		Azazel		Gnmap-Parser
+	Fuzzbunch
 
 
 
@@ -48,6 +49,9 @@ Pending Ideas:
 * Fix bash-completion bug in kali.
 
 # Change Log
+
+May 2nd
+* Fuzzbunch install added.
 
 April 27th
 * Some tweaks made for Kali 2017.1

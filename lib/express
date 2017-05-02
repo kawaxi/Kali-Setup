@@ -63,7 +63,7 @@ echo -e "${ORANGE} [i]${ORANGE} Our PID for Hexchat is: ${RESET}$HEXPID "
 
 #---founding our windows ID for our PID
 HEXWINID=$(xdotool search --onlyvisible --sync --pid ${HEXPID} | tail -1)
-echo -e "${ORANGE} [i]${ORANGE} We found our window ID for Hexchat PID : ${RESET}$HEXWINID ${RESET}\n"
+echo -e "${ORANGE} [i]${ORANGE} We found or window ID for Hexchat : ${RESET}$HEXWINID ${RESET}\n"
 
 xdotool key --window $HEXWINID Return
 
