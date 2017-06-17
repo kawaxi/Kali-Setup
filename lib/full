@@ -111,6 +111,17 @@ msfdb start
 msfconsole -q -x 'version;db_status;sleep 310;exit'
 
 
+#### Adding extra Metasploit modules here *****
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Adding Eternalblue SMB Metasploit module ${RESET}"
+echo -e " ${GREEN}[*]${RESET}   ${RESET}"
+mkdir ~/.msf4/modules/exploits/windows/smb/
+cd ~ && git clone -q https://github.com/kawaxi/Eternalblue-Doublepulsar-Metasploit.git /root/.Eternalblue-Doublepulsar \
+  || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
+cp /root/.Eternalblue-Doublepulsar/eternalblue_doublepulsar.rb ~/.msf4/modules/exploits/windows/smb/
+msfconsole -m ~/.msf4/modules/
+exit
+echo -e "${ORANGE} [i]${GREEN} Eternalblue-Doublepulsar-MSF Module ${ORANGE} use exploit/windows/smb/${RESET}eternalblue_doublepulsar${RESET}"
+
 #### Configuring armitage
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) Configuring ${GREEN}armitage${ORANGE} ~ GUI Metasploit UI ${RESET}"
 export MSF_DATABASE_CONFIG=/usr/share/metasploit-framework/config/database.yml
@@ -391,6 +402,15 @@ apt -y -qq install windows-binaries \
 ln -sf /opt/packers/ /usr/share/windows-binaries/packers
 
 
+if ! foobar_loc="$(type -p "shellter")" || [ -z "$foobar_loc" ]; then
+  #### Install Shellter - Bypassing Anti-Virus
+  (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Installing ${GREEN} Shellter  ${ORANGE} ~ Bypassing AV - Shellcode Injection ${RESET} "
+  apt -y -qq install Shellter \
+    || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+else
+  echo -e "\n\n ${GREEN}[*]${RESET} ${ORANGE} Veil-Evasion is Already Installed.... Skipping ${ORANGE} ${RESET}"
+fi
+
 
 #### Install gcc & multilib
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing ${GREEN}gcc${RESET} & ${GREEN}multilibc ${ORANGE} ~ Compiling Libraries ${RESET} "
@@ -565,6 +585,7 @@ ln -sf /usr/share/sqlmap/txt/wordlist.txt /usr/share/wordlists/sqlmap.txt
 #apt search wordlist
 #find / \( -iname '*wordlist*' -or -iname '*passwords*' \) #-exec ls -l {} \;
 
+
 #### Install Babel scripts
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing Babel Scripts ${ORANGE} ~ Post Exploitation Scripts ${RESET}"
 git clone -q -b master https://github.com/attackdebris/babel-sf.git /opt/babel-sf-git/ \
@@ -606,6 +627,15 @@ git clone -q -b master https://github.com/PowerShellEmpire/Empire.git /opt/empir
 pushd /opt/empire-git/ >/dev/null
 git pull -q
 popd >/dev/null
+#--- Add to path
+file=/usr/local/bin/empire-git
+cat <<EOF > "${file}" \
+  || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
+#!/bin/bash
+cd /opt/empire-git/ && python empire-git "\$@"
+EOF
+chmod +x "${file}"
+echo -e " ${YELLOW}[i]${ORANGE} Don't forget to run:  ${BOLD}${RESET}/opt/empire-git/setup/install.sh ${RESET}***"
 
 
 #### Install wig (https://bugs.kali.org/view.php?id=1932)
@@ -789,10 +819,16 @@ git clone -q -b master https://github.com/sensepost/reGeorg.git /opt/regeorg-git
 pushd /opt/regeorg-git/ >/dev/null
 git pull -q
 popd >/dev/null
+#---
+ln -sf /opt/regeorg-git /usr/share/webshells/reGeorg
 #--- Link to others
 apt -y -qq install webshells \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
-ln -sf /opt/reGeorg-git /usr/share/webshells/reGeorg
+#--- Installing Imsonia Shell
+curl --progress -k -L -f "https://www.insomniasec.com/downloads/tools/InsomniaShell.zip"  > /tmp/imsonia.zip 2>/dev/null \
+  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading InsomniaShell.zip" 1>&2
+unzip -q -o -d /usr/share/webshells/aspx/ /tmp/imsonia.zip 2>/dev/null
+
 
 
 #### Install Subterfuge  - GIT
@@ -894,6 +930,15 @@ xdotool windowactivate --sync ${HEXWINID} key --clearmodifiers --delay 100 alt+F
 echo -e "${ORANGE} [i]${ORANGE} is the PATH correct?  ${YELLOW} "
 cat ~/.wine-fuzzbunch/system.reg | grep PATH ${RESET}
 
+#--- Setup alias
+file=~/.bash_aliases; [ -e "${file}" ] && cp -n $file{,.bkup}   #/etc/bash.bash_aliases
+([[ -e "${file}" && "$(tail -c 1 ${file})" != "" ]]) && echo >> "${file}"
+grep -q '^## fuzzbunch' "${file}" 2>/dev/null \
+  || echo -e '## fuzzbunch\nalias fuzzbunch="cd ~/.wine-fuzzbunch/drive_c/fuzzbunch-debian/windows; wine cmd.exe"\n' >> "${file}"
+#--- Apply new alias
+source "${file}" || source ~/.zshrc
+echo -e " ${YELLOW}[i]${ORANGE} Now you can run fuzzbunch-debian with ${BOLD}${ORANGE}fuzzbunch${RESET}***"
+
 
 #### WineTricks METHOD
 # export WINEPREFIX=$HOME/.wine-fuzzbunch
@@ -930,6 +975,5 @@ cat ~/.wine-fuzzbunch/system.reg | grep PATH ${RESET}
 #
 # cat ~/.wine-fuzzbunch/system.reg | grep PATH
 #
-
 
 }

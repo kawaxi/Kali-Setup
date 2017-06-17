@@ -182,7 +182,7 @@ notice--(){
 
 heading--(){
 
-  TEXT="Kawaxi's Kali Linux Rolling 2016.2 Setup Script! V. 1.0 "
+  TEXT="Kawaxi's Kali Linux Rolling 2017.1 Setup Script! V. 1.0 "
   #--- Center text
   span=$(((M + ${#TEXT}) / 2 ))
   #--- Making sure to center if heading exists

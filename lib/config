@@ -678,8 +678,6 @@ echo -e "\n ${GREEN}[*] ${RESET}Let's create simlinks for: ${YELLOW}WordLists ${
 ln -s /usr/share/wordlists/rockyou.txt /root/rockyou.txt
 ln -s /usr/share/wordlists/dirb/common.txt /root/common.txt
 ln -s /usr/share/wordlists/dirbuster /root/
-
-
-
+ln -s /usr/share/webshells/ /root/
 
 }

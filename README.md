@@ -15,7 +15,7 @@ Express Install: It will install basic apps and configure services and your syst
 	Atom  	   	Asciinema	Pure-FTPd	Chromium 	Hexchat   	Shutter
 	Apache2		Tilda		Terminator 	htop 		Mysql		Conky 		
 	Dropbox 	psmisc 		SSH		Icedove   	Pipe Vievwer 	Tft
-	LibreOffice     Filezilla   Gitkraken
+	LibreOffice     Filezilla    Gitkraken
 
 
 Full Install: It will Install Express module apps, full package repos and let your system ready for Pentesting.
@@ -46,9 +46,17 @@ Pending Ideas:
 * Need to Include personalized exploits to exploit DB.
 * Set key macros for programming.  
 * Make script to trap TERM signal.
-* Fix bash-completion bug in kali.
+
 
 # Change Log
+
+June 16th
+* Unified incoming conections into access.log for Apache2
+*	Fixed little misconfiguration in Tilda
+* Eternalblue-Doublepulsar Metasploit module Added.
+* Fuzzbunch Alias Created.
+* Imsonia Webshell Added.
+* Shellter AV Evasion & shellcode injection added to full install module..
 
 May 2nd
 * Fuzzbunch install added.

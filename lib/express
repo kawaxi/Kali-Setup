@@ -213,13 +213,9 @@ if [[ -f "${file}" ]]; then
 	|| echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
 
 #! /bin/python
-
-
 with open('/root/.config/hexchat/pevents.conf', 'r') as iFile:
     x = iFile.read().splitlines()
-
 x[451] = 'event_text=%C18%C26$3$1%O$t$2'
-
 with open('/root/.config/hexchat/pevents.conf', 'w') as oFile:
     for i in x:
         oFile.write(i + '\n')
@@ -547,7 +543,7 @@ fi
 #### Install apache2 & php
 if ! foobar_loc="$(type -p "apache2")" || [ -z "$foobar_loc" ]; then
   (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Installing Apache2${RESET} & ${GREEN} PHP ${ORANGE} ~ Web Server ${RESET} "
-  apt -y -qq install apache2 php php-cli php-curl \
+  apt -y -qq install apache2 php php-cli php-curl lnav\
     || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 else
   touch /var/www/html/favicon.ico
@@ -559,7 +555,33 @@ else
   file=~/.bash_aliases; [ -e "${file}" ] && cp -n $file{,.bkup}   #/etc/bash.bash_aliases
   ([[ -e "${file}" && "$(tail -c 1 ${file})" != "" ]]) && echo >> "${file}"
   grep -q '^## www' "${file}" 2>/dev/null \
-    || echo -e '## www\nalias wwwroot="cd /var/www/html/"\n' >> "${file}"
+    || echo -e '## www\nalias wwwroot="cd /var/www/html/"\n' >> "${file}" \
+        echo -e '\nalias apache="/var/log/apache2/"\n' >> "${file}"
+
+  # grep 'LogFormat "%{User-agent}i" agent' /etc/apache2/apache2.conf 2>/dev/null \
+  #  && echo  -e '\nCustomLog /var/log/apache2/access.log combined' >> /etc/apache2/apache2.conf
+
+  file=/tmp/apache2.py
+  echo -e ' '${ORANGE}'[i]'${WHITE}" ${WHITE}  Modifiying Apache2.conf..." ${RESET} 1>&2
+  cat <<EOF > "${file}" \
+	|| echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
+
+#! /bin/python
+with open('/etc/apache2/apache2.conf', 'r') as iFile:
+    x = iFile.read().splitlines()
+x[218] = 'CustomLog /var/log/apache2/access.log combined \n'
+with open('/etc/apache2/apache2.conf', 'w') as oFile:
+    for i in x:
+        oFile.write(i + '\n')
+
+EOF
+
+
+chmod 755 $file
+python $file
+rm $file
+
+
   #--- Apply new alias
   source "${file}" || source ~/.zshrc
 
@@ -656,16 +678,20 @@ sleep 1
 kill -15 `cat save_pid.txt`
 echo -e "${ORANGE} [i]${ORANGE} Our PID for Tilda was: ${RESET}`cat save_pid.txt` ${RESET}"
 rm save_pid.txt
+echo -e " ${YELLOW}[i]${ORANGE}   ***${BOLD}${ORANGE} Use F2 to minimize tilda window ${RESET}***"
+echo -e " ${YELLOW}[i]${ORANGE}   ***${BOLD}${ORANGE} If not working try with F1       ${RESET}***"
 #-- Editing Config File
-file=~/.config/tilda/config_0; [ -e "${file}" ] && cp -n $file{,.bkup}
-sed -i 's/key=".*"/key="F2"/' "${file}"
-sed -i 's/double_buffer=.*/double_buffer=true/' "${file}"
-sed -i 's/hidden=.*/hidden=true/' "${file}"
-sed -i 's/copy_key=".*"/copy_key="<Control>c"/' "${file}"
-sed -i 's/scroll_history_infinite=.*/scroll_history_infinite=true/' "${file}"
-sed -i 's/max_height=.*/max_height=200/' "${file}"
-sed -i 's/max_witdh=.*/max_witdh=600/' "${file}"
+_TMP="$(find ~/.config/tilda -maxdepth 1 -type f -name 'config_*' | xargs -n1 file | cut -d ':' -f1)"
+for FILE in $(echo ${_TMP}); do
+sed -i 's/key=".*"/key="F2"/' "${FILE}"
+sed -i 's/double_buffer=.*/double_buffer=true/' "${FILE}"
+sed -i 's/hidden=.*/hidden=true/' "${FILE}"
+sed -i 's/copy_key=".*"/copy_key="<Control>c"/' "${FILE}"
+sed -i 's/scroll_history_infinite=.*/scroll_history_infinite=true/' "${FILE}"
+sed -i 's/max_height=.*/max_height=200/' "${FILE}"
+sed -i 's/max_witdh=.*/max_witdh=600/' "${FILE}"
 # --
+done
 nohup /usr/bin/tilda &
 
 
