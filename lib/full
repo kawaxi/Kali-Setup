@@ -635,8 +635,10 @@ cat <<EOF > "${file}" \
 cd /opt/empire-git/ && python empire-git "\$@"
 EOF
 chmod +x "${file}"
-echo -e " ${YELLOW}[i]${ORANGE} Don't forget to run:  ${BOLD}${RESET}/opt/empire-git/setup/install.sh ${RESET}***"
-
+#echo -e " ${YELLOW}[i]${ORANGE} Don't forget to run:  ${BOLD}${RESET}/opt/empire-git/setup/install.sh ${RESET}***"
+pushd /opt/empire-git/setup/ >/dev/null
+./install.sh
+popd >/dev/null
 
 #### Install wig (https://bugs.kali.org/view.php?id=1932)
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Wig ${ORANGE} ~ Web Application Detection ${RESET}"
