@@ -405,7 +405,7 @@ ln -sf /opt/packers/ /usr/share/windows-binaries/packers
 if ! foobar_loc="$(type -p "shellter")" || [ -z "$foobar_loc" ]; then
   #### Install Shellter - Bypassing Anti-Virus
   (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Installing ${GREEN} Shellter  ${ORANGE} ~ Bypassing AV - Shellcode Injection ${RESET} "
-  apt -y -qq install Shellter \
+  apt -y -qq install shellter \
     || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 else
   echo -e "\n\n ${GREEN}[*]${RESET} ${ORANGE} Veil-Evasion is Already Installed.... Skipping ${ORANGE} ${RESET}"
@@ -484,7 +484,7 @@ grep -q '^"PATH"=.*C:\\\\MinGW\\\\bin' ~/.wine/system.reg \
 
 #### Install hyperion
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing hyperion ${ORANGE} ~ Bypassing Anti-Virus ${RESET}"
-apt -y -qq install unzip windows-binaries \
+apt -y -qq install windows-binaries \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 unzip -q -o -d /usr/share/windows-binaries/ $(find /usr/share/windows-binaries/ -name "Hyperion-*.zip" -type f -print -quit)
 #--- Compile
@@ -642,7 +642,7 @@ popd >/dev/null
 
 #### Install wig (https://bugs.kali.org/view.php?id=1932)
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Wig ${ORANGE} ~ Web Application Detection ${RESET}"
-git clone -q -b master https://github.com/jekyc/wig.git /opt/wig-git/ \
+git clone -q -b master https://github.com/EmpireProject/Empire.git /opt/wig-git/ \
   || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
 pushd /opt/wig-git/ >/dev/null
 git pull -q
@@ -839,8 +839,18 @@ git clone -q -b master https://github.com/Subterfuge-Framework/Subterfuge.git /o
   || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
 # sleep 6
 # xdotool key y Return
+curl --progress -k -L -f "https://raw.githubusercontent.com/Subterfuge-Framework/Subterfuge/git-setup/setup.py" > /opt/subterfuge-git \
+  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading setup.py" 1>&2            #***!!! hardcoded version! Need to manually check for updates
 python /opt/subterfuge-git/setup.py \
-  || echo -e ' '${RED}'[!] Issue whith apt-install'${RESET} 1>&2
+  || echo -e ' '${RED}'[!] Issue whith GIT-install'${RESET} 1>&2
+python /opt/subterfuge-git/setup.py \
+  || echo -e ' '${RED}'[!] Issue whith GIT-install'${RESET} 1>&2
+
+ ## If you have any issues , try this other option.
+#git clone https://github.com/Subterfuge-Framework/Subterfuge.git
+#cd Subterfuge
+#git checkout git-setup
+#python setup.py
 
 #### Install Bettercap
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Bettarcap ${ORANGE} ~ MITM  ${RESET}"
@@ -930,7 +940,8 @@ sleep 7s
 xdotool windowactivate --sync ${HEXWINID} key --clearmodifiers --delay 100 alt+F4
 
 echo -e "${ORANGE} [i]${ORANGE} is the PATH correct?  ${YELLOW} "
-cat ~/.wine-fuzzbunch/system.reg | grep PATH ${RESET}
+#Possible error in here.
+echo -e " $(cat ~/.wine-fuzzbunch/system.reg | grep PATH) ${RESET}"
 
 #--- Setup alias
 file=~/.bash_aliases; [ -e "${file}" ] && cp -n $file{,.bkup}   #/etc/bash.bash_aliases
