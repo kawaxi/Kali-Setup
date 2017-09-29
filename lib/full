@@ -375,7 +375,7 @@ unrar x -y /tmp/pshtoolkit.rar /usr/share/windows-binaries/ >/dev/null
 #--- Already installed?
 if ! foobar_loc="$(type -p "veil-evasion")" || [ -z "$foobar_loc" ]; then
   (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Veil-Evasion Framework ${ORANGE} ~ Bypassing Anti-Virus ${RESET}"
-  apt -y -qq install veil-evasion \
+  apt -y -qq install veil-evasion >/dev/null  \
     || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
   #bash /usr/share/veil-evasion/setup/setup.sh --silent
   mkdir -p /var/lib/veil-evasion/go/bin/
@@ -441,17 +441,17 @@ done
 #--- Already Installed?
 if ! foobar_loc="$(type -p "winetricks")" || [ -z "$foobar_loc" ]; then
   (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing WINE${ORANGE} ~ Run Windows Programs on *nix${RESET}"
-  apt -y -qq install wine winbind winetricks \
+  apt -y -qq install wine winbind winetricks  \
     || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
   #--- Using x64?
   if [[ "$(uname -m)" == 'x86_64' ]]; then
     (( STAGE++ )); echo -e " ${ORANGE}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Configuring ${ORANGE}WINE ${RESET}(x64) "
     dpkg --add-architecture i386
     apt -qq update
-    apt -y -qq install wine32 \
+    apt -y -qq install wine32 1>/dev/null \
       || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
   else
-    apt -qq update & apt -y -qq install wine32 \
+    apt -qq update & apt -y -qq install wine32 1>/dev/null \
       || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 
   fi
@@ -839,12 +839,11 @@ git clone -q -b master https://github.com/Subterfuge-Framework/Subterfuge.git /o
   || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
 # sleep 6
 # xdotool key y Return
-curl --progress -k -L -f "https://raw.githubusercontent.com/Subterfuge-Framework/Subterfuge/git-setup/setup.py" > /opt/subterfuge-git \
+curl --progress -k -L -f "https://raw.githubusercontent.com/Subterfuge-Framework/Subterfuge/git-setup/setup.py" > /opt/subterfuge-git/setup.py \
   || echo -e ' '${RED}'[!]'${RESET}" Issue downloading setup.py" 1>&2            #***!!! hardcoded version! Need to manually check for updates
 python /opt/subterfuge-git/setup.py \
   || echo -e ' '${RED}'[!] Issue whith GIT-install'${RESET} 1>&2
-python /opt/subterfuge-git/setup.py \
-  || echo -e ' '${RED}'[!] Issue whith GIT-install'${RESET} 1>&2
+
 
  ## If you have any issues , try this other option.
 #git clone https://github.com/Subterfuge-Framework/Subterfuge.git
@@ -951,6 +950,14 @@ grep -q '^## fuzzbunch' "${file}" 2>/dev/null \
 #--- Apply new alias
 source "${file}" || source ~/.zshrc
 echo -e " ${YELLOW}[i]${ORANGE} Now you can run fuzzbunch-debian with ${BOLD}${ORANGE}fuzzbunch${RESET}***"
+
+
+file=~/.bash_aliases; [ -e "${file}" ] && cp -n $file{,.bkup}   #/etc/bash.bash_aliases
+([[ -e "${file}" && "$(tail -c 1 ${file})" != "" ]]) && echo >> "${file}"
+grep -q '^## fuzzbunch' "${file}" 2>/dev/null \
+  || echo -e '## tftp\nalias tftproot="cd /var/tftp/"\n' >> "${file}"
+#--- Apply new alias
+source "${file}" || source ~/.zshrc
 
 
 #### WineTricks METHOD
