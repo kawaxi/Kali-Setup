@@ -635,10 +635,10 @@ cat <<EOF > "${file}" \
 cd /opt/empire-git/ && python empire-git "\$@"
 EOF
 chmod +x "${file}"
-#echo -e " ${YELLOW}[i]${ORANGE} Don't forget to run:  ${BOLD}${RESET}/opt/empire-git/setup/install.sh ${RESET}***"
-pushd /opt/empire-git/setup/ >/dev/null
-./install.sh
-popd >/dev/null
+echo -e " ${YELLOW}[i]${ORANGE} Don't forget to run:  ${BOLD}${RESET}/opt/empire-git/setup/install.sh ${RESET}***"
+# pushd /opt/empire-git/setup/ >/dev/null
+# ./install.sh
+# popd >/dev/null
 
 #### Install wig (https://bugs.kali.org/view.php?id=1932)
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Wig ${ORANGE} ~ Web Application Detection ${RESET}"
@@ -648,7 +648,7 @@ pushd /opt/wig-git/ >/dev/null
 git pull -q
 popd >/dev/null
 #--- Add to path
-file=/usr/local/bin/wig-git
+file=/usr/local/bin/wig-git;
 cat <<EOF > "${file}" \
   || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
 #!/bin/bash
@@ -665,7 +665,7 @@ pushd /opt/cmsmap-git/ >/dev/null
 git pull -q
 popd >/dev/null
 #--- Add to path
-file=/usr/local/bin/cmsmap-git
+file=/usr/local/bin/cmsmap-git;
 cat <<EOF > "${file}" \
   || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
 #!/bin/bash
@@ -694,7 +694,9 @@ chmod +x "${file}"
 #### Install Crowbar -- brute force"
 
 if ! foobar_loc="$(type -p "crowbar-git")" || [ -z "$foobar_loc" ]; then
-  rm -r /opt/crowbar-git # in Case its already installed
+  pushd /opt/crowbar-git/ >/dev/null
+  git pull -q
+  popd >/dev/null
 else
   (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing crowbar ${ORANGE} ~ Brute Force Tool ${RESET}"
   apt -y -qq install freerdp-x11 tigervnc-viewer \
@@ -715,10 +717,17 @@ EOF
   chmod +x "${file}"
 fi
 
-#### Install xprobe  -- OS fingerprinting
-(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing xprobe ${ORANGE} ~ OS Fingerprinting ${RESET}"
-apt -y -qq install xprobe \
-  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+
+
+if ! foobar_loc="$(type -p "xprobe2")" || [ -z "$foobar_loc" ]; then
+  #### Install xprobe  -- OS fingerprinting
+  (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing xprobe2 ${ORANGE} ~ OS Fingerprinting ${RESET}"
+  apt -y -qq install xprobe \
+    || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+  else
+  (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Xprobe2 Already Installed ${ORANGE} Skipping.... ${RESET}"
+fi
+
 
 
 #### Install UACScript
@@ -927,7 +936,7 @@ cd $HOME/.wine-fuzzbunch/drive_c/fuzzbunch-debian/installers
 wine "pywin32-219.win32-py2.6.exe" & HEXPID=$!
 #wine "Z:\root\.wine-fuzzbunch\drive_c\fuzzbunch-debian\installers\pywin32-219.win32-py2.6.exe" & HEXPID=$!
 
-echo -e "${ORANGE} [i]${ORANGE} Our PID for Python is:$HEXPID "
+echo -e "${ORANGE} [i]${ORANGE} Our PID for Python is:$HEXPID ${RESET} "
 sleep 2s
 HEXWINID=$(xdotool search --any --pid ${HEXPID} --name "Setuyp pywin32-219" | tail -1 )
 echo -e "[i] We found our window ID for Python is : $HEXWINID \n"

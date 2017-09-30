@@ -48,7 +48,8 @@ fi
 
 #### Installing Hexchat
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Installing (GNOME) Hexchat ${ORANGE} ~ IRC Client ${RESET}"
-apt-get install hexchat -y
+apt-get -y -qq install hexchat \
+  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 
 echo -e "\n ${ORANGE}[*]${ORANGE} Let's Configure Hexchat ${RESET}"
 
@@ -426,7 +427,7 @@ apt -y -qq install icedove-enigmail \
 
 #### Install libreoffice
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing LibreOffice${ORANGE} ~ GUI Office Suite${RESET}"
-apt -y -qq install libreoffice \
+apt -y -qq install libreoffice >/dev/null \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 
 #### Install asciinema  -- Terminal Recorder
@@ -489,7 +490,7 @@ sed -i 's#^.*"Always use default editor".*#\t<Setting name="Always use default e
 if ! foobar_loc="$(type -p "ssh")" || [ -z "$foobar_loc" ]; then
   (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Setting up ${GREEN}SSH ${ORANGE} ~ CLI access ${RESET} "
   #apt -y -qq install openssh-server \
-  apt-get install -o Dpkg::Options::="--force-confold" --force-yes -y openssh-server \
+  apt-get -qq install -o Dpkg::Options::="--force-confold" --force-yes -y openssh-server \
     || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 else
   #--- Wipe current keys
@@ -561,7 +562,7 @@ else
   # grep 'LogFormat "%{User-agent}i" agent' /etc/apache2/apache2.conf 2>/dev/null \
   #  && echo  -e '\nCustomLog /var/log/apache2/access.log combined' >> /etc/apache2/apache2.conf
 
-  file=/tmp/apache2.py
+  file=/tmp/apache2.py;
   echo -e ' '${ORANGE}'[i]'${WHITE}" ${WHITE}  Modifiying Apache2.conf..." ${RESET} 1>&2
   cat <<EOF > "${file}" \
 	|| echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
@@ -577,11 +578,11 @@ with open('/etc/apache2/apache2.conf', 'w') as oFile:
 EOF
 
 
-chmod 755 $file
-python $file
-rm $file
+  chmod 755 "${file}"
+  python "${file}"
+  rm "${file}"
 
-
+  file=~/.bash_aliases;
   #--- Apply new alias
   source "${file}" || source ~/.zshrc
 
