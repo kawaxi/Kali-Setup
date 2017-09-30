@@ -426,7 +426,7 @@ done
 
 #### Install MinGW ~ cross compiling suite
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing MinGW ${ORANGE} ~ Cross Compiling Suite${RESET}"
-for FILE in mingw-w64 binutils-mingw-w64 gcc-mingw-w64 cmake   mingw-w64-dev mingw-w64-tools   gcc-mingw-w64-i686 gcc-mingw-w64-x86-64   mingw32; do
+for FILE in mingw-w64 binutils-mingw-w64 gcc-mingw-w64 cmake mingw-w64-dev mingw-w64-tools gcc-mingw-w64-i686 gcc-mingw-w64-x86-64 mingw32; do
   #---  Just install what's missing
   if dpkg-query -l "${FILE}" 2>/dev/null | grep ^ii >/dev/null;
   then
@@ -486,18 +486,19 @@ grep -q '^"PATH"=.*C:\\\\MinGW\\\\bin' ~/.wine/system.reg \
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing hyperion ${ORANGE} ~ Bypassing Anti-Virus ${RESET}"
 apt -y -qq install windows-binaries \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
-unzip -q -o -d /usr/share/windows-binaries/ $(find /usr/share/windows-binaries/ -name "Hyperion-*.zip" -type f -print -quit)
-#--- Compile
-i686-w64-mingw32-g++ -static-libgcc -static-libstdc++ \
-  /usr/share/windows-binaries/Hyperion-1.0/Src/Crypter/*.cpp \
-  -o /usr/share/windows-binaries/Hyperion-1.0/Src/Crypter/bin/crypter.exe
-ln -sf /usr/share/windows-binaries/Hyperion-1.0/Src/Crypter/bin/crypter.exe /usr/share/windows-binaries/Hyperion-1.0/crypter.exe                                                            #***!!! hardcoded path!
-wine ~/.wine/drive_c/MinGW/bin/g++.exe /usr/share/windows-binaries/Hyperion-1.0/Src/Crypter/*.cpp \
-  -o /usr/share/windows-binaries/hyperion.exe 2>&1 \
-  | grep -v 'If something goes wrong, please rerun with\|for more detailed debugging output'
-#--- Add to path
-file=/usr/local/bin/hyperion
-cat <<EOF > "${file}" \
+if ! foobar_loc="$(type -p "hyperion")" || [ -z "$foobar_loc" ]; then
+  unzip -q -o -d /usr/share/windows-binaries/ $(find /usr/share/windows-binaries/ -name "Hyperion-*.zip" -type f -print -quit)
+  #--- Compile
+  i686-w64-mingw32-g++ -static-libgcc -static-libstdc++ \
+    /usr/share/windows-binaries/Hyperion-1.0/Src/Crypter/*.cpp \
+    -o /usr/share/windows-binaries/Hyperion-1.0/Src/Crypter/bin/crypter.exe
+  ln -sf /usr/share/windows-binaries/Hyperion-1.0/Src/Crypter/bin/crypter.exe /usr/share/windows-binaries/Hyperion-1.0/crypter.exe                        #***!!! hardcoded path!
+  wine ~/.wine/drive_c/MinGW/bin/g++.exe /usr/share/windows-binaries/Hyperion-1.0/Src/Crypter/*.cpp \
+    -o /usr/share/windows-binaries/hyperion.exe 2>&1 \
+    | grep -v 'If something goes wrong, please rerun with\|for more detailed debugging output'
+  #--- Add to path
+  file=/usr/local/bin/hyperion
+  cat <<EOF > "${file}" \
   || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
 #!/bin/bash
 ## Note: This is far from perfect...
@@ -522,7 +523,12 @@ for FILE in \${1} \${2}; do
   echo "[i] \$(md5sum \${FILE})"
 done
 EOF
-chmod +x "${file}"
+  chmod +x "${file}"
+
+else
+  (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Hyperion Already Installed ${ORANGE} Skipping.... ${RESET}"
+fi
+
 
 
 #### Install Backdoor Factory Proxy (BDFProxy)
@@ -635,7 +641,7 @@ cat <<EOF > "${file}" \
 cd /opt/empire-git/ && python empire-git "\$@"
 EOF
 chmod +x "${file}"
-echo -e " ${YELLOW}[i]${ORANGE} Don't forget to run:  ${BOLD}${RESET}/opt/empire-git/setup/install.sh ${RESET}***"
+echo -e " ${YELLOW}[i]${ORANGE} Don't forget to run:  ${BOLD}${YELLOW}/opt/empire-git/setup/install.sh ${RESET}***"
 # pushd /opt/empire-git/setup/ >/dev/null
 # ./install.sh
 # popd >/dev/null
@@ -692,12 +698,7 @@ chmod +x "${file}"
 
 
 #### Install Crowbar -- brute force"
-
 if ! foobar_loc="$(type -p "crowbar-git")" || [ -z "$foobar_loc" ]; then
-  pushd /opt/crowbar-git/ >/dev/null
-  git pull -q
-  popd >/dev/null
-else
   (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing crowbar ${ORANGE} ~ Brute Force Tool ${RESET}"
   apt -y -qq install freerdp-x11 tigervnc-viewer \
     || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
@@ -715,6 +716,12 @@ else
   cd /opt/crowbar-git/ && python crowbar.py "\$@"
 EOF
   chmod +x "${file}"
+
+else
+  pushd /opt/crowbar-git/ >/dev/null
+  git pull -q
+  popd >/dev/null
+
 fi
 
 
@@ -724,7 +731,7 @@ if ! foobar_loc="$(type -p "xprobe2")" || [ -z "$foobar_loc" ]; then
   (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing xprobe2 ${ORANGE} ~ OS Fingerprinting ${RESET}"
   apt -y -qq install xprobe \
     || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
-  else
+else
   (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Xprobe2 Already Installed ${ORANGE} Skipping.... ${RESET}"
 fi
 

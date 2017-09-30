@@ -12,14 +12,16 @@ if [[ $(which gnome-shell) ]]; then
   export DISPLAY=:0.0
 
   #--- Installing Caffeine Extension ---#
+  pushd /tmp/ >/dev/null
   git clone git://github.com/eonpatapon/gnome-shell-extension-caffeine.git && cd gnome-shell-extension-caffeine
   ./update-locale.sh
   glib-compile-schemas --strict --targetdir=caffeine@patapon.info/schemas/ caffeine@patapon.info/schemas
   #--- Adding to Gsettings
   cp -r caffeine@patapon.info /usr/share/gnome-shell/extensions/
-  cp ~/gnome-shell-extension-caffeine/caffeine@patapon.info/schemas/org.gnome.shell.extensions.caffeine.gschema.xml \
+  cp /tmp/gnome-shell-extension-caffeine/caffeine@patapon.info/schemas/org.gnome.shell.extensions.caffeine.gschema.xml \
   /usr/share/glib-2.0/schemas/ && glib-compile-schemas /usr/share/glib-2.0/schemas/
-  rm -r /root/gnome-shell-extension-caffeine
+  rm -r /tmp/gnome-shell-extension-caffeine
+  popd >/dev/null
   gnome-shell-extension-tool -e caffeine@patapon.info
   gsettings set org.gnome.shell.extensions.caffeine user-enabled true
 
