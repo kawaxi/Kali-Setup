@@ -14,7 +14,7 @@ if [[ $(which gnome-shell) ]]; then
   #--- Installing Caffeine Extension ---#
   pushd /tmp/ >/dev/null
   git clone git://github.com/eonpatapon/gnome-shell-extension-caffeine.git && cd gnome-shell-extension-caffeine
-  ./update-locale.sh 1>/dev/null
+  ./update-locale.sh 2>/dev/null
   glib-compile-schemas --strict --targetdir=caffeine@patapon.info/schemas/ caffeine@patapon.info/schemas
   #--- Adding to Gsettings
   cp -r caffeine@patapon.info /usr/share/gnome-shell/extensions/
@@ -47,16 +47,16 @@ if [[ $(which gnome-shell) ]]; then
 
   #--- Dash-to-dock
   gnome-shell-extension-tool -e dash-to-dock@micxgx.gmail.com
-  #--- Adding dash-to-dock to gsettings, compiling.    --- Note: seems to be fixed on 2016.2
-  #cp /usr/share/gnome-shell/extensions/dash-to-dock@micxgx.gmail.com/schemas/org.gnome.shell.extensions.dash-to-dock.gschema.xml \
-  #/usr/share/glib-2.0/schemas/ && glib-compile-schemas /usr/share/glib-2.0/schemas/
+  #--- Adding dash-to-dock to gsettings, compiling.    --- Note: seems to be fixed after 2016.2 
+  cp /usr/share/gnome-shell/extensions/dash-to-dock@micxgx.gmail.com/schemas/org.gnome.shell.extensions.dash-to-dock.gschema.xml \
+  /usr/share/glib-2.0/schemas/ >/dev/null && glib-compile-schemas /usr/share/glib-2.0/schemas/
   ##### Configuring your Dash to Dock, you need to reboot to all efects to take place.
   gsettings set org.gnome.shell.extensions.dash-to-dock intellihide true
   gsettings set org.gnome.shell.extensions.dash-to-dock autohide true
   gsettings set org.gnome.shell.extensions.dash-to-dock dock-fixed false
   gsettings set org.gnome.shell.extensions.dash-to-dock intellihide-mode 'ALL_WINDOWS'
   gsettings set org.gnome.shell.extensions.dash-to-dock require-pressure-to-show false
-  gsettings set org.gnome.shell.extensions.dash-to-dock background-color '#3465a4'
+  gsettings set org.gnome.shell.extensions.dash-to-dock background-color '#3465a4' 2>/dev/null
   gsettings set org.gnome.shell.extensions.dash-to-dock show-delay 0.15000000000000002
   gsettings set org.gnome.shell.extensions.dash-to-dock hide-delay 0.200
 

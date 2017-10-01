@@ -48,7 +48,7 @@ fi
 
 #### Installing Hexchat
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Installing (GNOME) Hexchat ${ORANGE} ~ IRC Client ${RESET}"
-apt-get -y -qq install hexchat \
+apt-get -y -qqq install hexchat 1>/dev/null \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 
 echo -e "\n ${ORANGE}[*]${ORANGE} Let's Configure Hexchat ${RESET}"
@@ -72,7 +72,7 @@ HEXWINID=$(xdotool search --onlyvisible --sync --pid ${HEXPID} | tail -1)
 xdotool windowactivate --sync ${HEXWINID} key --clearmodifiers --delay 100 alt+o
 sleep 15
 
-timeout 5 killall -9 -q -w hexchat
+timeout 5 killall -9 -q -w hexchat >/dev/null
 
 #--- HEXCHAT GENERAL CONFIGURATION; YOU COULD ALSO LET HEXCHAT TO GENERATE IT.
 file=~/.config/hexchat/hexchat.conf; [ -e "${file}" ] && cp -n $file{,.bkup}

@@ -263,6 +263,7 @@ systemctl restart apache2
 
 
 #### Install Graudit
+if ! foobar_loc="$(type -p "graudit-git")" || [ -z "$foobar_loc" ]; then
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}  Installing Graudit ${ORANGE} ~ Source Code Auditing ${RESET}"
 git clone -q -b master https://github.com/wireghoul/graudit.git /opt/graudit-git/ \
   || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
@@ -278,6 +279,13 @@ cat <<EOF > "${file}" \
 cd /opt/graudit-git/ && bash graudit.sh "\$@"
 EOF
 chmod +x "${file}"
+else
+  (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Graudit already installed ${ORANGE} ~ Pulling from git .... ${RESET}"
+  pushd /opt/graudit-git/ >/dev/null
+  git pull -q
+  popd >/dev/null
+fi
+
 
 
 
@@ -311,6 +319,7 @@ chmod -R 0755 /usr/share/nmap/scripts/; find /usr/share/nmap/scripts/ -type f -e
 
 
 #### Install proxychains-ng (https://bugs.kali.org/view.php?id=2037)
+#if ! foobar_loc="$(type -p "proxychains-ng")" || [ -z "$foobar_loc" ]; then
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Installing Proxychains-ng ${ORANGE} ~ Proxifier   ${RESET}"
 git clone -q -b master https://github.com/rofl0r/proxychains-ng.git /opt/proxychains-ng-git/ \
   || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
@@ -322,6 +331,8 @@ make -s 2>/dev/null && make -s install   # bad, but it gives errors which might 
 popd >/dev/null
 #--- Add to path (with a 'better' name)
 ln -sf /usr/bin/proxychains4 /usr/local/bin/proxychains-ng
+#else
+#fi
 
 
 #### Install httptunnel
@@ -408,7 +419,7 @@ if ! foobar_loc="$(type -p "shellter")" || [ -z "$foobar_loc" ]; then
   apt -y -qq install shellter \
     || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 else
-  echo -e "\n\n ${GREEN}[*]${RESET} ${ORANGE} Veil-Evasion is Already Installed.... Skipping ${ORANGE} ${RESET}"
+  echo -e "\n\n ${GREEN}[*]${RESET} ${ORANGE} Shellter is Already Installed.... Skipping ${ORANGE} ${RESET}"
 fi
 
 
@@ -537,17 +548,17 @@ apt -y -qq install bdfproxy \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 
 
-#### Install BetterCap
-(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing BetterCap ${ORANGE} ~ MITM Framework ${RESET} "
-apt -y -qq install ruby-dev libpcap-dev \
-  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
-git clone -q -b master https://github.com/evilsocket/bettercap.git /opt/bettercap-git/ \
-  || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
-pushd /opt/bettercap-git/ >/dev/null
-git pull -q
-gem build bettercap.gemspec
-gem install bettercap*.gem
-popd >/dev/null
+# #### Install BetterCap
+# (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing BetterCap ${ORANGE} ~ MITM Framework ${RESET} "
+# apt -y -qq install ruby-dev libpcap-dev \
+# || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+# git clone -q -b master https://github.com/evilsocket/bettercap.git /opt/bettercap-git/ \
+# || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
+# pushd /opt/bettercap-git/ >/dev/null
+# git pull -q
+# gem build bettercap.gemspec
+# gem install bettercap*.gem
+# popd >/dev/null
 
 
 #### Install mitmf
@@ -627,14 +638,15 @@ popd >/dev/null
 
 
 #### Install Empire
-(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Empire ${ORANGE} ~ PowerShell Post-Exploitation Tool ${RESET}"
-git clone -q -b master https://github.com/PowerShellEmpire/Empire.git /opt/empire-git/ \
-  || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
-pushd /opt/empire-git/ >/dev/null
-git pull -q
-popd >/dev/null
-#--- Add to path
-file=/usr/local/bin/empire-git
+if ! foobar_loc="$(type -p "empire-git")" || [ -z "$foobar_loc" ]; then
+  (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Empire ${ORANGE} ~ PowerShell Post-Exploitation Tool ${RESET}"
+  git clone -q -b master https://github.com/PowerShellEmpire/Empire.git /opt/empire-git/ \
+    || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
+  pushd /opt/empire-git/ >/dev/null
+  git pull -q
+  popd >/dev/null
+  #--- Add to path
+  file=/usr/local/bin/empire-git
 cat <<EOF > "${file}" \
   || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
 #!/bin/bash
@@ -645,16 +657,24 @@ echo -e " ${YELLOW}[i]${ORANGE} Don't forget to run:  ${BOLD}${YELLOW}/opt/empir
 # pushd /opt/empire-git/setup/ >/dev/null
 # ./install.sh
 # popd >/dev/null
+else
+  (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Empire Already Installed ${ORANGE} Pulling from github .... ${RESET}"
+  pushd /opt/empire-git/ >/dev/null
+  git pull -q
+  popd >/dev/null
+
+fi
 
 #### Install wig (https://bugs.kali.org/view.php?id=1932)
-(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Wig ${ORANGE} ~ Web Application Detection ${RESET}"
-git clone -q -b master https://github.com/EmpireProject/Empire.git /opt/wig-git/ \
-  || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
-pushd /opt/wig-git/ >/dev/null
-git pull -q
-popd >/dev/null
-#--- Add to path
-file=/usr/local/bin/wig-git;
+if ! foobar_loc="$(type -p "wig-git")" || [ -z "$foobar_loc" ]; then
+  (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Wig ${ORANGE} ~ Web Application Detection ${RESET}"
+  git clone -q -b master https://github.com/EmpireProject/Empire.git /opt/wig-git/ \
+    || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
+  pushd /opt/wig-git/ >/dev/null
+  git pull -q
+  popd >/dev/null
+  #--- Add to path
+  file=/usr/local/bin/wig-git;
 cat <<EOF > "${file}" \
   || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
 #!/bin/bash
@@ -662,25 +682,40 @@ cd /opt/wig-git/ && python wig.py "\$@"
 EOF
 chmod +x "${file}"
 
+else
+  (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} WIG Already Installed ${ORANGE} Pulling from github .... ${RESET}"
+  pushd /opt/wig-git/ >/dev/null
+  git pull -q
+  popd >/dev/null
+fi
+
 
 #### Install CMSmap --  CMS detection
-(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing CMSmap ${ORANGE} ~ CMS Detection ${RESET}"
-git clone -q -b master https://github.com/Dionach/CMSmap.git /opt/cmsmap-git/ \
-  || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
-pushd /opt/cmsmap-git/ >/dev/null
-git pull -q
-popd >/dev/null
-#--- Add to path
-file=/usr/local/bin/cmsmap-git;
+if ! foobar_loc="$(type -p "cmsmap-git")" || [ -z "$foobar_loc" ]; then
+  (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing CMSmap ${ORANGE} ~ CMS Detection ${RESET}"
+  git clone -q -b master https://github.com/Dionach/CMSmap.git /opt/cmsmap-git/ \
+    || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
+  pushd /opt/cmsmap-git/ >/dev/null
+  git pull -q
+  popd >/dev/null
+  #--- Add to path
+  file=/usr/local/bin/cmsmap-git;
 cat <<EOF > "${file}" \
   || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
 #!/bin/bash
 cd /opt/cmsmap-git/ && python cmsmap.py "\$@"
 EOF
 chmod +x "${file}"
+else
+  (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} CMSmap-git Already Installed ${ORANGE} Pulling from github .... ${RESET}"
+  pushd /opt/cmsmap-git/ >/dev/null
+  git pull -q
+  popd >/dev/null
+fi
 
 
 #### Install droopescan
+if ! foobar_loc="$(type -p "droopescan-git")" || [ -z "$foobar_loc" ]; then
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing DroopeScan ${ORANGE} ~ Drupal Vulnerability Scanner ${RESET}"
 git clone -q -b master https://github.com/droope/droopescan.git /opt/droopescan-git/ \
   || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
@@ -695,6 +730,12 @@ cat <<EOF > "${file}" \
 cd /opt/droopescan-git/ && python droopescan "\$@"
 EOF
 chmod +x "${file}"
+else
+  (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Droopscan-git Already Installed ${ORANGE} Pulling from github .... ${RESET}"
+  pushd /opt/droopescan-git/ >/dev/null
+  git pull -q
+  popd >/dev/null
+fi
 
 
 #### Install Crowbar -- brute force"
@@ -718,6 +759,7 @@ EOF
   chmod +x "${file}"
 
 else
+  (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Crowbar-git Already Installed ${ORANGE} Pulling from github .... ${RESET}"
   pushd /opt/crowbar-git/ >/dev/null
   git pull -q
   popd >/dev/null
@@ -725,9 +767,8 @@ else
 fi
 
 
-
+#### Install xprobe  -- OS fingerprinting
 if ! foobar_loc="$(type -p "xprobe2")" || [ -z "$foobar_loc" ]; then
-  #### Install xprobe  -- OS fingerprinting
   (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing xprobe2 ${ORANGE} ~ OS Fingerprinting ${RESET}"
   apt -y -qq install xprobe \
     || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
@@ -739,8 +780,6 @@ fi
 
 #### Install UACScript
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing UACScript ${ORANGE} ~ UAC Bypass for Windows 7 ${RESET}"
-apt -y -qq install windows-binaries \
-  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 git clone -q -b master https://github.com/Vozzie/uacscript.git /opt/uacscript-git/ \
   || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
 pushd /opt/uacscript-git/ >/dev/null
@@ -761,9 +800,13 @@ apt -y -qq install golang \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 
 #### Install gitg
+if ! foobar_loc="$(type -p "gitg")" || [ -z "$foobar_loc" ]; then
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Gitg ${ORANGE} ~ GUI Git Client ${RESET}"
 apt -y -qq install gitg \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+else
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Gitg Already Installed ${ORANGE} Skipping.... ${RESET}"
+fi
 
 
 #### Install Gnmap-Parser (fork)
@@ -853,14 +896,11 @@ unzip -q -o -d /usr/share/webshells/aspx/ /tmp/imsonia.zip 2>/dev/null
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Subterfuge ${ORANGE} ~ MITM ${RESET}"
 git clone -q -b master https://github.com/Subterfuge-Framework/Subterfuge.git /opt/subterfuge-git \
   || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
-# sleep 6
-# xdotool key y Return
-curl --progress -k -L -f "https://raw.githubusercontent.com/Subterfuge-Framework/Subterfuge/git-setup/setup.py" > /opt/subterfuge-git/setup.py \
+# hardcoded value....
+curl --progress -k -L -f "https://raw.githubusercontent.com/kawaxi/Kali-Setup/master/lib/subterfurge-setup.py" > /opt/subterfuge-git/setup.py \
   || echo -e ' '${RED}'[!]'${RESET}" Issue downloading setup.py" 1>&2            #***!!! hardcoded version! Need to manually check for updates
 python /opt/subterfuge-git/setup.py \
-  || echo -e ' '${RED}'[!] Issue whith GIT-install'${RESET} 1>&2
-
-
+  || echo -e ' '${RED}'[!] Issue whith setup script'${RESET} 1>&2
  ## If you have any issues , try this other option.
 #git clone https://github.com/Subterfuge-Framework/Subterfuge.git
 #cd Subterfuge
@@ -869,9 +909,11 @@ python /opt/subterfuge-git/setup.py \
 
 #### Install Bettercap
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Bettarcap ${ORANGE} ~ MITM  ${RESET}"
-apt-get -y -q install bettercap
+apt-get -y -q install bettercap  \
+  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 
 #### Install patator (GIT)
+if ! foobar_loc="$(type -p "patator-git")" || [ -z "$foobar_loc" ]; then
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Patator  (GIT) ${ORANGE} ~ Brute Forcer ${RESET}"
 git clone -q -b master https://github.com/lanjelot/patator.git /opt/patator-git/ \
   || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
@@ -887,6 +929,13 @@ cat <<EOF > "${file}" \
 cd /opt/patator-git/ && python patator.py "\$@"
 EOF
 chmod +x "${file}"
+else
+  (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Patator Already Installed ${ORANGE} Pulling from github .... ${RESET}"
+  pushd /opt/patator-git/ >/dev/null
+  git pull -q
+  popd >/dev/null
+
+fi
 
 
 ####Installing fuzzbunch
@@ -946,7 +995,7 @@ wine "pywin32-219.win32-py2.6.exe" & HEXPID=$!
 echo -e "${ORANGE} [i]${ORANGE} Our PID for Python is:$HEXPID ${RESET} "
 sleep 2s
 HEXWINID=$(xdotool search --any --pid ${HEXPID} --name "Setuyp pywin32-219" | tail -1 )
-echo -e "[i] We found our window ID for Python is : $HEXWINID \n"
+echo -e "[i] We found our window ID for Python is : $HEXWINID ${RESET} \n"
 
 xdotool windowactivate --sync ${HEXWINID} key --clearmodifiers Return
 xdotool windowactivate --sync ${HEXWINID} key --clearmodifiers Return
@@ -954,7 +1003,7 @@ xdotool windowactivate --sync ${HEXWINID} key --clearmodifiers Return
 sleep 7s
 xdotool windowactivate --sync ${HEXWINID} key --clearmodifiers --delay 100 alt+F4
 
-echo -e "${ORANGE} [i]${ORANGE} is the PATH correct?  ${YELLOW} "
+echo -e "${ORANGE} [i]${ORANGE} is the PATH correct?  ${YELLOW}  "
 #Possible error in here.
 echo -e " $(cat ~/.wine-fuzzbunch/system.reg | grep PATH) ${RESET}"
 
