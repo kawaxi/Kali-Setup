@@ -64,7 +64,7 @@ file=~/.bash_aliases; [ -e "${file}" ] && cp -n $file{,.bkup}   #/etc/bash.bash_
 ([[ -e "${file}" && "$(tail -c 1 ${file})" != "" ]]) && echo >> "${file}"
 #--- Aliases for console
 grep -q '^alias msfc=' "${file}" 2>/dev/null \
-  || echo -e 'alias msfc="systemctl start postgresql; msfdb start; msfconsole -q \"\$@\""' >> "${file}"
+  || echo -e '\n### MSF\nalias msfc="systemctl start postgresql; msfdb start; msfconsole -q \"\$@\""' >> "${file}"
 grep -q '^alias msfconsole=' "${file}" 2>/dev/null \
   || echo -e 'alias msfconsole="systemctl start postgresql; msfdb start; msfconsole \"\$@\""\n' >> "${file}"
 grep -q '^alias msf=' "${file}" 2>/dev/null \
@@ -222,11 +222,11 @@ if [[ "${openVAS}" != "false" ]]; then
   systemctl disable openvas-manager
   systemctl disable openvas-scanner
   systemctl disable greenbone-security-assistant
-  #--- Setup alias
-  file=~/.bash_aliases; [ -e "${file}" ] && cp -n $file{,.bkup}   #/etc/bash.bash_aliases
-  grep -q '^## openvas' "${file}" 2>/dev/null \
-    || echo -e '## openvas\nalias openvas="openvas-stop; openvas-start; sleep 3s; xdg-open https://127.0.0.1:9392/ >/dev/null 2>&1"\n' >> "${file}"
-  source "${file}" || source ~/.zshrc
+  # #--- Setup alias
+  # file=~/.bash_aliases; [ -e "${file}" ] && cp -n $file{,.bkup}   #/etc/bash.bash_aliases
+  # grep -q '^## openvas' "${file}" 2>/dev/null \
+  #   || echo -e '## openvas\nalias openvas="openvas-stop; openvas-start; sleep 3s; xdg-open https://127.0.0.1:9392/ >/dev/null 2>&1"\n' >> "${file}"
+  # source "${file}" || source ~/.zshrc
 else
   echo -e "\n\n ${YELLOW}[i]${RESET} ${YELLOW}Skipping OpenVAS${RESET} (missing: '$0 ${BOLD}--openvas${RESET}')..." 1>&2
 fi
@@ -360,6 +360,7 @@ popd >/dev/null
 
 #### Downloading AccessChk.exe
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Downloading ${GREEN}AccessChk.exe ${ORANGE} ~ Windows Environment Tester ${RESET}"
+ echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} You might want to disable your AV  ${ORANGE} ~ if it is stuck in here ${RESET}"
 apt -y -qq install windows-binaries \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 echo -n '[1/2]'; timeout 300 curl --progress -k -L -f "https://web.archive.org/web/20080530012252/http://live.sysinternals.com/accesschk.exe" > /usr/share/windows-binaries/accesschk_v5.02.exe \
@@ -495,9 +496,9 @@ grep -q '^"PATH"=.*C:\\\\MinGW\\\\bin' ~/.wine/system.reg \
 
 #### Install hyperion
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing hyperion ${ORANGE} ~ Bypassing Anti-Virus ${RESET}"
-apt -y -qq install windows-binaries \
-  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 if ! foobar_loc="$(type -p "hyperion")" || [ -z "$foobar_loc" ]; then
+  apt -y -qq install windows-binaries \
+    || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
   unzip -q -o -d /usr/share/windows-binaries/ $(find /usr/share/windows-binaries/ -name "Hyperion-*.zip" -type f -print -quit)
   #--- Compile
   i686-w64-mingw32-g++ -static-libgcc -static-libstdc++ \
@@ -1017,12 +1018,6 @@ source "${file}" || source ~/.zshrc
 echo -e " ${YELLOW}[i]${ORANGE} Now you can run fuzzbunch-debian with ${BOLD}${ORANGE}fuzzbunch${RESET}***"
 
 
-file=~/.bash_aliases; [ -e "${file}" ] && cp -n $file{,.bkup}   #/etc/bash.bash_aliases
-([[ -e "${file}" && "$(tail -c 1 ${file})" != "" ]]) && echo >> "${file}"
-grep -q '^## fuzzbunch' "${file}" 2>/dev/null \
-  || echo -e '## tftp\nalias tftproot="cd /var/tftp/"\n' >> "${file}"
-#--- Apply new alias
-source "${file}" || source ~/.zshrc
 
 
 #### WineTricks METHOD

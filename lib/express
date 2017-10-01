@@ -72,7 +72,7 @@ HEXWINID=$(xdotool search --onlyvisible --sync --pid ${HEXPID} | tail -1)
 xdotool windowactivate --sync ${HEXWINID} key --clearmodifiers --delay 100 alt+o
 sleep 15
 
-timeout 5 killall -9 -q -w hexchat >/dev/null
+timeout 5 killall -9 -q -w hexchat &>/dev/null
 
 #--- HEXCHAT GENERAL CONFIGURATION; YOU COULD ALSO LET HEXCHAT TO GENERATE IT.
 file=~/.config/hexchat/hexchat.conf; [ -e "${file}" ] && cp -n $file{,.bkup}
@@ -553,11 +553,14 @@ else
     && echo '<?php echo "Access denied for " . $_SERVER["REMOTE_ADDR"]; ?>' > /var/www/html/index.php \
     && echo -e 'User-agent: *n\Disallow: /\n' > /var/www/html/robots.txt
   #--- Setup alias
-  file=~/.bash_aliases; [ -e "${file}" ] && cp -n $file{,.bkup}   #/etc/bash.bash_aliases
-  ([[ -e "${file}" && "$(tail -c 1 ${file})" != "" ]]) && echo >> "${file}"
-  grep -q '^## www' "${file}" 2>/dev/null \
-    || echo -e '## www\nalias wwwroot="cd /var/www/html/"\n' >> "${file}" \
-        echo -e '\nalias apache="/var/log/apache2/"\n' >> "${file}"
+  # file=~/.bash_aliases; [ -e "${file}" ] && cp -n $file{,.bkup}   #/etc/bash.bash_aliases
+  # ([[ -e "${file}" && "$(tail -c 1 ${file})" != "" ]]) && echo >> "${file}"
+  # grep -q '^## www' "${file}" 2>/dev/null \
+  #   || echo -e '## www\nalias wwwroot="cd /var/www/html/"\n' >> "${file}" \
+  #    && echo -e '\nalias apache="/var/log/apache2/"\n' >> "${file}"
+  #
+  # #--- Apply new alias
+  # source "${file}" || source ~/.zshrc
 
   # grep 'LogFormat "%{User-agent}i" agent' /etc/apache2/apache2.conf 2>/dev/null \
   #  && echo  -e '\nCustomLog /var/log/apache2/access.log combined' >> /etc/apache2/apache2.conf
@@ -581,10 +584,6 @@ EOF
   chmod 755 "${file}"
   python "${file}"
   rm "${file}"
-
-  file=~/.bash_aliases;
-  #--- Apply new alias
-  source "${file}" || source ~/.zshrc
 
 fi
 
@@ -657,13 +656,13 @@ echo -e " ${YELLOW}[i]${GREEN} Pure-FTPd username: ${ORANGE} anonymous ${RESET} 
 echo -e " ${YELLOW}[i]${GREEN} Pure-FTPd password: ${ORANGE} anonymous ${RESET} "
 #--- Apply settings
 systemctl restart pure-ftpd
-#--- Setup alias
-file=~/.bash_aliases; [ -e "${file}" ] && cp -n $file{,.bkup}   #/etc/bash.bash_aliases
-([[ -e "${file}" && "$(tail -c 1 ${file})" != "" ]]) && echo >> "${file}"
-grep -q '^## ftp' "${file}" 2>/dev/null \
-  || echo -e '## ftp\nalias ftproot="cd /var/ftp/"\n' >> "${file}"
-#--- Apply new alias
-source "${file}" || source ~/.zshrc
+# #--- Setup alias
+# file=~/.bash_aliases; [ -e "${file}" ] && cp -n $file{,.bkup}   #/etc/bash.bash_aliases
+# ([[ -e "${file}" && "$(tail -c 1 ${file})" != "" ]]) && echo >> "${file}"
+# grep -q '^## ftp' "${file}" 2>/dev/null \
+#   || echo -e '## ftp\nalias ftproot="cd /var/ftp/"\n' >> "${file}"
+# #--- Apply new alias
+# source "${file}" || source ~/.zshrc
 #--- Remove from start up
 systemctl disable pure-ftpd
 

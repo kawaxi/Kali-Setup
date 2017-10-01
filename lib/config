@@ -14,7 +14,7 @@ if [[ $(which gnome-shell) ]]; then
   #--- Installing Caffeine Extension ---#
   pushd /tmp/ >/dev/null
   git clone git://github.com/eonpatapon/gnome-shell-extension-caffeine.git && cd gnome-shell-extension-caffeine
-  ./update-locale.sh 2>/dev/null
+  ./update-locale.sh &>/dev/null
   glib-compile-schemas --strict --targetdir=caffeine@patapon.info/schemas/ caffeine@patapon.info/schemas
   #--- Adding to Gsettings
   cp -r caffeine@patapon.info /usr/share/gnome-shell/extensions/
@@ -47,7 +47,7 @@ if [[ $(which gnome-shell) ]]; then
 
   #--- Dash-to-dock
   gnome-shell-extension-tool -e dash-to-dock@micxgx.gmail.com
-  #--- Adding dash-to-dock to gsettings, compiling.    --- Note: seems to be fixed after 2016.2 
+  #--- Adding dash-to-dock to gsettings, compiling.    --- Note: seems to be fixed after 2016.2
   cp /usr/share/gnome-shell/extensions/dash-to-dock@micxgx.gmail.com/schemas/org.gnome.shell.extensions.dash-to-dock.gschema.xml \
   /usr/share/glib-2.0/schemas/ >/dev/null && glib-compile-schemas /usr/share/glib-2.0/schemas/
   ##### Configuring your Dash to Dock, you need to reboot to all efects to take place.
@@ -211,14 +211,20 @@ grep -q '^## Force create folders' "${file}" 2>/dev/null \
 || echo -e '## Force create folders\nalias mkdir="/bin/mkdir -pv"\n' >> "${file}"
 #grep -q '^## Mount' "${file}" 2>/dev/null \
 #  || echo -e '## Mount\nalias mount="mount | column -t"\n' >> "${file}"
+
+#--- List Open Ports - ports
 grep -q '^## List open ports' "${file}" 2>/dev/null \
 || echo -e '## List open ports\nalias ports="netstat -tulanp"\n' >> "${file}"
+#--- Get Header - header
 grep -q '^## Get header' "${file}" 2>/dev/null \
 || echo -e '## Get header\nalias header="curl -I"\n' >> "${file}"
+#--- Get External IP  - ipx
 grep -q '^## Get external IP address' "${file}" 2>/dev/null \
 || echo -e '## Get external IP address\nalias ipx="curl -s http://ipinfo.io/ip"\n' >> "${file}"
+#--- Get External IP  - dns1
 grep -q '^## DNS - External IP #1' "${file}" 2>/dev/null \
 || echo -e '## DNS - External IP #1\nalias dns1="dig +short @resolver1.opendns.com myip.opendns.com"\n' >> "${file}"
+#--- Get External IP  - dns2
 grep -q '^## DNS - External IP #2' "${file}" 2>/dev/null \
 || echo -e '## DNS - External IP #2\nalias dns2="dig +short @208.67.222.222 myip.opendns.com"\n' >> "${file}"
 grep -q '^## DNS - Check' "${file}" 2>/dev/null \
@@ -252,40 +258,24 @@ fi
 EOF
 grep -q '^## strings' "${file}" 2>/dev/null \
 || echo -e '## strings\nalias strings="strings -a"\n' >> "${file}"
+#--- Bash History - history
 grep -q '^## history' "${file}" 2>/dev/null \
 || echo -e '## history\nalias hg="history | grep"\n' >> "${file}"
+#--- Listening Ports - listen
 grep -q '^## Network Services' "${file}" 2>/dev/null \
 || echo -e '### Network Services\nalias listen="netstat -antp | grep LISTEN"\n' >> "${file}"
+
 grep -q '^## HDD size' "${file}" 2>/dev/null \
 || echo -e '### HDD size\nalias hogs="for i in G M K; do du -ah | grep [0-9]$i | sort -nr -k 1; done | head -n 11"\n' >> "${file}"
+
 grep -q '^## Listing' "${file}" 2>/dev/null \
 || echo -e '### Listing\nalias ll="ls -l --block-size=1 --color=auto"\n' >> "${file}"
-#--- Add in tools
-grep -q '^## nmap' "${file}" 2>/dev/null \
-|| echo -e '## nmap\nalias nmap="nmap --reason --open --stats-every 3m --max-retries 1 --max-scan-delay 20 --defeat-rst-ratelimit"\n' >> "${file}"
-grep -q '^## aircrack-ng' "${file}" 2>/dev/null \
-|| echo -e '## aircrack-ng\nalias aircrack-ng="aircrack-ng -z"\n' >> "${file}"
-grep -q '^## airodump-ng' "${file}" 2>/dev/null \
-|| echo -e '## airodump-ng \nalias airodump-ng="airodump-ng --manufacturer --wps --uptime"\n' >> "${file}"
-grep -q '^## metasploit' "${file}" 2>/dev/null \
-|| (echo -e '## metasploit\nalias msfc="systemctl start postgresql; msfdb start; msfconsole -q \"\$@\""' >> "${file}" \
-  && echo -e 'alias msfconsole="systemctl start postgresql; msfdb start; msfconsole \"\$@\""\n' >> "${file}" \
-  && echo -e 'alias msf="systemctl start postgresql; msfdb start; msfconsole \"\$@\""\n' >> "${file}")
-[ "${openVAS}" != "false" ] \
-&& (grep -q '^## openvas' "${file}" 2>/dev/null \
-  || echo -e '## openvas\nalias openvas="openvas-stop; openvas-start; sleep 3s; xdg-open https://127.0.0.1:9392/ >/dev/null 2>&1"\n' >> "${file}")
-grep -q '^## mana-toolkit' "${file}" 2>/dev/null \
-|| (echo -e '## mana-toolkit\nalias mana-toolkit-start="a2ensite 000-mana-toolkit;a2dissite 000-default; systemctl restart apache2"' >> "${file}" \
-  && echo -e 'alias mana-toolkit-stop="a2dissite 000-mana-toolkit; a2ensite 000-default; systemctl restart apache2"\n' >> "${file}" )
-grep -q '^## ssh' "${file}" 2>/dev/null \
-|| echo -e '## ssh\nalias ssh-start="systemctl restart ssh"\nalias ssh-stop="systemctl stop ssh"\n' >> "${file}"
-grep -q '^## samba' "${file}" 2>/dev/null \
-|| echo -e '## samba\nalias smb-start="systemctl restart smbd nmbd"\nalias smb-stop="systemctl stop smbd nmbd"\n' >> "${file}"
-grep -q '^## rdesktop' "${file}" 2>/dev/null \
-|| echo -e '## rdesktop\nalias rdesktop="rdesktop -z -P -g 90% -r disk:local=\"/tmp/\""\n' >> "${file}"
+
 #--- Add in folders
 grep -q '^## www' "${file}" 2>/dev/null \
 || echo -e '## www\nalias wwwroot="cd /var/www/html/"\n#alias www="cd /var/www/html/"\n' >> "${file}"
+grep -q '^## apache' "${file}" 2>/dev/null \
+|| echo -e '\nalias apache="/var/log/apache2/"\n' >> "${file}"
 grep -q '^## ftp' "${file}" 2>/dev/null \
 || echo -e '## ftp\nalias ftproot="cd /var/ftp/"\n' >> "${file}"
 grep -q '^## tftp' "${file}" 2>/dev/null \
@@ -299,10 +289,33 @@ grep -q '^## edb' "${file}" 2>/dev/null \
 || echo -e '## edb\nalias edb="cd /usr/share/exploitdb/platforms/"\nalias edbroot="cd /usr/share/exploitdb/platforms/"\n' >> "${file}"
 grep -q '^## wordlist' "${file}" 2>/dev/null \
 || echo -e '## wordlist\nalias wordlists="cd /usr/share/wordlists/"\n' >> "${file}"
+
+#--- Add in tools
+grep -q '^## nmap' "${file}" 2>/dev/null \
+|| echo -e '## nmap\nalias nmap="nmap --reason --open --stats-every 3m --max-retries 1 --max-scan-delay 20 --defeat-rst-ratelimit"\n' >> "${file}"
+grep -q '^## aircrack-ng' "${file}" 2>/dev/null \
+|| echo -e '## aircrack-ng\nalias aircrack-ng="aircrack-ng -z"\n' >> "${file}"
+grep -q '^## airodump-ng' "${file}" 2>/dev/null \
+|| echo -e '## airodump-ng \nalias airodump-ng="airodump-ng --manufacturer --wps --uptime"\n' >> "${file}"
+grep -q '^## metasploit' "${file}" 2>/dev/null \
+|| (echo -e '## metasploit\nalias msfc="systemctl start postgresql; msfdb start; msfconsole -q \"\$@\""' >> "${file}" \
+  && echo -e 'alias msfconsole="systemctl start postgresql; msfdb start; msfconsole \"\$@\""\n' >> "${file}" \
+  && echo -e 'alias msf="systemctl start postgresql; msfdb start; msfconsole \"\$@\""\n' >> "${file}")
+grep -q '^## mana-toolkit' "${file}" 2>/dev/null \
+|| (echo -e '## mana-toolkit\nalias mana-toolkit-start="a2ensite 000-mana-toolkit;a2dissite 000-default; systemctl restart apache2"' >> "${file}" \
+  && echo -e 'alias mana-toolkit-stop="a2dissite 000-mana-toolkit; a2ensite 000-default; systemctl restart apache2"\n' >> "${file}" )
+grep -q '^## ssh' "${file}" 2>/dev/null \
+|| echo -e '## ssh\nalias ssh-start="systemctl restart ssh"\nalias ssh-stop="systemctl stop ssh"\n' >> "${file}"
+grep -q '^## samba' "${file}" 2>/dev/null \
+|| echo -e '## samba\nalias smb-start="systemctl restart smbd nmbd"\nalias smb-stop="systemctl stop smbd nmbd"\n' >> "${file}"
+grep -q '^## rdesktop' "${file}" 2>/dev/null \
+|| echo -e '## rdesktop\nalias rdesktop="rdesktop -z -P -g 90% -r disk:local=\"/tmp/\""\n' >> "${file}"
+[ "${openVAS}" != "false" ] \
+&& (grep -q '^## openvas' "${file}" 2>/dev/null \
+  || echo -e '## openvas\nalias openvas="openvas-stop; openvas-start; sleep 3s; xdg-open https://127.0.0.1:9392/ >/dev/null 2>&1"\n' >> "${file}")
 #--- Apply new aliases
 source "${file}" || source ~/.zshrc
 #--- Check
-#alias
 
 ### Customize nautilus
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Configuring Nautilus ${ORANGE} ~ GUI file system navigation${RESET}"
