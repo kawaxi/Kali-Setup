@@ -499,21 +499,68 @@ grep -q '^"PATH"=.*C:\\\\MinGW\\\\bin' ~/.wine/system.reg \
 if ! foobar_loc="$(type -p "hyperion")" || [ -z "$foobar_loc" ]; then
   apt -y -qq install windows-binaries \
     || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
-  unzip -q -o -d /usr/share/windows-binaries/ $(find /usr/share/windows-binaries/ -name "Hyperion-*.zip" -type f -print -quit)
-  #--- Compile
-  i686-w64-mingw32-g++ -static-libgcc -static-libstdc++ \
-    /usr/share/windows-binaries/Hyperion-1.0/Src/Crypter/*.cpp \
-    -o /usr/share/windows-binaries/Hyperion-1.0/Src/Crypter/bin/crypter.exe
-  ln -sf /usr/share/windows-binaries/Hyperion-1.0/Src/Crypter/bin/crypter.exe /usr/share/windows-binaries/Hyperion-1.0/crypter.exe                        #***!!! hardcoded path!
-  wine ~/.wine/drive_c/MinGW/bin/g++.exe /usr/share/windows-binaries/Hyperion-1.0/Src/Crypter/*.cpp \
-    -o /usr/share/windows-binaries/hyperion.exe 2>&1 \
-    | grep -v 'If something goes wrong, please rerun with\|for more detailed debugging output'
-  #--- Add to path
-  file=/usr/local/bin/hyperion
-  cat <<EOF > "${file}" \
-  || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
+
+    #unzip -q -o -d /usr/share/windows-binaries/ $(find /usr/share/windows-binaries/ -name "Hyperion-*.zip" -type f -print -quit)
+    hyp=$(find /usr/share/windows-binaries/ -name "Hyperion-*.zip" -type f -print -quit)
+    DIRECTORY=$(find /usr/share/windows-binaries/ -type d -name "Hyperion-*" -print -quit)
+    if [ -d "$DIRECTORY" ]; then
+    #--- Compile
+    i686-w64-mingw32-g++ -static-libgcc -static-libstdc++ \
+    /usr/share/windows-binaries/hyperion/Src/Crypter/*.cpp \
+    -o /usr/share/windows-binaries/hyperion/Src/Crypter/crypter.exe
+    ln -sf /usr/share/windows-binaries/hyperion/Src/Crypter/crypter.exe /usr/share/windows-binaries/hyperion/crypter.exe                        #***!!! hardcoded path!
+    # wine ~/.wine/drive_c/MinGW/bin/g++.exe /usr/share/windows-binaries/hyperion/Src/Crypter/*.cpp \
+    # -o /usr/share/windows-binaries/hyperion.exe 2>&1 \
+    #   | grep -v 'If something goes wrong, please rerun with\|for more detailed debugging output'
+    #--- Add to path
+    file=/usr/local/bin/hyperion
+    cat <<EOF > "${file}" \
+  || echo -e "${RED}[!] Issue with writing file${RESET}" 1>&2
+ #!/bin/bash
+ ## Note: This is far from perfect...
+ RED="\033[01;31m"
+ RESET="\033[00m"
+ CWD=\$(pwd)/
+ BWD="?"
+ ## Using full path?
+ [ -e "/\${1}" ] && BWD=""
+ ## Using relative path?
+ [ -e "./\${1}" ] && BWD="\${CWD}"
+ ## Can't find input file!
+ [[ "\${BWD}" == "?" ]] && echo -e " ${RED}[!]${RESET} Cant find \$1. Quitting..." && exit
+ ## The magic!
+ cd /usr/share/windows-binaries/hyperion/
+ $(which wine) /usr/share/windows-binaries/hyperion/crypter.exe \${BWD}\${1} output.exe
+ ## Restore our path
+ cd \${CWD}/
+ sleep 1s
+ ## Move the output file
+ mv -f /usr/share/windows-binaries/hyperion/output.exe \${2}
+ ## Generate file hashes
+for FILE in \${1} \${2}; do
+  echo "[i] \$(md5sum \${FILE})"
+done
+EOF
+  chmod +x "${file}"
+
+    else
+      unzip -q -o -d /usr/share/windows-binaries/ $(find /usr/share/windows-binaries/ -name "Hyperion-*.zip" -type f -print -quit)
+      #--- Compile
+      i686-w64-mingw32-g++ -static-libgcc -static-libstdc++ \
+        /usr/share/windows-binaries/Hyperion-1.0/Src/Crypter/*.cpp \
+        -o /usr/share/windows-binaries/Hyperion-1.0/Src/Crypter/bin/crypter.exe
+      ln -sf /usr/share/windows-binaries/Hyperion-1.0/Src/Crypter/bin/crypter.exe /usr/share/windows-binaries/Hyperion-1.0/crypter.exe                        #***!!! hardcoded path!
+      wine ~/.wine/drive_c/MinGW/bin/g++.exe /usr/share/windows-binaries/Hyperion-1.0/Src/Crypter/*.cpp \
+        -o /usr/share/windows-binaries/hyperion.exe 2>&1 \
+        | grep -v 'If something goes wrong, please rerun with\|for more detailed debugging output'
+      #--- Add to path
+      file=/usr/local/bin/hyperion
+      cat <<EOF > "${file}" \
+  || echo -e "${RED}[!] Issue with writing file${RESET}" 1>&2
 #!/bin/bash
 ## Note: This is far from perfect...
+RED="\033[01;31m"
+RESET="\033[00m"
 CWD=\$(pwd)/
 BWD="?"
 ## Using full path?
@@ -521,7 +568,7 @@ BWD="?"
 ## Using relative path?
 [ -e "./\${1}" ] && BWD="\${CWD}"
 ## Can't find input file!
-[[ "\${BWD}" == "?" ]] && echo -e ' '${RED}'[!]'${RESET}' Cant find \$1. Quitting...' && exit
+[[ "\${BWD}" == "?" ]] && echo -e " ${RED}[!]${RESET} Cant find \$1. Quitting..." && exit
 ## The magic!
 cd /usr/share/windows-binaries/Hyperion-1.0/
 $(which wine) ./Src/Crypter/bin/crypter.exe \${BWD}\${1} output.exe
@@ -535,10 +582,11 @@ for FILE in \${1} \${2}; do
   echo "[i] \$(md5sum \${FILE})"
 done
 EOF
-  chmod +x "${file}"
+    chmod +x "${file}"
+  fi
 
 else
-  (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Hyperion Already Installed ${ORANGE} Skipping.... ${RESET}"
+   (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Hyperion Already Installed ${ORANGE} Skipping.... ${RESET}"
 fi
 
 

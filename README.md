@@ -33,7 +33,7 @@ Full Install: It will Install Express module apps, full package repos and let yo
 
 Just do:
 
-# git clone https://github.com/kawaxi/kali-setup
+# git clone https://github.com/kawaxi/kali-setup.git
 
 For help do:
 
@@ -48,7 +48,17 @@ Pending Ideas:
 * Make script to trap TERM signal.
 
 
+
 # Change Log
+
+October Update
+* Fixed tilda config file problem.
+* Fixed problem with bash aliases made by a typo.
+* Updated some github repositories.
+* Made some tweaks to code.
+* Made optimizations to make code fully compatible with kali 2017.1 & 2016.2
+* Fixed Problem with Hyperion
+
 
 June 16th
 * Unified incoming conections into access.log for Apache2

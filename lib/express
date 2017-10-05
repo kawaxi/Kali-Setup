@@ -668,18 +668,21 @@ systemctl disable pure-ftpd
 
 #### Installing Tilda
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Tilda ${ORANGE} ~ Pop Up Terminal Emulator ${RESET}"
-apt-get -y -q install tilda
+apt-get -y -q install tilda \
+  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 #Adding Tilda to startup
 cp /usr/share/applications/tilda.desktop ~/.config/autostart/
 #--- Creating Config File
 nohup /usr/bin/tilda tilda &
-echo $! > save_pid.txt
+#echo $! > save_pid.txt
 sleep 1
-kill -15 `cat save_pid.txt`
-echo -e "${ORANGE} [i]${ORANGE} Our PID for Tilda was: ${RESET}`cat save_pid.txt` ${RESET}"
-rm save_pid.txt
-echo -e " ${YELLOW}[i]${ORANGE}   ***${BOLD}${ORANGE} Use F2 to minimize tilda window ${RESET}***"
-echo -e " ${YELLOW}[i]${ORANGE}   ***${BOLD}${ORANGE} If not working try with F1       ${RESET}***"
+#kill -15 `cat save_pid.txt`
+#pid=$(pidof tilda)
+pkill tilda
+sleep 1
+#echo -e "${ORANGE} [i]${ORANGE} Our PID for Tilda was: ${RESET}`cbat save_pid.txt` ${RESET}"
+#rm save_pid.txt
+echo -e " ${YELLOW}[i]${ORANGE}   ***${BOLD}${ORANGE} Use F2 to minimize tilda window, If not working try with F1 ${RESET}***"
 #-- Editing Config File
 _TMP="$(find ~/.config/tilda -maxdepth 1 -type f -name 'config_*' | xargs -n1 file | cut -d ':' -f1)"
 for FILE in $(echo ${_TMP}); do
@@ -712,7 +715,7 @@ if [[ "$(uname -m)" == 'x86_64' ]]; then
 fi
 
 #--- Create start script
-ile=~/.config/autostart/dropbox.desktop; [ -e "${file}" ] && cp -n $file{,.bkup}
+file=~/.config/autostart/dropbox.desktop; [ -e "${file}" ] && cp -n $file{,.bkup}
 cat <<EOF > "${file}" \
   || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
 [Desktop Entry]
