@@ -457,7 +457,7 @@ if ! foobar_loc="$(type -p "winetricks")" || [ -z "$foobar_loc" ]; then
     || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
   #--- Using x64?
   if [[ "$(uname -m)" == 'x86_64' ]]; then
-    (( STAGE++ )); echo -e " ${ORANGE}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Configuring ${ORANGE}WINE ${RESET}(x64) "
+    (( STAGE++ )); echo -e " ${ORANGE}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Configuring ${ORANGE}WINE ${RESET}(x86) "
     dpkg --add-architecture i386
     apt -qq update
     apt -y -qq install wine32 1>/dev/null \
@@ -502,7 +502,7 @@ if ! foobar_loc="$(type -p "hyperion")" || [ -z "$foobar_loc" ]; then
 
     #unzip -q -o -d /usr/share/windows-binaries/ $(find /usr/share/windows-binaries/ -name "Hyperion-*.zip" -type f -print -quit)
     hyp=$(find /usr/share/windows-binaries/ -name "Hyperion-*.zip" -type f -print -quit)
-    DIRECTORY=$(find /usr/share/windows-binaries/ -type d -name "Hyperion-*" -print -quit)
+    DIRECTORY=$(find /usr/share/windows-binaries/ -type d -name "hyperion*" -print -quit)
     if [ -d "$DIRECTORY" ]; then
     #--- Compile
     i686-w64-mingw32-g++ -static-libgcc -static-libstdc++ \
@@ -518,8 +518,6 @@ if ! foobar_loc="$(type -p "hyperion")" || [ -z "$foobar_loc" ]; then
   || echo -e "${RED}[!] Issue with writing file${RESET}" 1>&2
  #!/bin/bash
  ## Note: This is far from perfect...
- RED="\033[01;31m"
- RESET="\033[00m"
  CWD=\$(pwd)/
  BWD="?"
  ## Using full path?
@@ -527,7 +525,7 @@ if ! foobar_loc="$(type -p "hyperion")" || [ -z "$foobar_loc" ]; then
  ## Using relative path?
  [ -e "./\${1}" ] && BWD="\${CWD}"
  ## Can't find input file!
- [[ "\${BWD}" == "?" ]] && echo -e " ${RED}[!]${RESET} Cant find \$1. Quitting..." && exit
+ [[ "\${BWD}" == "?" ]] && printf "${RED}[!]${RESET} Cant find \$1. , input file? Quitting..." && exit
  ## The magic!
  cd /usr/share/windows-binaries/hyperion/
  $(which wine) /usr/share/windows-binaries/hyperion/crypter.exe \${BWD}\${1} output.exe
@@ -535,7 +533,8 @@ if ! foobar_loc="$(type -p "hyperion")" || [ -z "$foobar_loc" ]; then
  cd \${CWD}/
  sleep 1s
  ## Move the output file
- mv -f /usr/share/windows-binaries/hyperion/output.exe \${2}
+ mv -f /usr/share/windows-binaries/hyperion/output.exe \${2} 2>/dev/null  \
+  || printf "${RED}[!] Issue with writing file, please indicate an input file ${RESET}" 1>&2
  ## Generate file hashes
 for FILE in \${1} \${2}; do
   echo "[i] \$(md5sum \${FILE})"
@@ -568,7 +567,7 @@ BWD="?"
 ## Using relative path?
 [ -e "./\${1}" ] && BWD="\${CWD}"
 ## Can't find input file!
-[[ "\${BWD}" == "?" ]] && echo -e " ${RED}[!]${RESET} Cant find \$1. Quitting..." && exit
+[[ "\${BWD}" == "?" ]] && echo -e " ${RED}[!]${RESET} Cant find \$1. , input file? Quitting..." && exit
 ## The magic!
 cd /usr/share/windows-binaries/Hyperion-1.0/
 $(which wine) ./Src/Crypter/bin/crypter.exe \${BWD}\${1} output.exe
@@ -576,7 +575,8 @@ $(which wine) ./Src/Crypter/bin/crypter.exe \${BWD}\${1} output.exe
 cd \${CWD}/
 sleep 1s
 ## Move the output file
-mv -f /usr/share/windows-binaries/Hyperion-1.0/output.exe \${2}
+mv -f /usr/share/windows-binaries/Hyperion-1.0/output.exe \${2} 2>/dev/null  \
+ || printf "${RED}[!] Issue with writing file, please indicate an input file ${RESET}" 1>&2
 ## Generate file hashes
 for FILE in \${1} \${2}; do
   echo "[i] \$(md5sum \${FILE})"
@@ -1017,7 +1017,7 @@ sleep 2s
 msiexec /a python-2.6.msi & HEXPID=$!
 sleep 2s
 
-echo -e "${ORANGE} [i]${ORANGE} Our PID for Python is:$HEXPID "
+echo -e "${YELLOW} [i]${ORANGE}  Our PID for Python is:${RESET} $HEXPID "
 sleep 2s
 #
 HEXWINID=$(xdotool search --any --pid ${HEXPID} --name "Python 2.6.2" | tail -1 )
@@ -1041,10 +1041,10 @@ cd $HOME/.wine-fuzzbunch/drive_c/fuzzbunch-debian/installers
 wine "pywin32-219.win32-py2.6.exe" & HEXPID=$!
 #wine "Z:\root\.wine-fuzzbunch\drive_c\fuzzbunch-debian\installers\pywin32-219.win32-py2.6.exe" & HEXPID=$!
 
-echo -e "${ORANGE} [i]${ORANGE} Our PID for Python is:$HEXPID ${RESET} "
+echo -e "${YELLOW} [i]${ORANGE}  Our PID for Python is:${RESET}$HEXPID ${RESET} "
 sleep 2s
 HEXWINID=$(xdotool search --any --pid ${HEXPID} --name "Setuyp pywin32-219" | tail -1 )
-echo -e "[i] We found our window ID for Python is : $HEXWINID ${RESET} \n"
+echo -e "${YELLOW}[i]${ORANGE} We found our window ID for Python:${RESET} $HEXWINID ${RESET} \n"
 
 xdotool windowactivate --sync ${HEXWINID} key --clearmodifiers Return
 xdotool windowactivate --sync ${HEXWINID} key --clearmodifiers Return
@@ -1052,7 +1052,7 @@ xdotool windowactivate --sync ${HEXWINID} key --clearmodifiers Return
 sleep 7s
 xdotool windowactivate --sync ${HEXWINID} key --clearmodifiers --delay 100 alt+F4
 
-echo -e "${ORANGE} [i]${ORANGE} is the PATH correct?  ${YELLOW}  "
+echo -e "${YELLOW} [i]${ORANGE} is the PATH correct?  ${YELLOW}  "
 #Possible error in here.
 echo -e " $(cat ~/.wine-fuzzbunch/system.reg | grep PATH) ${RESET}"
 

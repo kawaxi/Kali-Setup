@@ -54,9 +54,9 @@ Pending Ideas:
 October Update
 * Fixed tilda config file problem.
 * Fixed problem with bash aliases made by a typo.
-* Updated some github repositories.
+* Updated some github repos.
 * Made some tweaks to code.
-* Made optimizations to make code fully compatible with kali 2017.1 & 2016.2
+* Made optimizations to make code fully compatible with Kali 2017.2 & 2016.2
 * Fixed Problem with Hyperion
 
 

@@ -101,9 +101,7 @@ EOF
 fi
 
 #--- Add your own Servers  List, you can either add lines, create or download the file.
-
 #--- Please remember to change this so you can clone it instead.
-
 #--- Dont forget to review this lines and fill it with your own info.
 file=~/.config/hexchat/servlist.conf; [ -e "${file}" ] && cp -n $file{,.bkup}
 if [[ -f "${file}" ]]; then
