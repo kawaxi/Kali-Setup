@@ -682,12 +682,12 @@ file=~/.config/autostart/wallpaper.desktop; [ -e "${file}" ] && cp -n $file{,.bk
 cat <<EOF > "${file}" \
   || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
 [Desktop Entry]
-Type=Application
-Exec=/usr/local/bin/rand-wallpaper
+Name=wallpaper
+Exec=bash /usr/local/bin/rand-wallpaper
 Hidden=false
 NoDisplay=false
 X-GNOME-Autostart-enabled=true
-Name=wallpaper
+Type=Application
 EOF
 
 echo -e "\n ${GREEN}[*] ${RESET}Let's create simlinks for: ${YELLOW}WordLists ${RESET}"
