@@ -1021,7 +1021,7 @@ echo -e "${YELLOW} [i]${ORANGE}  Our PID for Python is:${RESET} $HEXPID "
 sleep 2s
 #
 HEXWINID=$(xdotool search --any --pid ${HEXPID} --name "Python 2.6.2" | tail -1 )
-echo -e "${ORANGE} [i]${ORANGE} We found our window ID for Python PID : $HEXWINID \n"
+echo -e "${YELLOW} [i]${ORANGE} We found our window ID for Python PID :${RESET} $HEXWINID \n"
 
 xdotool windowactivate --sync ${HEXWINID} key --clearmodifiers Return
 sleep 1s
