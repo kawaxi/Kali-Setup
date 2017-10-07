@@ -566,9 +566,9 @@ echo -n '[11/11]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.
     || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'uBlock'" 1>&2
 
 #---Tamper Data     # LOOK FOR ANOTHER OPTIONS Since actual version its incompatible with firefox
-#echo -n '[8/11]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/tamper-data/addon-966-latest.xpi?src=search" \
-#  -o "${ffpath}/{9c51bd27-6ed8-4000-a2bf-36cb95c0c947}.xpi" \
-#    || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'Tamper Data'" 1>&2
+echo -n '[8/11]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/tamper-data/addon-966-latest.xpi?src=search" \
+  -o "${ffpath}/{9c51bd27-6ed8-4000-a2bf-36cb95c0c947}.xpi" \
+    || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'Tamper Data'" 1>&2
 
 #--- Installing extensions
 for FILE in $(find "${ffpath}" -maxdepth 1 -type f -name '*.xpi'); do
