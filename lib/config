@@ -480,7 +480,9 @@ sed -i 's/^.*extensions.https_everywhere._observatory.popup_shown.*/user_pref("e
   || echo 'user_pref("extensions.https_everywhere._observatory.popup_shown", true);' >> "${file}"
 sed -i 's/^.network.security.ports.banned.override/user_pref("network.security.ports.banned.override", "1-65455");' "${file}" 2>/dev/null \
   || echo 'user_pref("network.security.ports.banned.override", "1-65455");' >> "${file}"
+
 #--- Replace bookmarks (base: http://pentest-bookmarks.googlecode.com)
+
 file=$(find ~/.mozilla/firefox/*.default*/ -maxdepth 1 -type f -name 'bookmarks.html' -print -quit)
 [ -e "${file}" ] \
   && cp -n $file{,.bkup}   #/etc/firefox-esr/profile/bookmarks.html
@@ -520,55 +522,88 @@ ffpath="$(find ~/.mozilla/firefox/*.default*/ -maxdepth 0 -mindepth 0 -type d -n
 [ "${ffpath}" == "/extensions" ] \
   && echo -e ' '${RED}'[!]'${RESET}" Couldn't find Firefox folder" 1>&2
 mkdir -p "${ffpath}/"
-#--- plug-n-hack
-#--- HttpFox
+
+
+#--- Note: dont change the name of the folders to be created or the installation will fail!
 #--- SQLite Manager
-echo -n '[1/11]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/5817/addon-5817-latest.xpi?src=dp-btn-primary" \
+echo -n '[1/16]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/5817/addon-5817-latest.xpi?src=dp-btn-primary" \
   -o "${ffpath}/SQLiteManager@mrinalkant.blogspot.com.xpi" \
     || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'SQLite Manager'" 1>&2
 #--- Cookies Manager+
-echo -n '[2/11]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/92079/addon-92079-latest.xpi?src=dp-btn-primary" \
+echo -n '[2/16]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/92079/addon-92079-latest.xpi?src=dp-btn-primary" \
   -o "${ffpath}/{bb6bc1bb-f824-4702-90cd-35e2fb24f25d}.xpi" \
     || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'Cookies Manager+'" 1>&2
 #--- Firebug
-echo -n '[3/11]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/1843/addon-1843-latest.xpi?src=dp-btn-primary" \
+echo -n '[3/16]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/1843/addon-1843-latest.xpi?src=dp-btn-primary" \
   -o "${ffpath}/firebug@software.joehewitt.com.xpi" \
     || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'Firebug'" 1>&2
 #--- FoxyProxy Basic
-echo -n '[4/11]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/file/493298/foxyproxy_basic-3.5.7-sm+tb+fx.xpi?src=dp-btn-primary" -o "${ffpath}/foxyproxy-basic@eric.h.jung.xpi" \
+echo -n '[4/16]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/file/493298/foxyproxy_basic-3.5.7-sm+tb+fx.xpi?src=dp-btn-primary" -o "${ffpath}/foxyproxy-basic@eric.h.jung.xpi" \
     || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'FoxyProxy Basic'" 1>&2
 #--- User Agent Overrider
-echo -n '[5/11]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/429678/addon-429678-latest.xpi?src=dp-btn-primary" \
+echo -n '[5/16]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/429678/addon-429678-latest.xpi?src=dp-btn-primary" \
   -o "${ffpath}/useragentoverrider@qixinglu.com.xpi" \
     || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'User Agent Overrider'" 1>&2
 #--- HTTPS Everywhere
-echo -n '[6/11]'; timeout 300 curl --progress -k -L -f "https://www.eff.org/files/https-everywhere-latest.xpi" \
+echo -n '[6/16]'; timeout 300 curl --progress -k -L -f "https://www.eff.org/files/https-everywhere-latest.xpi" \
   -o "${ffpath}/https-everywhere@eff.org.xpi" \
     || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'HTTPS Everywhere'" 1>&2
+
 #--- Live HTTP Headers
-echo -n '[7/11]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/3829/addon-3829-latest.xpi?src=dp-btn-primary" \
+echo -n '[7/16]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/3829/addon-3829-latest.xpi?src=dp-btn-primary" \
   -o "${ffpath}/{8f8fe09b-0bd3-4470-bc1b-8cad42b8203a}.xpi" \
     || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'Live HTTP Headers'" 1>&2
 
 #--- Disable Add-on Compatibility Checks
-echo -n '[9/11]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/300254/addon-300254-latest.xpi?src=dp-btn-primary" \
+echo -n '[8/16]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/300254/addon-300254-latest.xpi?src=dp-btn-primary" \
   -o "${ffpath}/check-compatibility@dactyl.googlecode.com.xpi" \
     || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'Disable Add-on Compatibility Checks'" 1>&2
 
 #--- Disable HackBar
-echo -n '[10/11]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/3899/addon-3899-latest.xpi?src=dp-btn-primary" \
+echo -n '[9/16]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/3899/addon-3899-latest.xpi?src=dp-btn-primary" \
   -o "${ffpath}/{F5DDF39C-9293-4d5e-9AA8-E04E6DD5E9B4}.xpi" \
     || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'HackBar'" 1>&2
 
 #--- uBlock
-echo -n '[11/11]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/607454/addon-607454-latest.xpi?src=dp-btn-primary" \
-  -o "${ffpath}/{ec8030f7-c20a-464f-9b0e-13a3a9e97384}.xpi" \
+echo -n '[10/16]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/607454/addon-607454-latest.xpi?src=dp-btn-primary" \
+  -o "${ffpath}/uBlock0@raymondhill.net.xpi" \
     || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'uBlock'" 1>&2
 
-#---Tamper Data     # LOOK FOR ANOTHER OPTIONS Since actual version its incompatible with firefox
-echo -n '[8/11]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/tamper-data/addon-966-latest.xpi?src=search" \
+#---Tamper Data
+echo -n '[11/16]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/tamper-data/addon-966-latest.xpi?src=dp-btn-primary" \
   -o "${ffpath}/{9c51bd27-6ed8-4000-a2bf-36cb95c0c947}.xpi" \
     || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'Tamper Data'" 1>&2
+
+#-- Noredirect    #
+echo -n '[12/16]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/noredirect/addon-11787-latest.xpi?src=dp-btn-primary" \
+  -o "${ffpath}/{c1970c0d-dbe6-4d91-804f-c9c0de643a57}.xpi" \
+    || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'noredirect'" 1>&2
+
+#-- Passive Recon   #
+echo -n '[13/16]'; timeout 300 curl --progress -k -L  "https://addons.mozilla.org/firefox/downloads/latest/passiverecon/addon-6196-latest.xpi?src=dp-btn-primary" \
+  -o "${ffpath}/passiverecon@blogspot.com.xpi" \
+    || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'Passive-Recon'" 1>&2
+
+#-- Form-Hack   #
+echo -n '[14/16]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/form-hack/addon-734085-latest.xpi?src=dp-btn-primary" \
+  -o "${ffpath}/{f6493a83-5202-4427-a971-24b6da0fe2e5}.xpi" \
+    || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'Form-Hack'" 1>&2
+
+#-- Wappalizer    #
+echo -n '[15/16]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/wappalyzer/addon-10229-latest.xpi?src=dp-btn-primary" \
+  -o "${ffpath}/wappalyzer@crunchlabz.com.xpi" \
+    || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'Wappalizer'" 1>&2
+
+#--Httpfox
+echo -n '[16/16]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/httpfox/addon-6647-latest.xpi?src=dp-btn-primary" \
+-o "${ffpath}/{4093c4de-454a-4329-8aff-c6b0b123c386}.xpi" \
+  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'Httpfox'" 1>&2
+
+#--Hackbar Mod
+echo -n '[16/16]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/~h3ll4r_h5h-hackmod/addon-663182-latest.xpi?src=dp-btn-primary" \
+-o "${ffpath}/{2B5E9984-75A1-11E5-963A-2E7C1D5D46B0}.xpi" \
+  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'Httpfox'" 1>&2
+
 
 #--- Installing extensions
 for FILE in $(find "${ffpath}" -maxdepth 1 -type f -name '*.xpi'); do
@@ -579,7 +614,8 @@ for FILE in $(find "${ffpath}" -maxdepth 1 -type f -name '*.xpi'); do
 done
 #--- Enable Firefox's addons/plugins/extensions
 timeout 5 firefox >/dev/null 2>&1
-timeout 5 killall -9 -q -w firefox-esr >/dev/null
+#timeout 5 killall -9 -q -w firefox-esr >/dev/null
+timeout 5 pkill firefox-esr >/dev/null
 sleep 3s
 
 
@@ -600,11 +636,11 @@ file=$(find ~/.mozilla/firefox/*.default*/ -maxdepth 1 -type f -name 'prefs.js' 
   && sed -i '/extensions.installCache/d' "${file}"
 #--- For extensions that just work without restarting
 timeout 5 firefox >/dev/null 2>&1
-timeout 5 killall -9 -q -w firefox-esr >/dev/null
+timeout 5 pkill firefox-esr >/dev/null
 sleep 2s
 #--- For (most) extensions, as they need firefox to restart
 timeout 5 firefox >/dev/null 2>&1
-timeout 5 killall -9 -q -w firefox-esr >/dev/null
+timeout 5 pkill firefox-esr >/dev/null
 sleep 5s
 #--- Wipe session (due to force close)
 find ~/.mozilla/firefox/*.default*/ -maxdepth 1 -type f -name 'sessionstore.*' -delete
@@ -621,8 +657,6 @@ else     # Create new
   echo -ne '<proxy name="Default" id="3377581719" notes="" fromSubscription="false" enabled="true" mode="direct" selectedTabIndex="0" lastresort="true" animatedIcons="false" includeInCycle="true" color="#0055E5" proxyDNS="true" noInternalIPs="false" autoconfMode="pac" clearCacheBeforeUse="false" disableCache="false" clearCookiesBeforeUse="false" rejectCookies="false"><matches><match enabled="true" name="All" pattern="*" isRegEx="false" isBlackList="false" isMultiLine="false" caseSensitive="false" fromSubscription="false"/></matches><autoconf url="" loadNotification="true" errorNotification="true" autoReload="false" reloadFreqMins="60" disableOnBadPAC="true"/><autoconf url="http://wpad/wpad.dat" loadNotification="true" errorNotification="true" autoReload="false" reloadFreqMins="60" disableOnBadPAC="true"/><manualconf host="" port="" socksversion="5" isSocks="false" username="" password=""/></proxy>' >> "${file}"
   echo -e '</proxies></foxyproxy>' >> "${file}"
 fi
-
-
 
 
 

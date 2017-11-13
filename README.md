@@ -51,13 +51,21 @@ Pending Ideas:
 
 # Change Log
 
+November Update
+* New Extentions added to firefox-esr (hack the form, NoRedirect, PassiveRecon, Wappalyzer, H3LL4R_H5H HackMod for HackBar)
+* New shells added from https://webshell.co/
+* JSWebMeter shell added.
+* Fixed some small errors.
+* Gophish Fishing Toolkit added.
+
 October Update
 * Fixed tilda config file problem.
 * Fixed problem with bash aliases made by a typo.
 * Updated some github repos.
-* Made some tweaks to code.
+* Made some code improvements.
 * Made optimizations to make code fully compatible with Kali 2017.2 & 2016.2
 * Fixed Problem with Hyperion
+* New Extentions added to firefox-esr
 
 
 June 16th

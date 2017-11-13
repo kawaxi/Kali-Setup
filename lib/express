@@ -433,9 +433,18 @@ apt -y -qq install libreoffice >/dev/null \
 apt -y -qq install asciinema  \
   || echo -e ' '${RED}'[!] Issue with apt install'  1>&2
 
+#### Install mtpaint  - To Edit images on keepnote.
+apt -y -qq install mtpaint \
+  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+
+
+#### Install lnav  - watch logs.
+apt -y -qq  install lnav \
+  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+
 #### Install Shutter   -- Take snapshots.
 (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing Shutter ${ORANGE} ~ GUI Static Screen Capture ${RESET}"
-apt -y -qq install shutter \
+apt -y -qq install shutter  \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
 
 #### Install htop  - an interactive process viewer for Unix
@@ -469,7 +478,7 @@ export DISPLAY=:0.0
 timeout 5 filezilla >/dev/null 2>&1     # Start and kill. Files needed for first time run
 mkdir -p ~/.config/filezilla/
 file=~/.config/filezilla/filezilla.xml; [ -e "${file}" ] && cp -n $file{,.bkup}
-[ ! -e "${file}" ] && cat <<EOF> "${file}"
+[ ! -e "${file}" ] && cat <<EOF > "${file}"
 <?xml version="1.0" encoding="UTF-8"?>
 <FileZilla3 version="3.15.0.2" platform="*nix">
   <Settings>

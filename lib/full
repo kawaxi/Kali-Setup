@@ -934,11 +934,6 @@ ln -sf /opt/regeorg-git /usr/share/webshells/reGeorg
 #--- Link to others
 apt -y -qq install webshells \
   || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
-#--- Installing Imsonia Shell
-curl --progress -k -L -f "https://www.insomniasec.com/downloads/tools/InsomniaShell.zip"  > /tmp/imsonia.zip 2>/dev/null \
-  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading InsomniaShell.zip" 1>&2
-unzip -q -o -d /usr/share/webshells/aspx/ /tmp/imsonia.zip 2>/dev/null
-
 
 
 #### Install Subterfuge  - GIT
@@ -985,6 +980,32 @@ else
   popd >/dev/null
 
 fi
+
+#### Install Gophish, hardcoded please check for updates
+file=/tmp/gophish.zip
+#--- Using x64?
+if [[ "$(uname -m)" == 'x86_64' ]]; then
+  (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing${GREEN}Gophish x64 ${ORANGE} ~  Phishing Toolkit ${RESET}"
+  timeout 300 curl --progress -k -L -f  "https://github.com/gophish/gophish/releases/download/v0.4.0/gophish-v0.4-linux-64bit.zip" > ${file} \
+    || echo -e ' '${RED}'[!]'${RESET}" Issue downloading sublime.deb" 1>&2
+else
+  (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing${GREEN}Gophish x32 ${ORANGE} ~  Phishing Toolkit ${RESET}"
+  timeout 300 curl --progress -k -L -f "https://github.com/gophish/gophish/releases/download/v0.4.0/gophish-v0.4-linux-32bit.zip" > ${file} \
+    || echo -e ' '${RED}'[!]'${RESET}" Issue downloading sublime.deb" 1>&2
+fi
+7z x -aoa -y "${file}" -o/opt/gophish/
+pushd /opt/gophish/* > /dev/null
+## Moving files to an up directory and delecting the current Directory
+cp -rf * ../ && rm -rf -- "$(pwd -P)" && cd ..
+popd > /dev/null
+#--- Add to path (with a 'better' name)
+file=/usr/local/bin/gophish
+cat <<EOF > "${file}" \
+  || echo -e "${RED}[!] Issue with writing file${RESET}" 1>&2
+#!/bin/bash
+cd /opt/gophish/ && ./gophish "\$@"
+EOF
+chmod +x "${file}"
 
 
 ####Installing fuzzbunch
@@ -1103,5 +1124,41 @@ echo -e " ${YELLOW}[i]${ORANGE} Now you can run fuzzbunch-debian with ${BOLD}${O
 #
 # cat ~/.wine-fuzzbunch/system.reg | grep PATH
 #
+
+#--- Installing Imsonia Shell
+curl --progress -k -L -f "https://www.insomniasec.com/downloads/tools/InsomniaShell.zip" > /tmp/imsonia.zip 2>/dev/null \
+  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading InsomniaShell.zip" 1>&2
+unzip -q -o -d /usr/share/webshells/aspx/ /tmp/imsonia.zip 2>/dev/null
+
+#--- Installing JSWebMeter Shell
+git clone -q -b master https://github.com/Cn33liz/JSMeter.git /usr/share/webshells/JSWebMeter/ \
+  || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
+pushd /usr/share/webshells/JSWebMeter/ >/dev/null
+git pull -q
+popd >/dev/null
+
+#--- Installing from https://webshell.co/
+#--- Pouya Shell
+curl --progress -k -L -f "https://webshell.co/shells/asp/zip/pouyashell.zip" > /tmp/shell.zip 2>/dev/null \
+  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading PouyaShell" 1>&2
+7z e -ppass /tmp/shell.zip -o/usr/share/webshells/asp/ 1>/dev/null
+#--- kacakshell
+curl --progress -k -L -f "https://webshell.co/shells/asp/zip/kacakshell.zip" > /tmp/shell.zip 2>/dev/null \
+  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading Shell" 1>&2
+7z e -ppass /tmp/shell.zip -o/usr/share/webshells/asp/ 1>/dev/null
+#--- c99
+curl --progress -k -L -f "https://webshell.co/shells/php/zip/c99shell.zip" > /tmp/shell.zip 2>/dev/null \
+  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading Shell" 1>&2
+7z e -ppass /tmp/shell.zip -o/usr/share/webshells/php/ 1>/dev/null
+#--- b374kshell
+curl --progress -k -L -f "https://webshell.co/shells/php/zip/b374kshell.zip" > /tmp/shell.zip 2>/dev/null \
+  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading Shell" 1>&2
+7z e -ppass /tmp/shell.zip -o/usr/share/webshells/php/ 1>/dev/null
+#--- r57shell
+curl --progress -k -L -f "https://webshell.co/shells/php/zip/r57shell.zip" > /tmp/shell.zip 2>/dev/null \
+  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading Shell" 1>&2
+7z e -ppass /tmp/shell.zip -o/usr/share/webshells/php/ 1>/dev/null
+
+
 
 }
