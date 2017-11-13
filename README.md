@@ -15,7 +15,7 @@ Express Install: It will install basic apps and configure services and your syst
 	Atom  	   	Asciinema	Pure-FTPd	Chromium 	Hexchat   	Shutter
 	Apache2		Tilda		Terminator 	htop 		Mysql		Conky 		
 	Dropbox 	psmisc 		SSH		Icedove   	Pipe Vievwer 	Tft
-	LibreOffice     Filezilla    Gitkraken
+	LibreOffice     Filezilla    	Gitkraken	lnav
 
 
 Full Install: It will Install Express module apps, full package repos and let your system ready for Pentesting.
@@ -27,7 +27,7 @@ Full Install: It will Install Express module apps, full package repos and let yo
 	Hyperion 		CrackMapExec		Crowbar	 	Clusterd 	wdiff		Proxychains
 	Veil-framework		BDFProxy		Credcrack	Subterfuge 	Webhandler 	Vbindiff
 	HttpTunnel		OP-Packers 		BetterCap	Empire		Azazel		Gnmap-Parser
-	Fuzzbunch
+	Fuzzbunch		Gophish
 
 
 
