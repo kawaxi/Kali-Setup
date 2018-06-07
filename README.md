@@ -51,6 +51,17 @@ Pending Ideas:
 
 # Change Log
 
+
+
+June Update
+* New addon added to firefox-esr , now there are 20 installed.
+* Bin file Created for Burpsuite-Pro
+* Fixed and ported to gtk3 terminator's plugin to capture all console output with timestamp for pentesting.
+* Few tweaks added for Hyperion.
+
+
+-- 2017 --
+
 November Update
 * New Extentions added to firefox-esr (hack the form, NoRedirect, PassiveRecon, Wappalyzer, H3LL4R_H5H HackMod for HackBar)
 * New shells added from https://webshell.co/

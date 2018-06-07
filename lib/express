@@ -248,7 +248,7 @@ file=~/.config/terminator/config; [ -e "${file}" ] && cp -n $file{,.bkup}
 cat <<EOF > "${file}" \
   || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
 [global_config]
-  enabled_plugins = TerminalShot, LaunchpadCodeURLHandler, APTURLHandler, LaunchpadBugURLHandler
+  enabled_plugins = TerminalShot, LaunchpadCodeURLHandler, APTURLHandler, LaunchpadBugURLHandler, KawaxisLogger
   focus = mouse
 [keybindings]
   copy = <Primary>c
@@ -282,6 +282,11 @@ cat <<EOF > "${file}" \
       parent = ""
 [plugins]
 EOF
+
+#Installing Custom plugin hardcoded value....
+curl --progress -k -L -f "https://raw.githubusercontent.com/kawaxi/Kali-Setup/master/lib/Logger-working.py" > /root/.config/terminator/plugins/kawaxislogger.py \
+  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading setup.py" 1>&2            #***!!! hardcoded version! Need to manually check for updates
+
 #--- Set terminator for Gnomes default
 gsettings set org.gnome.desktop.default-applications.terminal exec /usr/bin/terminator
 gsettings set org.gnome.desktop.default-applications.terminal exec-arg "-x"

@@ -526,83 +526,101 @@ mkdir -p "${ffpath}/"
 
 #--- Note: dont change the name of the folders to be created or the installation will fail!
 #--- SQLite Manager
-echo -n '[1/16]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/5817/addon-5817-latest.xpi?src=dp-btn-primary" \
+echo -n '[1/20]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/5817/addon-5817-latest.xpi?src=dp-btn-primary" \
   -o "${ffpath}/SQLiteManager@mrinalkant.blogspot.com.xpi" \
     || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'SQLite Manager'" 1>&2
 #--- Cookies Manager+
-echo -n '[2/16]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/92079/addon-92079-latest.xpi?src=dp-btn-primary" \
+echo -n '[2/20]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/92079/addon-92079-latest.xpi?src=dp-btn-primary" \
   -o "${ffpath}/{bb6bc1bb-f824-4702-90cd-35e2fb24f25d}.xpi" \
     || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'Cookies Manager+'" 1>&2
 #--- Firebug
-echo -n '[3/16]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/1843/addon-1843-latest.xpi?src=dp-btn-primary" \
+echo -n '[3/20]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/1843/addon-1843-latest.xpi?src=dp-btn-primary" \
   -o "${ffpath}/firebug@software.joehewitt.com.xpi" \
     || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'Firebug'" 1>&2
 #--- FoxyProxy Basic
-echo -n '[4/16]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/file/493298/foxyproxy_basic-3.5.7-sm+tb+fx.xpi?src=dp-btn-primary" -o "${ffpath}/foxyproxy-basic@eric.h.jung.xpi" \
+echo -n '[4/20]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/file/493298/foxyproxy_basic-3.5.7-sm+tb+fx.xpi?src=dp-btn-primary" -o "${ffpath}/foxyproxy-basic@eric.h.jung.xpi" \
     || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'FoxyProxy Basic'" 1>&2
 #--- User Agent Overrider
-echo -n '[5/16]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/429678/addon-429678-latest.xpi?src=dp-btn-primary" \
+echo -n '[5/20]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/429678/addon-429678-latest.xpi?src=dp-btn-primary" \
   -o "${ffpath}/useragentoverrider@qixinglu.com.xpi" \
     || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'User Agent Overrider'" 1>&2
 #--- HTTPS Everywhere
-echo -n '[6/16]'; timeout 300 curl --progress -k -L -f "https://www.eff.org/files/https-everywhere-latest.xpi" \
+echo -n '[6/20]'; timeout 300 curl --progress -k -L -f "https://www.eff.org/files/https-everywhere-latest.xpi" \
   -o "${ffpath}/https-everywhere@eff.org.xpi" \
     || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'HTTPS Everywhere'" 1>&2
 
 #--- Live HTTP Headers
-echo -n '[7/16]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/3829/addon-3829-latest.xpi?src=dp-btn-primary" \
+echo -n '[7/20]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/3829/addon-3829-latest.xpi?src=dp-btn-primary" \
   -o "${ffpath}/{8f8fe09b-0bd3-4470-bc1b-8cad42b8203a}.xpi" \
     || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'Live HTTP Headers'" 1>&2
 
 #--- Disable Add-on Compatibility Checks
-echo -n '[8/16]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/300254/addon-300254-latest.xpi?src=dp-btn-primary" \
+echo -n '[8/20]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/300254/addon-300254-latest.xpi?src=dp-btn-primary" \
   -o "${ffpath}/check-compatibility@dactyl.googlecode.com.xpi" \
     || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'Disable Add-on Compatibility Checks'" 1>&2
 
 #--- Disable HackBar
-echo -n '[9/16]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/3899/addon-3899-latest.xpi?src=dp-btn-primary" \
+echo -n '[9/20]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/3899/addon-3899-latest.xpi?src=dp-btn-primary" \
   -o "${ffpath}/{F5DDF39C-9293-4d5e-9AA8-E04E6DD5E9B4}.xpi" \
     || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'HackBar'" 1>&2
 
 #--- uBlock
-echo -n '[10/16]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/607454/addon-607454-latest.xpi?src=dp-btn-primary" \
+echo -n '[10/20]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/607454/addon-607454-latest.xpi?src=dp-btn-primary" \
   -o "${ffpath}/uBlock0@raymondhill.net.xpi" \
     || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'uBlock'" 1>&2
 
 #---Tamper Data
-echo -n '[11/16]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/tamper-data/addon-966-latest.xpi?src=dp-btn-primary" \
+echo -n '[11/20]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/tamper-data/addon-966-latest.xpi?src=dp-btn-primary" \
   -o "${ffpath}/{9c51bd27-6ed8-4000-a2bf-36cb95c0c947}.xpi" \
     || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'Tamper Data'" 1>&2
 
 #-- Noredirect    #
-echo -n '[12/16]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/noredirect/addon-11787-latest.xpi?src=dp-btn-primary" \
+echo -n '[12/20]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/noredirect/addon-11787-latest.xpi?src=dp-btn-primary" \
   -o "${ffpath}/{c1970c0d-dbe6-4d91-804f-c9c0de643a57}.xpi" \
     || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'noredirect'" 1>&2
 
 #-- Passive Recon   #
-echo -n '[13/16]'; timeout 300 curl --progress -k -L  "https://addons.mozilla.org/firefox/downloads/latest/passiverecon/addon-6196-latest.xpi?src=dp-btn-primary" \
+echo -n '[13/20]'; timeout 300 curl --progress -k -L  "https://addons.mozilla.org/firefox/downloads/latest/passiverecon/addon-6196-latest.xpi?src=dp-btn-primary" \
   -o "${ffpath}/passiverecon@blogspot.com.xpi" \
     || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'Passive-Recon'" 1>&2
 
 #-- Form-Hack   #
-echo -n '[14/16]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/form-hack/addon-734085-latest.xpi?src=dp-btn-primary" \
+echo -n '[14/20]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/form-hack/addon-734085-latest.xpi?src=dp-btn-primary" \
   -o "${ffpath}/{f6493a83-5202-4427-a971-24b6da0fe2e5}.xpi" \
     || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'Form-Hack'" 1>&2
 
 #-- Wappalizer    #
-echo -n '[15/16]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/wappalyzer/addon-10229-latest.xpi?src=dp-btn-primary" \
+echo -n '[15/20]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/wappalyzer/addon-10229-latest.xpi?src=dp-btn-primary" \
   -o "${ffpath}/wappalyzer@crunchlabz.com.xpi" \
     || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'Wappalizer'" 1>&2
 
 #--Httpfox
-echo -n '[16/16]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/httpfox/addon-6647-latest.xpi?src=dp-btn-primary" \
+echo -n '[16/20]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/httpfox/addon-6647-latest.xpi?src=dp-btn-primary" \
 -o "${ffpath}/{4093c4de-454a-4329-8aff-c6b0b123c386}.xpi" \
   || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'Httpfox'" 1>&2
 
 #--Hackbar Mod
-echo -n '[16/16]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/~h3ll4r_h5h-hackmod/addon-663182-latest.xpi?src=dp-btn-primary" \
+echo -n '[17/20]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/~h3ll4r_h5h-hackmod/addon-663182-latest.xpi?src=dp-btn-primary" \
 -o "${ffpath}/{2B5E9984-75A1-11E5-963A-2E7C1D5D46B0}.xpi" \
-  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'Httpfox'" 1>&2
+  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'h3ll4r_h5h-hackmod'" 1>&2
+
+#--Sql Inject me
+echo -n '[18/17]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/sql-inject-me/addon-7597-latest.xpi?src=dp-btn-primary" \
+-o "${ffpath}/sqlime@security.compass.xpi" \
+  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'sql-inject-me'" 1>&2
+
+
+#--XSS me
+echo -n '[19/20]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/xss-me/addon-7598-latest.xpi?src=dp-btn-primary" \
+-o "${ffpath}/xssme@security.compass.xpi" \
+  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'XSS me'" 1>&2
+
+
+#--Websecurify
+echo -n '[20/20]'; timeout 300 curl --progress -k -L -f "https://addons.mozilla.org/firefox/downloads/latest/websecurify/addon-337391-latest.xpi?src=dp-btn-primary" \
+-o "${ffpath}/firefox@websecurify.gnucitizen.org.xpi" \
+  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 'websecurify'" 1>&2
+
 
 
 #--- Installing extensions
@@ -729,5 +747,17 @@ ln -s /usr/share/wordlists/rockyou.txt /root/rockyou.txt
 ln -s /usr/share/wordlists/dirb/common.txt /root/common.txt
 ln -s /usr/share/wordlists/dirbuster /root/
 ln -s /usr/share/webshells/ /root/
+
+#--- Use your own location for your Burpsuite-Pro.
+echo -e "\n ${GREEN}[*] ${RESET}Let's create bin file for: ${YELLOW}Burpsuite-Pro ${RESET}"
+file=/usr/local/bin/burpsuite-pro; [ -e "${file}" ] && cp -n $file{,.bkup}
+cat <<EOF > "${file}" \
+  || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
+  #!/bin/bash
+  java -jar /root/Dropbox/burpsuite/burpsuite_pro_v1.7.32.jar
+  exit 0
+EOF
+
+chmod -f 0500 "${file}"
 
 }

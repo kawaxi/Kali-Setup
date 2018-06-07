@@ -584,6 +584,13 @@ done
 EOF
     chmod +x "${file}"
   fi
+# We more steps added to avoid last minute work.
+pushd /usr/share/windows-binaries/hyperion
+cp -p /usr/lib/gcc/i686-w64-mingw32/7.2-win32/libstdc++-6.dll .
+cp -p /usr/lib/gcc/i686-w64-mingw32/7.2-win32/libgcc_s_sjlj-1.dll .
+popd
+
+
 
 else
    (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Hyperion Already Installed ${ORANGE} Skipping.... ${RESET}"
