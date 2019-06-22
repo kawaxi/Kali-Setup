@@ -790,6 +790,7 @@ else
   (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Droopscan-git Already Installed ${ORANGE} Pulling from github .... ${RESET}"
   pushd /opt/droopescan-git/ >/dev/null
   git pull -q
+  pip install -r requirements.txt
   popd >/dev/null
 fi
 

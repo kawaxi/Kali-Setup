@@ -85,7 +85,7 @@ if [[ $(which gnome-shell) ]]; then
       gsettings set org.gnome.shell favorite-apps "['chromium.desktop', 'firefox-esr.desktop', 'org.gnome.Nautilus.desktop', 'org.gnome.Terminal.desktop', 'terminator.desktop', 'kali-msfconsole.desktop', 'kali-armitage.desktop', 'kali-burpsuite.desktop', 'kali-beef.desktop', 'kali-faraday.desktop', 'leafpad.desktop', 'gnome-tweak-tool.desktop', 'atom.desktop', 'keepnote.desktop', 'icedove.desktop', 'shutter.desktop', 'hexchat.desktop']"
   else
   #--- Adding favorites to our Gnome Dash-to-dock  x64
-      gsettings set org.gnome.shell favorite-apps "['chromium.desktop', 'firefox-esr.desktop', 'org.gnome.Nautilus.desktop', 'org.gnome.Terminal.desktop', 'terminator.desktop', 'kali-msfconsole.desktop', 'kali-armitage.desktop', 'kali-burpsuite.desktop', 'kali-beef.desktop', 'kali-faraday.desktop', 'leafpad.desktop', 'gnome-tweak-tool.desktop','sublime_text.desktop', 'keepnote.desktop', 'icedove.desktop', 'shutter.desktop' , 'hexchat.desktop']"
+      gsettings set org.gnome.shell favorite-apps "['chromium.desktop', 'waterfox.desktop', 'org.gnome.Nautilus.desktop', 'org.gnome.Terminal.desktop', 'terminator.desktop', 'kali-msfconsole.desktop', 'kali-armitage.desktop', 'kali-burpsuite.desktop', 'kali-beef.desktop', 'kali-faraday.desktop', 'leafpad.desktop', 'gnome-tweak-tool.desktop','sublime_text.desktop', 'keepnote.desktop', 'icedove.desktop', 'shutter.desktop' , 'hexchat.desktop']"
   fi
 
   ##### Configure GNOME terminal ;  Note: need to restart xserver for effect
@@ -453,10 +453,10 @@ fi
 
 
 
-#### Configure firefox
+#### Configure waterfox
 export DISPLAY=:0.0
-#--- Start and kill. Files needed for first time run
-timeout 5 firefox >/dev/null 2>&1
+#--- Start and kill. Files needed for first time
+timeout 5 firefox-esr >/dev/null 2>&1
 timeout 5 killall -9 -q -w firefox-esr >/dev/null
 file=$(find ~/.mozilla/firefox/*.default*/ -maxdepth 1 -type f -name 'prefs.js' -print -quit)
 [ -e "${file}" ] \
@@ -483,7 +483,7 @@ sed -i 's/^.network.security.ports.banned.override/user_pref("network.security.p
 
 #--- Replace bookmarks (base: http://pentest-bookmarks.googlecode.com)
 
-file=$(find ~/.mozilla/firefox/*.default*/ -maxdepth 1 -type f -name 'bookmarks.html' -print -quit)
+file=$(find ~/.firefox-esr/*.default*/ -maxdepth 1 -type f -name 'bookmarks.html' -print -quit)
 [ -e "${file}" ] \
   && cp -n $file{,.bkup}   #/etc/firefox-esr/profile/bookmarks.html
 timeout 300 curl --progress -k -L -f "https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/pentest-bookmarks/bookmarksv1.5.html" > /tmp/bookmarks_new.html \
@@ -631,7 +631,7 @@ for FILE in $(find "${ffpath}" -maxdepth 1 -type f -name '*.xpi'); do
   rm -f "${FILE}"
 done
 #--- Enable Firefox's addons/plugins/extensions
-timeout 5 firefox >/dev/null 2>&1
+timeout 5 firefox-esr >/dev/null 2>&1
 #timeout 5 killall -9 -q -w firefox-esr >/dev/null
 timeout 5 pkill firefox-esr >/dev/null
 sleep 3s
@@ -639,7 +639,7 @@ sleep 3s
 
 #--- Method for Newer versions
 #---&& [ -e "${file}" ] && cp -n $file{,.bkup}
-file=$(find ~/.mozilla/firefox/*.default*/ -maxdepth 1 -type f -name 'extensions.json' -print -quit)
+file=$(find ~/./*.default*/ -maxdepth 1 -type f -name 'extensions.json' -print -quit)
 if [[ -e "${file}" ]] || [[ -n "${file}" ]]; then
   echo -e " ${YELLOW}[i]${RESET} Enabled ${YELLOW}Firefox's extensions${RESET} (via method #2 - extensions.json)"
   #--- Force them all!
@@ -653,11 +653,11 @@ file=$(find ~/.mozilla/firefox/*.default*/ -maxdepth 1 -type f -name 'prefs.js' 
 [ -n "${file}" ] \
   && sed -i '/extensions.installCache/d' "${file}"
 #--- For extensions that just work without restarting
-timeout 5 firefox >/dev/null 2>&1
+timeout 5 firefox-esr >/dev/null 2>&1
 timeout 5 pkill firefox-esr >/dev/null
 sleep 2s
 #--- For (most) extensions, as they need firefox to restart
-timeout 5 firefox >/dev/null 2>&1
+timeout 5 firefox-esr >/dev/null 2>&1
 timeout 5 pkill firefox-esr >/dev/null
 sleep 5s
 #--- Wipe session (due to force close)

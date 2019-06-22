@@ -52,6 +52,14 @@ Pending Ideas:
 # Change Log
 
 
+June 2019
+* Waterfox has been added for legacy addons support as alternative to firefox-esr
+
+
+Augoust
+
+* Installed Requirements for droopscan.
+
 
 June Update
 * New addon added to firefox-esr , now there are 20 installed.

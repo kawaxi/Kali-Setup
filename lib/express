@@ -544,11 +544,11 @@ else
   echo -e " ${YELLOW}[i]${GREEN} MySQL username: ${ORANGE} root"
   echo -e " ${YELLOW}[i]${GREEN} MySQL password: ${ORANGE} <blank>   ***${BOLD}CHANGE THIS ASAP${RESET}***"
   [[ -e ~/.my.cnf ]] \
-    || cat <<EOF > ~/.my.cnf
-  [client]
-  user=root
-  host=localhost
-  password=
+      || cat <<EOF > ~/.my.cnf
+    [client]
+    user=root
+    host=localhost
+    password=
 EOF
 fi
 
@@ -757,6 +757,17 @@ else
   echo -e 'export CHROMIUM_FLAGS="$CHROMIUM_FLAGS --password-store=detect --no-sandbox --user-data-dir --start-maximized" ' >> "${file}"
   echo -e "${ORANGE} [i]${GREEN} Chromium is installed ${RESET}"
 fi
+file=/etc/chromium.d/default-flags.bkup;
+if [[ -f "${file}" ]]; then
+  echo -e ' '${RED}'[!]'${RESET}" ${file} detected. Skipping..." 1>&2
+else
+  #-- Edit CHROMIUM_FLAGS to run as Root
+  file=/etc/chromium.d/default-flags; [ -e "${file}" ] && cp -n $file{,.bkup}
+  echo -e "# Run as root Kali" >> "${file}"
+  echo -e 'export CHROMIUM_FLAGS="$CHROMIUM_FLAGS --password-store=detect --no-sandbox --user-data-dir --start-maximized" ' >> "${file}"
+  echo -e "${ORANGE} [i]${GREEN} Chromium is installed ${RESET}"
+fi
+
 
 #### if x64
 if [[ "$(uname -m)" == 'x86_64' ]]; then
@@ -766,7 +777,48 @@ if [[ "$(uname -m)" == 'x86_64' ]]; then
     || echo -e ' '${RED}'[!]'${RESET}" Issue downloading file" 1>&2
   dpkg -i gitkraken.deb
   rm gitkraken.deb
+
+
+  #### Installing Waterfox
+  (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Waterfox ${ORANGE} ~ Web browser ${RESET}"
+  ### Hardcoded Link
+  timeout 300 curl --progress -k -L -f "https://storage-waterfox.netdna-ssl.com/releases/linux64/installer/waterfox-56.2.10.en-US.linux-x86_64-1.tar.bz2" -o /tmp/waterfox.tar.bz2 \
+    || echo -e ' '${RED}'[!]'${RESET}" Issue downloading Waterfox" 1>&2
+  gunzip /tmp/waterfox.tar.bz2
+  tar -xf /tmp/waterfox.tar.bz2 -C /opt/
+  #--- Add to path
+  file=/usr/local/bin/waterfox
+  cat <<EOF > "${file}" \
+    || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
+  #!/bin/bash
+  cd /opt/waterfox/ && ./waterfox "\$@"
+EOF
+  chmod +x "${file}"
+
+  #--- Create Desktop File
+  _TMP="$(find /opt/waterfox/browser/icons/ -maxdepth 1 -type f -name 'mozi*' | cut -d ':' -f1)"
+  file=/usr/share/applications/waterfox.desktop; [ -e "${file}" ] && cp -n $file{,.bkup}
+  cat <<EOF > "${file}" \
+    || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
+  [Desktop Entry]
+  Name=Waterfox
+  GenericName=Web Browser
+  Comment=Browse the World Wide Web
+  Exec=waterfox
+  Terminal=false
+  X-MultipleArgs=false
+  Type=Application
+  Icon=$_TMP
+  Categories=Network;WebBrowser;
+  MimeType=text/html;text/xml;application/xhtml_xml;application/x-mimearchive;x-scheme-handler/http;x-scheme-handler/https;
+  StartupWMClass=Waterfox
+  StartupNotify=true
+EOF
+
+
 fi
+
+
 
 #--- Copying Windows-binaries to ftp folder
 cp -r /usr/share/windows-binaries /var/ftp/

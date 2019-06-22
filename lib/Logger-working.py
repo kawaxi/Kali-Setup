@@ -50,9 +50,11 @@ class KawaxisLogger (plugin.MenuItem):
         """ Final function to write a file """
         content = terminal.get_text_range(row_start, col_start, row_end, col_end,
                                           lambda *a: True)
+                                          
         # Insert current time to the beginning of a new line
         content = content[0]
-        now = datetime.datetime.now().strftime("[%d/%m - %H:%M] ")
+        now = datetime.datetime.now().strftime("[%H:%M - %d/%m/%y] ")
+        #now = datetime.datetime.now().strftime("[%d/%m - %H:%M] ")
         #now = $'export PS1="\u@\h [\t]:\w\\$ \[$(tput sgr0)\]"'
         fd = self.loggers[terminal]["fd"]
         # Don't write the last char which is always '\n'
