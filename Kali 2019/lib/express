@@ -39,7 +39,7 @@ else
   timeout 300 curl --progress-bar -k -L -f "https://download.sublimetext.com/sublime-text_build-3126_i386.deb" > /tmp/sublime.deb \
     || echo -e ' '${RED}'[!]'${RESET}" Issue downloading sublime.deb" 1>&2
     if [ -e /tmp/sublime.deb ]; then
-      apt install -y /tmp/sublime.deb
+      apt install -y -qq /tmp/sublime.deb
     fi
 
 fi
@@ -77,10 +77,10 @@ timeout 5 killall -9 -q -w hexchat &>/dev/null
 file=~/.config/hexchat/hexchat.conf; [ -e "${file}" ] && cp -n $file{,.bkup}
 if [[ -f "${file}" ]]; then
   echo -e ' '${ORANGE}'[i]'${WHITE}" ${file} ${YELLOW} Detected. Replacing ..." ${RESET} 1>&2
-  timeout 300 curl --progress-bar -k -L -f "https://raw.githubusercontent.com/kawaxi/Kali-Setup/master/hexchat.conf" > "${file}" \
+  timeout 300 curl --progress-bar -k -L -f "https://raw.githubusercontent.com/kawaxi/blob/master/static-lib/hexchat.conf" > "${file}" \
   || echo -e ' '${RED}'[!] Issue Downloading file'${RESET} 1>&2
 else
-  timeout 300 curl --progress-bar -k -L -f "https://raw.githubusercontent.com/kawaxi/Kali-Setup/master/hexchat.conf" > "${file}" \
+  timeout 300 curl --progress-bar -k -L -f "https://raw.githubusercontent.com/kawaxi/blob/master/static-lib/hexchat.conf" > "${file}" \
   || echo -e ' '${RED}'[!] Issue Downloading file'${RESET} 1>&2
 fi
 
@@ -110,6 +110,7 @@ if [[ -f "${file}" ]]; then
   file=/tmp/servlist.py
   cat <<EOF > "${file}" \
 	|| echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
+
 #! /bin/python
 
 with open('/root/.config/hexchat/servlist.conf', 'r') as iFile:
@@ -150,51 +151,51 @@ file=~/.config/hexchat/colors.conf; [ -e "${file}" ] && cp -n $file{,.bkup}
 if [[ -f "${file}" ]]; then
   echo -e ' '${ORANGE}'[i]'${RESET}" ${file} ${ORANGE} Detected. Skipping..."  ${RESET} 1>&2
 else
-  cat <<EOF > "${file}" \
-	|| echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
+    cat <<EOF > "${file}" \
+  	|| echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
 
-color_0 = d3d3 d7d7 cfcf
-color_1 = 2e2e 3434 3636
-color_2 = 3434 6565 a4a4
-color_3 = 4e4e 9a9a 0606
-color_4 = cccc 0000 0000
-color_5 = 8f8f 3939 0202
-color_6 = 5c5c 3535 6666
-color_7 = cece 5c5c 0000
-color_8 = c4c4 a0a0 0000
-color_9 = 7373 d2d2 1616
-color_10 = 1111 a8a8 7979
-color_11 = 5858 a1a1 9d9d
-color_12 = 5757 7979 9e9e
-color_13 = a0d0 42d4 6562
-color_14 = 5555 5757 5353
-color_15 = 8888 8a8a 8585
-color_16 = d3d3 d7d7 cfcf
-color_17 = 2e2e 3434 3636
-color_18 = 3434 6565 a4a4
-color_19 = 4e4e 9a9a 0606
-color_20 = cccc 0000 0000
-color_21 = 8f8f 3939 0202
-color_22 = 5c5c 3535 6666
-color_23 = cece 5c5c 0000
-color_24 = c4c4 a0a0 0000
-color_25 = 7373 d2d2 1616
-color_26 = 1111 a8a8 7979
-color_27 = 5858 a1a1 9d9d
-color_28 = 5757 7979 9e9e
-color_29 = a0d0 42d4 6562
-color_30 = 5555 5757 5353
-color_31 = 8888 8a8a 8585
-color_256 = d3d3 d7d7 cfcf
-color_257 = 2020 4a4a 8787
-color_258 = e1e1 e1e1 e1e1
-color_259 = 0d0d 2d2d 5b5b
-color_260 = 8f8f 3939 0202
-color_261 = 7474 a9a9 eaea
-color_262 = 4e4e 9a9a 0606
-color_263 = cece 5c5c 0000
-color_264 = 8888 8a8a 8585
-color_265 = a4a4 0000 0000
+  color_0 = d3d3 d7d7 cfcf
+  color_1 = 2e2e 3434 3636
+  color_2 = 3434 6565 a4a4
+  color_3 = 4e4e 9a9a 0606
+  color_4 = cccc 0000 0000
+  color_5 = 8f8f 3939 0202
+  color_6 = 5c5c 3535 6666
+  color_7 = cece 5c5c 0000
+  color_8 = c4c4 a0a0 0000
+  color_9 = 7373 d2d2 1616
+  color_10 = 1111 a8a8 7979
+  color_11 = 5858 a1a1 9d9d
+  color_12 = 5757 7979 9e9e
+  color_13 = a0d0 42d4 6562
+  color_14 = 5555 5757 5353
+  color_15 = 8888 8a8a 8585
+  color_16 = d3d3 d7d7 cfcf
+  color_17 = 2e2e 3434 3636
+  color_18 = 3434 6565 a4a4
+  color_19 = 4e4e 9a9a 0606
+  color_20 = cccc 0000 0000
+  color_21 = 8f8f 3939 0202
+  color_22 = 5c5c 3535 6666
+  color_23 = cece 5c5c 0000
+  color_24 = c4c4 a0a0 0000
+  color_25 = 7373 d2d2 1616
+  color_26 = 1111 a8a8 7979
+  color_27 = 5858 a1a1 9d9d
+  color_28 = 5757 7979 9e9e
+  color_29 = a0d0 42d4 6562
+  color_30 = 5555 5757 5353
+  color_31 = 8888 8a8a 8585
+  color_256 = d3d3 d7d7 cfcf
+  color_257 = 2020 4a4a 8787
+  color_258 = e1e1 e1e1 e1e1
+  color_259 = 0d0d 2d2d 5b5b
+  color_260 = 8f8f 3939 0202
+  color_261 = 7474 a9a9 eaea
+  color_262 = 4e4e 9a9a 0606
+  color_263 = cece 5c5c 0000
+  color_264 = 8888 8a8a 8585
+  color_265 = a4a4 0000 0000
 
 EOF
 fi
@@ -229,7 +230,7 @@ else
   # Harcoded Link
   file=~/.config/hexchat/pevents.conf
   echo -e "${ORANGE} [i] ${WHITE}Downloading pevents.conf ${YELLOW}          File  Downloaded ${RESET}"
-  timeout 300 curl --progress-bar -k -L -f "https://raw.githubusercontent.com/kawaxi/Kali-Setup/master/pevents.conf" > "${file}" \
+  timeout 300 curl --progress-bar -k -L -f "https://raw.githubusercontent.com/kawaxi/blob/master/static-lib/pevents.conf" > "${file}" \
   || echo -e ' '${RED}'[!] Issue Downloading file'${RESET} 1>&2
 fi
 
@@ -284,7 +285,7 @@ cat <<EOF > "${file}" \
 EOF
 
 #Installing Custom plugin hardcoded value....
-wget -P /root/.config/terminator/plugins/kawaxislogger.py https://raw.githubusercontent.com/kawaxi/Kali-Setup/master/lib/Logger-working.py  \
+wget -P /root/.config/terminator/plugins/kawaxislogger.py "https://raw.githubusercontent.com/kawaxi/Kali-Setup/master/Kali%202019/lib/KawaxisLogger.py"  \
   || echo -e ' '${RED}'[!]'${RESET}" Issue downloading setup.py" 1>&2            #***!!! hardcoded version! Need to manually check for updates
 
 #--- Set terminator for Gnomes default

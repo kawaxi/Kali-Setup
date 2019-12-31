@@ -568,7 +568,7 @@ ffpath="$(find ~/.waterfox/*.default*/ -maxdepth 0 -mindepth 0 -type d -name '*.
 mkdir -p "${ffpath}/"
 #---Since the extensions and addons now are legacy I'm gonna be using my own set.
 #--- Hardcoded link
-echo -n '[1/10]'; timeout 300 curl --progress-bar -k -L -f "https://github.com/kawaxi/Kali-Setup/raw/master/Kali%202019/lib/extensions.zip" > /tmp/extensions.zip \
+echo -n '[1/10]'; timeout 300 curl --progress-bar -k -L -f "https://github.com/kawaxi/Kali-Setup/blob/master/static-lib/extensions.zip" > /tmp/extensions.zip \
   || echo -e ' '${RED}'[!]'${RESET}" Issue downloading firefox extensions" 1>&2
 unzip -oqd ${ffpath} /tmp/extensions.zip
 
@@ -642,7 +642,7 @@ mkdir -p ~/.themes/
 # xfconf-query -n -c xsettings -p /Net/ThemeName -s "axiomd"
 # xfconf-query -n -c xsettings -p /Net/IconThemeName -s "Vibrancy-Kali-Dark"
 #--- Get new desktop wallpaper      (All are #***!!! hardcoded paths!)
-echo -n '[1/10]'; timeout 300 curl --progress-bar -k -L -f "https://github.com/kawaxi/Kali-Setup/raw/master/lib/kali.zip" > /tmp/kali.zip \
+echo -n '[1/10]'; timeout 300 curl --progress-bar -k -L -f "https://github.com/kawaxi/Kali-Setup/blob/master/static-lib/kali.zip" > /tmp/kali.zip \
   || echo -e ' '${RED}'[!]'${RESET}" Issue downloading wallpapers" 1>&2
 unzip -joqd /usr/share/wallpapers/kali /tmp/kali.zip 1>&2
 _TMP="$(find /usr/share/wallpapers/kali -maxdepth 1 -type f -name 'kali_*' | xargs -n1 file | grep -i 'HTML\|empty' | cut -d ':' -f1)"
