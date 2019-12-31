@@ -568,11 +568,9 @@ ffpath="$(find ~/.waterfox/*.default*/ -maxdepth 0 -mindepth 0 -type d -name '*.
 mkdir -p "${ffpath}/"
 #---Since the extensions and addons now are legacy I'm gonna be using my own set.
 #--- Hardcoded link
-echo -n '[1/10]'; timeout 300 curl --progress-bar -k -L -f "https://github.com/kawaxi/Kali-Setup/raw/master/lib/kali.zip" > /tmp/extensions.zip \
+echo -n '[1/10]'; timeout 300 curl --progress-bar -k -L -f "https://github.com/kawaxi/Kali-Setup/raw/master/Kali%202019/lib/extensions.zip" > /tmp/extensions.zip \
   || echo -e ' '${RED}'[!]'${RESET}" Issue downloading firefox extensions" 1>&2
 unzip -oqd ${ffpath} /tmp/extensions.zip
-
-
 
 #--- Installing extensions
 for FILE in $(find "${ffpath}" -maxdepth 1 -type f -name '*.xpi'); do
@@ -581,16 +579,16 @@ for FILE in $(find "${ffpath}" -maxdepth 1 -type f -name '*.xpi'); do
   unzip -q -o -d "${ffpath}/${d}/" "${FILE}"
   rm -f "${FILE}"
 done
-#--- Enable Firefox's addons/plugins/extensions
-timeout 5 firefox >/dev/null 2>&1
+#--- Enable Waterfox's addons/plugins/extensions
+timeout 5 waterfox >/dev/null 2>&1
 #timeout 5 killall -9 -q -w firefox >/dev/null
-timeout 5 pkill firefox >/dev/null
+timeout 5 pkill waterfox >/dev/null
 sleep 3s
 
 
 #--- Method for Newer versions
 #---&& [ -e "${file}" ] && cp -n $file{,.bkup}
-file=$(find ~/./*.default*/ -maxdepth 1 -type f -name 'extensions.json' -print -quit)
+file=$(find ~/.waterfox/*.default*/ -maxdepth 1 -type f -name 'extensions.json' -print -quit)
 if [[ -e "${file}" ]] || [[ -n "${file}" ]]; then
   echo -e " ${YELLOW}[i]${RESET} Enabled ${YELLOW}Firefox's extensions${RESET} (via method #2 - extensions.json)"
   #--- Force them all!
@@ -600,19 +598,19 @@ if [[ -e "${file}" ]] || [[ -n "${file}" ]]; then
 fi
 #--- Remove cache
 #---&& [ -e "${file}" ] && cp -n $file{,.bkup}
-file=$(find ~/.mozilla/firefox/*.default*/ -maxdepth 1 -type f -name 'prefs.js' -print -quit)
+file=$(find ~/.waterfox/*.default*/ -maxdepth 1 -type f -name 'prefs.js' -print -quit)
 [ -n "${file}" ] \
   && sed -i '/extensions.installCache/d' "${file}"
 #--- For extensions that just work without restarting
-timeout 5 firefox >/dev/null 2>&1
-timeout 5 pkill firefox >/dev/null
+timeout 5 waterfox >/dev/null 2>&1
+timeout 5 pkill waterfox >/dev/null
 sleep 2s
-#--- For (most) extensions, as they need firefox to restart
-timeout 5 firefox >/dev/null 2>&1
-timeout 5 pkill firefox >/dev/null
+#--- For (most) extensions, as they need waterfox to restart
+timeout 5 waterfox >/dev/null 2>&1
+timeout 5 pkill waterfox >/dev/null
 sleep 5s
 #--- Wipe session (due to force close)
-find ~/.mozilla/firefox/*.default*/ -maxdepth 1 -type f -name 'sessionstore.*' -delete
+find ~/.waterfox/*.default*/ -maxdepth 1 -type f -name 'sessionstore.*' -delete
 
 #--- Configure foxyproxy
 
