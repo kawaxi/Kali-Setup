@@ -1,0 +1,42 @@
+#!/bin/bash
+
+
+update--()
+{
+
+#  if [ -z "$CONDITION" ] || [ "$CONDITION" == Y ] || [ "$CONDITION" == y ]; then
+  (( STAGE++ )); echo -e "\n\n ${YELLOW}[*]${WHITE} (${STAGE}/${TOTAL}) ${UBlue} Update & Upgrade your system ${RESET}"
+  #--- Add network repositories
+  file=/etc/apt/sources.list; [ -e "${file}" ] && cp -n $file{,.bkup}
+  ([[ -e "${file}" && "$(tail -c 1 ${file})" != "" ]]) && echo >> "${file}"
+  #--- Main
+  grep -q '^deb .* kali-rolling' "${file}" 2>/dev/null \
+    || echo -e "\n\n# Kali Rolling\ndeb http://http.kali.org/kali kali-rolling main contrib non-free" >> "${file}"
+  #--- Source
+  grep -q '^deb-src .* kali-rolling' "${file}" 2>/dev/null \
+    || echo -e "deb-src http://http.kali.org/kali kali-rolling main contrib non-free" >> "${file}"
+  #--- Disable CD repositories
+  sed -i '/kali/ s/^\( \|\t\|\)deb cdrom/#deb cdrom/g' "${file}"
+  #--- incase we were interrupted
+  #dpkg --configure -a
+  #--- Update
+  # Clean up      clean remove autoremove autoclean
+
+  #Saving some Config Files we will need.
+  file=/etc/ssh/sshd_config; [ -e "${file}" ] && cp -n $file{,.bkup}
+
+  # apt-mark hold openssh-server bash-completion cc gcc g++ gcc-multilib make automake libc6 libc6-dev libc6-amd64 libc6-dev-amd64 libc6-i386 libc6-dev-i386 libc6-i686 libc6-dev-i686 build-essential dpkg-dev
+  # echo <pkg> hold | dpkg --set-selections
+   apt-get -y -qq update && apt-get -y -qq upgrade
+  #
+  # apt-mark hold openssh-server
+
+
+
+  #### Time taken for Update
+  finishtime=$(date +%s)
+  echo -e "\n\n ${YELLOW}[i]${RESET} Time (roughly) taken: ${YELLOW}$(( $(( finishtime - time )) / 60 )) minutes ${RESET}"
+
+
+
+}

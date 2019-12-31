@@ -1,0 +1,1172 @@
+#!/bin/bash
+
+full--()
+{
+
+#### Install metasploit ~ http://docs.kali.org/general-use/starting-metasploit-framework-in-kali
+if [[ "${openVAS}" != "false" ]]; then
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing metasploit ${ORANGE} ~ Exploit Framework ${RESET} "
+apt -y -qq install metasploit-framework \
+  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+mkdir -p ~/.msf4/modules/{auxiliary,exploits,payloads,post}/
+#--- ASCII art
+#export GOCOW=1   # Always a cow logo ;)   Others: THISISHALLOWEEN (Halloween), APRILFOOLSPONIES (My Little Pony)
+#file=~/.bashrc; [ -e "${file}" ] && cp -n $file{,.bkup}
+#([[ -e "${file}" && "$(tail -c 1 ${file})" != "" ]]) && echo >> "${file}"
+#grep -q '^GOCOW' "${file}" 2>/dev/null || echo 'GOCOW=1' >> "${file}"
+#--- Fix any port issues
+file=$(find /etc/postgresql/*/main/ -maxdepth 1 -type f -name postgresql.conf -print -quit);
+[ -e "${file}" ] && cp -n $file{,.bkup}
+sed -i 's/port = .* #/port = 5432 /' "${file}"
+#--- Fix permissions - 'could not translate host name "localhost", service "5432" to address: Name or service not known'
+chmod 0644 /etc/hosts
+#--- Start services
+systemctl stop postgresql
+systemctl start postgresql
+msfdb reinit
+sleep 5s
+#--- Autorun Metasploit commands each startup
+file=~/.msf4/msf_autorunscript.rc; [ -e "${file}" ] && cp -n $file{,.bkup}
+if [[ -f "${file}" ]]; then
+  echo -e ' '${RED}'[!]'${RESET}" ${file} detected. Skipping..." 1>&2
+else
+  cat <<EOF > "${file}"
+#run post/windows/escalate/getsystem
+#run migrate -f -k
+#run migrate -n "explorer.exe" -k    # Can trigger AV alerts by touching explorer.exe...
+#run post/windows/manage/smart_migrate
+#run post/windows/gather/smart_hashdump
+EOF
+fi
+file=~/.msf4/msfconsole.rc; [ -e "${file}" ] && cp -n $file{,.bkup}
+if [[ -f "${file}" ]]; then
+  echo -e ' '${RED}'[!]'${RESET}" ${file} detected. Skipping..." 1>&2
+else
+  cat <<EOF > "${file}"
+load auto_add_route
+load alias
+alias del rm
+alias handler use exploit/multi/handler
+load sounds
+setg TimestampOutput true
+setg VERBOSE true
+setg ExitOnSession false
+setg EnableStageEncoding true
+setg LHOST 0.0.0.0
+setg LPORT 443
+EOF
+#use exploit/multi/handler
+#setg AutoRunScript 'multi_console_command -rc "~/.msf4/msf_autorunscript.rc"'
+#set PAYLOAD windows/meterpreter/reverse_https
+fi
+#--- Aliases time
+file=~/.bash_aliases; [ -e "${file}" ] && cp -n $file{,.bkup}   #/etc/bash.bash_aliases
+([[ -e "${file}" && "$(tail -c 1 ${file})" != "" ]]) && echo >> "${file}"
+#--- Aliases for console
+grep -q '^alias msfc=' "${file}" 2>/dev/null \
+  || echo -e '\n### MSF\nalias msfc="systemctl start postgresql; msfdb start; msfconsole -q \"\$@\""' >> "${file}"
+grep -q '^alias msfconsole=' "${file}" 2>/dev/null \
+  || echo -e 'alias msfconsole="systemctl start postgresql; msfdb start; msfconsole \"\$@\""\n' >> "${file}"
+grep -q '^alias msf=' "${file}" 2>/dev/null \
+    || echo -e 'alias msf="systemctl start postgresql; msfdb start; msfconsole \"\$@\""\n' >> "${file}"
+#--- Aliases to speed up msfvenom (create static output)
+grep -q "^alias msfvenom-list-all" "${file}" 2>/dev/null \
+  || echo "alias msfvenom-list-all='cat ~/.msf4/msfvenom/all'" >> "${file}"
+grep -q "^alias msfvenom-list-nops" "${file}" 2>/dev/null \
+  || echo "alias msfvenom-list-nops='cat ~/.msf4/msfvenom/nops'" >> "${file}"
+grep -q "^alias msfvenom-list-payloads" "${file}" 2>/dev/null \
+  || echo "alias msfvenom-list-payloads='cat ~/.msf4/msfvenom/payloads'" >> "${file}"
+grep -q "^alias msfvenom-list-encoders" "${file}" 2>/dev/null \
+  || echo "alias msfvenom-list-encoders='cat ~/.msf4/msfvenom/encoders'" >> "${file}"
+grep -q "^alias msfvenom-list-formats" "${file}" 2>/dev/null \
+  || echo "alias msfvenom-list-formats='cat ~/.msf4/msfvenom/formats'" >> "${file}"
+grep -q "^alias msfvenom-list-generate" "${file}" 2>/dev/null \
+  || echo "alias msfvenom-list-generate='_msfvenom-list-generate'" >> "${file}"
+grep -q "^function _msfvenom-list-generate" "${file}" 2>/dev/null \
+  || cat <<EOF >> "${file}" \
+    || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
+function _msfvenom-list-generate {
+  mkdir -p ~/.msf4/msfvenom/
+  msfvenom --list > ~/.msf4/msfvenom/all
+  msfvenom --list nops > ~/.msf4/msfvenom/nops
+  msfvenom --list payloads > ~/.msf4/msfvenom/payloads
+  msfvenom --list encoders > ~/.msf4/msfvenom/encoders
+  msfvenom --help-formats 2> ~/.msf4/msfvenom/formats
+}
+EOF
+#--- Apply new aliases
+source "${file}" || source ~/.zshrc
+#--- Generate (Can't call alias)
+mkdir -p ~/.msf4/msfvenom/
+msfvenom --list > ~/.msf4/msfvenom/all
+msfvenom --list nops > ~/.msf4/msfvenom/nops
+msfvenom --list payloads > ~/.msf4/msfvenom/payloads
+msfvenom --list encoders > ~/.msf4/msfvenom/encoders
+msfvenom --help-formats 2> ~/.msf4/msfvenom/formats
+#--- First time run with Metasploit
+(( STAGE++ )); echo -e " ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Starting Metasploit for the first time ${RESET} ~ this ${BOLD}will take a ~350 seconds${RESET} (~6 mintues)"
+echo "Started at: $(date)"
+systemctl start postgresql
+msfdb start
+msfconsole -q -x 'version;db_status;sleep 310;exit'
+
+
+#### Adding extra Metasploit modules here *****
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Adding Eternalblue SMB Metasploit module ${RESET}"
+echo -e " ${GREEN}[*]${RESET}   ${RESET}"
+mkdir ~/.msf4/modules/exploits/windows/smb/
+cd ~ && git clone -q https://github.com/kawaxi/Eternalblue-Doublepulsar-Metasploit.git /root/.Eternalblue-Doublepulsar \
+  || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
+cp /root/.Eternalblue-Doublepulsar/eternalblue_doublepulsar.rb ~/.msf4/modules/exploits/windows/smb/
+msfconsole -m ~/.msf4/modules/
+exit
+echo -e "${ORANGE} [i]${GREEN} Eternalblue-Doublepulsar-MSF Module ${ORANGE} use exploit/windows/smb/${RESET}eternalblue_doublepulsar${RESET}"
+
+#### Configuring armitage
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) Configuring ${GREEN}armitage${ORANGE} ~ GUI Metasploit UI ${RESET}"
+export MSF_DATABASE_CONFIG=/usr/share/metasploit-framework/config/database.yml
+for file in /etc/bash.bashrc ~/.zshrc; do     #~/.bashrc
+  [ ! -e "${file}" ] && continue
+  [ -e "${file}" ] && cp -n $file{,.bkup}
+  ([[ -e "${file}" && "$(tail -c 1 ${file})" != "" ]]) && echo >> "${file}"
+  grep -q 'MSF_DATABASE_CONFIG' "${file}" 2>/dev/null \
+    || echo -e 'MSF_DATABASE_CONFIG=/usr/share/metasploit-framework/config/database.yml\n' >> "${file}"
+done
+#--- Test
+#msfrpcd -U msf -P test -f -S -a 127.0.0.1
+
+fi
+
+
+#### Install Python (Windows via WINE)
+#--- Add options for 64 bits.
+if [[ "$(uname -m)" == 'i686' ]]; then
+  (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Installing Python (Windows) ${RESET}"
+  echo -n '[1/2]'; timeout 300 curl --progress -k -L -f "https://www.python.org/ftp/python/2.7.9/python-2.7.9.msi" > /tmp/python.msi \
+    || echo -e ' '${RED}'[!]'${RESET}" Issue downloading python.msi" 1>&2       #***!!! hardcoded path!
+  echo -n '[2/2]'; timeout 300 curl --progress -k -L -f "http://sourceforge.net/projects/pywin32/files/pywin32/Build%20219/pywin32-219.win32-py2.7.exe/download" > /tmp/pywin32.exe \
+    || echo -e ' '${RED}'[!]'${RESET}" Issue downloading pywin32.exe" 1>&2      #***!!! hardcoded path!
+  wine msiexec /i /tmp/python.msi /qb 2>&1 | grep -v 'If something goes wrong, please rerun with\|for more detailed debugging output'
+  pushd /tmp/ >/dev/null
+  rm -rf "PLATLIB/" "SCRIPTS/"
+  unzip -q -o /tmp/pywin32.exe
+  cp -rf PLATLIB/* ~/.wine/drive_c/Python27/Lib/site-packages/
+  cp -rf SCRIPTS/* ~/.wine/drive_c/Python27/Scripts/
+  rm -rf "PLATLIB/" "SCRIPTS/"
+  popd >/dev/null
+fi
+
+#### Install PyCharm (Community Edition)
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing PyCharm (Community Edition) ${ORANGE} ~ Python IDE ${RESET} "
+timeout 300 curl --progress -k -L -f "https://download.jetbrains.com/python/pycharm-community-2016.2.3.tar.gz" > /tmp/pycharms-community.tar.gz \
+  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading pycharms-community.tar.gz" 1>&2       #***!!! hardcoded version!
+if [ -e /tmp/pycharms-community.tar.gz ]; then
+  tar -xf /tmp/pycharms-community.tar.gz -C /tmp/
+  rm -rf /opt/pycharms/
+  mv -f /tmp/pycharm-community-*/ /opt/pycharms
+  mkdir -p /usr/local/bin/
+  ln -sf /opt/pycharms/bin/pycharm.sh /usr/local/bin/pycharms
+fi
+
+
+#### Install wdiff - this is a word comparer , it would tell you the differences between 2 files.
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Installing Wdiff ${ORANGE} ~ Compares Two Files Word by Word ${RESET}"
+apt -y -qq install wdiff wdiff-doc \
+  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+
+#### Install meld - visual diff and merge tool
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing Meld  ${ORANGE} ~ GUI Text Compare ${RESET}"
+apt -y -qq install meld \
+  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+#--- Configure meld
+gconftool-2 -t bool -s /apps/meld/show_line_numbers true
+gconftool-2 -t bool -s /apps/meld/show_whitespace true
+gconftool-2 -t bool -s /apps/meld/use_syntax_highlighting true
+gconftool-2 -t int -s /apps/meld/edit_wrap_lines 2
+
+
+
+#### Install vbindiff - Binary File Comparer
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Installing ${GREEN} vbindiff  ${ORANGE} ~ Visually Compare Binary Files ${RESET} "
+apt -y -qq install vbindiff \
+  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+
+
+#### Install OpenVAS
+if [[ "${openVAS}" != "false" ]]; then
+  (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Installing ${GREEN}OpenVAS  ${ORANGE} ~ Vulnerability Scanner ${RESET}"
+  apt -y -qq install openvas \
+    || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+  openvas-setup
+  #--- Bug fix (target credentials creation)
+  mkdir -p /var/lib/openvas/gnupg/
+  #--- Bug fix (keys)
+  curl --progress -k -L -f "http://www.openvas.org/OpenVAS_TI.asc" | gpg --import - \
+    || echo -e ' '${RED}'[!]'${RESET}" Issue downloading OpenVAS_TI.asc" 1>&2
+  #--- Make sure all services are correct
+  openvas-start
+  #--- User control
+  username="root"
+  password="toor"
+  (openvasmd --get-users | grep -q ^admin$) \
+    && echo -n 'admin user: ' \
+    && openvasmd --delete-user=admin
+  (openvasmd --get-users | grep -q "^${username}$") \
+    || (echo -n "${username} user: "; openvasmd --create-user="${username}"; openvasmd --user="${username}" --new-password="${password}" >/dev/null)
+  echo -e " ${YELLOW}[i]${ORANGE} OpenVAS username: ${username}"
+  echo -e " ${YELLOW}[i]${ORANGE} OpenVAS password: ${password}   ***${BOLD}${ORANGE}CHANGE THIS ASAP${RESET}***"
+  echo -e " ${YELLOW}[i]${ORANGE} Run: # openvasmd --user=root --new-password='<NEW_PASSWORD>' ${RESET}"
+  sleep 3s
+  openvas-check-setup
+  #--- Remove from start up
+  systemctl disable openvas-manager
+  systemctl disable openvas-scanner
+  systemctl disable greenbone-security-assistant
+  # #--- Setup alias
+  # file=~/.bash_aliases; [ -e "${file}" ] && cp -n $file{,.bkup}   #/etc/bash.bash_aliases
+  # grep -q '^## openvas' "${file}" 2>/dev/null \
+  #   || echo -e '## openvas\nalias openvas="openvas-stop; openvas-start; sleep 3s; xdg-open https://127.0.0.1:9392/ >/dev/null 2>&1"\n' >> "${file}"
+  # source "${file}" || source ~/.zshrc
+else
+  echo -e "\n\n ${YELLOW}[i]${RESET} ${YELLOW}Skipping OpenVAS${RESET} (missing: '$0 ${BOLD}--openvas${RESET}')..." 1>&2
+fi
+
+
+#### Install vFeed  - Vulnerability Database
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Installing vFeed ${ORANGE} ~ Vulnerability Database ${RESET}"
+apt -y -qq install vfeed \
+  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+
+
+#### Install rips
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Installing Rips  ${ORANGE} ~ Source Code Scanner ${RESET}"
+git clone -q -b master https://github.com/ripsscanner/rips.git /opt/rips-git/ \
+  || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
+pushd /opt/rips-git/ >/dev/null
+git pull -q
+popd >/dev/null
+#--- Add to path
+file=/etc/apache2/conf-available/rips.conf
+[ -e "${file}" ] \
+  || cat <<EOF > "${file}"
+Alias /rips /opt/rips-git
+<Directory /opt/rips-git/ >
+  Options FollowSymLinks
+  AllowOverride None
+  Order deny,allow
+  Deny from all
+  Allow from 127.0.0.0/255.0.0.0 ::1/128
+</Directory>
+EOF
+ln -sf /etc/apache2/conf-available/rips.conf /etc/apache2/conf-enabled/rips.conf
+systemctl restart apache2
+
+
+#### Install Graudit
+if ! foobar_loc="$(type -p "graudit-git")" || [ -z "$foobar_loc" ]; then
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}  Installing Graudit ${ORANGE} ~ Source Code Auditing ${RESET}"
+git clone -q -b master https://github.com/wireghoul/graudit.git /opt/graudit-git/ \
+  || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
+pushd /opt/graudit-git/ >/dev/null
+git pull -q
+popd >/dev/null
+#--- Add to path
+mkdir -p /usr/local/bin/
+file=/usr/local/bin/graudit-git
+cat <<EOF > "${file}" \
+  || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
+#!/bin/bash
+cd /opt/graudit-git/ && bash graudit.sh "\$@"
+EOF
+chmod +x "${file}"
+else
+  (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Graudit already installed ${ORANGE} ~ Pulling from git .... ${RESET}"
+  pushd /opt/graudit-git/ >/dev/null
+  git pull -q
+  popd >/dev/null
+fi
+
+
+
+
+#### Install Daemonfs - GUI file monitor
+if ! foobar_loc="$(type -p "daemonfs")" || [ -z "$foobar_loc" ]; then
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Installing daemonfs ${ORANGE} ~ GUI File Monitor ${RESET}"
+apt -y -qq install daemonfs \
+  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+else
+  echo -e "\n\n ${GREEN}[*]${RESET} ${ORANGE} daemonfs is already installed.... Skipping ${ORANGE} ${RESET}"
+fi
+
+
+#### Install VPN support
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Installing VPN Support for Network-Manager ${RESET}"
+for FILE in network-manager-openvpn network-manager-pptp network-manager-vpnc network-manager-openconnect network-manager-iodine; do
+  apt -y -qq install "${FILE}" \
+    || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+done
+
+
+#### Install Vulscan script for nmap
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Installing ${GREEN}Vulscan Script for Nmap ${ORANGE} ~ Vulnerability Scanner Add-On ${RESET}"
+mkdir -p /usr/share/nmap/scripts/vulscan/
+timeout 300 curl --progress -k -L -f "http://www.computec.ch/projekte/vulscan/download/nmap_nse_vulscan-2.0.tar.gz" > /tmp/nmap_nse_vulscan.tar.gz \
+  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading file" 1>&2      #***!!! hardcoded version! Need to manually check for updates
+gunzip /tmp/nmap_nse_vulscan.tar.gz
+tar -xf /tmp/nmap_nse_vulscan.tar -C /usr/share/nmap/scripts/
+#--- Fix permissions (by default its 0777)
+chmod -R 0755 /usr/share/nmap/scripts/; find /usr/share/nmap/scripts/ -type f -exec chmod 0644 {} \;
+
+
+#### Install proxychains-ng (https://bugs.kali.org/view.php?id=2037)
+#if ! foobar_loc="$(type -p "proxychains-ng")" || [ -z "$foobar_loc" ]; then
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Installing Proxychains-ng ${ORANGE} ~ Proxifier   ${RESET}"
+git clone -q -b master https://github.com/rofl0r/proxychains-ng.git /opt/proxychains-ng-git/ \
+  || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
+pushd /opt/proxychains-ng-git/ >/dev/null
+git pull -q
+make -s clean
+./configure --prefix=/usr --sysconfdir=/etc >/dev/null
+make -s 2>/dev/null && make -s install   # bad, but it gives errors which might be confusing (still builds)
+popd >/dev/null
+#--- Add to path (with a 'better' name)
+ln -sf /usr/bin/proxychains4 /usr/local/bin/proxychains-ng
+#else
+#fi
+
+
+#### Install httptunnel
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing ${GREEN}httptunnel ${ORANGE} ~ Tunnels Data Streams in HTTP requests ${RESET}"
+apt -y -qq install http-tunnel \
+  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+
+
+#### Install sshuttle
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing ${GREEN}sshuttle ${ORANGE}  ~ VPN over SSH ${RESET}"
+apt -y -qq install sshuttle \
+  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+#--- Example
+#sshuttle --dns --remote root@123.9.9.9 0/0 -vv
+
+
+#### Install pfi -- Port Forwarding Interceptor
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing ${GREEN}pfi ${ORANGE} ~ Port Forwarding Interceptor${RESET}"
+git clone -q -b master https://github.com/s7ephen/pfi.git /opt/pfi-git/ \
+  || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
+pushd /opt/pfi-git/ >/dev/null
+git pull -q
+popd >/dev/null
+
+
+#### Downloading AccessChk.exe
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Downloading ${GREEN}AccessChk.exe ${ORANGE} ~ Windows Environment Tester ${RESET}"
+ echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} You might want to disable your AV  ${ORANGE} ~ if it is stuck in here ${RESET}"
+apt -y -qq install windows-binaries \
+  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+echo -n '[1/2]'; timeout 300 curl --progress -k -L -f "https://web.archive.org/web/20080530012252/http://live.sysinternals.com/accesschk.exe" > /usr/share/windows-binaries/accesschk_v5.02.exe \
+  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading accesschk_v5.02.exe" 1>&2   #***!!! hardcoded path!
+echo -n '[2/2]'; timeout 300 curl --progress -k -L -f "https://download.sysinternals.com/files/AccessChk.zip" > /usr/share/windows-binaries/AccessChk.zip \
+  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading AccessChk.zip" 1>&2
+unzip -q -o -d /usr/share/windows-binaries/ /usr/share/windows-binaries/AccessChk.zip
+rm -f /usr/share/windows-binaries/{AccessChk.zip,Eula.txt}
+
+
+#### Downloading PsExec.exeif ! foobar_loc="$(type -p "wine")" || [ -z "$foobar_loc" ]; then
+
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Downloading PsExec.exe ${ORANGE} ~ Pass The Hash 'phun' ${RESET}"
+apt -y -qq install windows-binaries \
+  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+echo -n '[1/2]'; timeout 300 curl --progress -k -L -f "https://download.sysinternals.com/files/PSTools.zip" > /tmp/pstools.zip \
+  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading pstools.zip" 1>&2
+echo -n '[2/2]'; timeout 300 curl --progress -k -L -f "http://www.coresecurity.com/system/files/pshtoolkit_v1.4-src.rar" > /tmp/pshtoolkit.rar \
+  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading pshtoolkit.rar" 1>&2  #***!!! hardcoded path!
+unzip -q -o -d /usr/share/windows-binaries/pstools/ /tmp/pstools.zip
+unrar x -y /tmp/pshtoolkit.rar /usr/share/windows-binaries/ >/dev/null
+
+#### Install veil framework
+#--- Already installed?
+if ! foobar_loc="$(type -p "veil-evasion")" || [ -z "$foobar_loc" ]; then
+  (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Veil-Evasion Framework ${ORANGE} ~ Bypassing Anti-Virus ${RESET}"
+  apt -y -qq install veil-evasion >/dev/null  \
+    || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+  #bash /usr/share/veil-evasion/setup/setup.sh --silent
+  mkdir -p /var/lib/veil-evasion/go/bin/
+  touch /etc/veil/settings.py
+  sed -i 's/TERMINAL_CLEAR=".*"/TERMINAL_CLEAR="false"/' /etc/veil/settings.py
+else
+  echo -e "\n\n ${GREEN}[*]${RESET} ${ORANGE} Veil-Evasion is Already Installed.... Skipping ${ORANGE} ${RESET}"
+fi
+
+#### Install OP Packers
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing OP packers ${ORANGE} ~ Bypassing Anti-Virus ${RESET} "
+apt -y -qq install upx-ucl \
+  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+mkdir -p /opt/packers/
+echo -n '[1/3]'; timeout 300 curl --progress -k -L -f "http://www.eskimo.com/~scottlu/win/cexe.exe" > /opt/packers/cexe.exe \
+  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading cexe.exe" 1>&2            #***!!! hardcoded version! Need to manually check for updates
+echo -n '[2/3]'; timeout 300 curl --progress -k -L -f "http://www.farbrausch.de/~fg/kkrunchy/kkrunchy_023a2.zip" > /opt/packers/kkrunchy.zip \
+  && unzip -q -o -d /opt/packers/ /opt/packers/kkrunchy.zip \
+  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading kkrunchy.zip" 1>&2        #***!!! hardcoded version! Need to manually check for updates
+echo -n '[3/3]'; timeout 300 wget -k -L "https://github.com/Veil-Framework/Veil-Evasion/raw/master/tools/pescrambler/PEScrambler.exe" > /opt/packers/PEScrambler.zip \
+    || echo -e ' '${RED}'[!]'${RESET}" Issue downloading PEScrambler.zip" 1>&2     #***!!! hardcoded version! Need to check for updates , this is version 1
+apt -y -qq install windows-binaries \
+  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+ln -sf /opt/packers/ /usr/share/windows-binaries/packers
+
+
+if ! foobar_loc="$(type -p "shellter")" || [ -z "$foobar_loc" ]; then
+  #### Install Shellter - Bypassing Anti-Virus
+  (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Installing ${GREEN} Shellter  ${ORANGE} ~ Bypassing AV - Shellcode Injection ${RESET} "
+  apt -y -qq install shellter \
+    || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+else
+  echo -e "\n\n ${GREEN}[*]${RESET} ${ORANGE} Shellter is Already Installed.... Skipping ${ORANGE} ${RESET}"
+fi
+
+
+#### Install gcc & multilib
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing ${GREEN}gcc${RESET} & ${GREEN}multilibc ${ORANGE} ~ Compiling Libraries ${RESET} "
+for FILE in cc gcc g++ gcc-multilib make automake libc6 libc6-dev libc6-amd64 libc6-dev-amd64 libc6-i386 libc6-dev-i386 libc6-i686 libc6-dev-i686 build-essential dpkg-dev; do
+ if dpkg-query -l "${FILE}" 2>/dev/null | grep ^ii >/dev/null;
+  then
+     echo -e "\n\n ${GREEN}[*]${RESET} ${WHITE} "${FILE}" is already installed ${ORANGE} ${RESET}\n"
+  else
+    apt install -y -qq "${FILE}"
+  fi
+done
+
+
+#### Install MinGW ~ cross compiling suite
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing MinGW ${ORANGE} ~ Cross Compiling Suite${RESET}"
+for FILE in mingw-w64 binutils-mingw-w64 gcc-mingw-w64 cmake mingw-w64-dev mingw-w64-tools gcc-mingw-w64-i686 gcc-mingw-w64-x86-64 mingw32; do
+  #---  Just install what's missing
+  if dpkg-query -l "${FILE}" 2>/dev/null | grep ^ii >/dev/null;
+  then
+    echo -e "\n\n ${GREEN}[*]${RESET} ${WHITE} "${FILE}" is already installed ${ORANGE} ${RESET}\n"
+  else
+      apt install -y -qq "${FILE}"
+  fi
+done
+
+
+#### Install WINE
+#--- Already Installed?
+if ! foobar_loc="$(type -p "winetricks")" || [ -z "$foobar_loc" ]; then
+  (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing WINE${ORANGE} ~ Run Windows Programs on *nix${RESET}"
+  apt -y -qq install wine winbind winetricks  \
+    || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+  #--- Using x64?
+  if [[ "$(uname -m)" == 'x86_64' ]]; then
+    (( STAGE++ )); echo -e " ${ORANGE}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Configuring ${ORANGE}WINE ${RESET}(x86) "
+    dpkg --add-architecture i386
+    apt -qq update
+    apt -y -qq install wine32 1>/dev/null \
+      || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+  else
+    apt -qq update & apt -y -qq install wine32 1>/dev/null \
+      || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+
+  fi
+  #--- Run WINE for the first time
+  [ -e /usr/share/windows-binaries/whoami.exe ] && wine /usr/share/windows-binaries/whoami.exe &>/dev/null
+  #--- Setup default file association for .exe
+  file=~/.local/share/applications/mimeapps.list; [ -e "${file}" ] && cp -n $file{,.bkup}
+  ([[ -e "${file}" && "$(tail -c 1 ${file})" != "" ]]) && echo >> "${file}"
+  echo -e 'application/x-ms-dos-executable=wine.desktop' >> "${file}"
+else
+  echo -e "\n\n ${GREEN}[*]${RESET} ${ORANGE} Wine is Already Installed.... Skipping ${ORANGE} ${RESET}"
+fi
+
+
+#### Install MinGW (Windows) ~ cross compiling suite
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing MinGW (Windows) ${ORANGE} ~ Cross Compiling Suite ${RESET}"
+timeout 300 curl --progress -k -L -f "http://sourceforge.net/projects/mingw/files/Installer/mingw-get/mingw-get-0.6.2-beta-20131004-1/mingw-get-0.6.2-mingw32-beta-20131004-1-bin.zip/download" > /tmp/mingw-get.zip \
+  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading mingw-get.zip" 1>&2       #***!!! hardcoded path!
+mkdir -p ~/.wine/drive_c/MinGW/bin/
+unzip -q -o -d ~/.wine/drive_c/MinGW/ /tmp/mingw-get.zip
+pushd ~/.wine/drive_c/MinGW/ >/dev/null
+for FILE in mingw32-base mingw32-gcc-g++ mingw32-gcc-objc; do   #msys-base
+  wine ./bin/mingw-get.exe install "${FILE}" 2>&1 | grep -v 'If something goes wrong, please rerun with\|for more detailed debugging output'
+done
+popd >/dev/null
+#--- Add to windows path
+grep -q '^"PATH"=.*C:\\\\MinGW\\\\bin' ~/.wine/system.reg \
+  || sed -i '/^"PATH"=/ s_"$_;C:\\\\MinGW\\\\bin"_' ~/.wine/system.reg
+
+
+#### Install hyperion
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing hyperion ${ORANGE} ~ Bypassing Anti-Virus ${RESET}"
+if ! foobar_loc="$(type -p "hyperion")" || [ -z "$foobar_loc" ]; then
+  apt -y -qq install windows-binaries \
+    || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+
+    #unzip -q -o -d /usr/share/windows-binaries/ $(find /usr/share/windows-binaries/ -name "Hyperion-*.zip" -type f -print -quit)
+    hyp=$(find /usr/share/windows-binaries/ -name "Hyperion-*.zip" -type f -print -quit)
+    DIRECTORY=$(find /usr/share/windows-binaries/ -type d -name "hyperion*" -print -quit)
+    if [ -d "$DIRECTORY" ]; then
+    #--- Compile
+    i686-w64-mingw32-g++ -static-libgcc -static-libstdc++ \
+    /usr/share/windows-binaries/hyperion/Src/Crypter/*.cpp \
+    -o /usr/share/windows-binaries/hyperion/Src/Crypter/crypter.exe
+    ln -sf /usr/share/windows-binaries/hyperion/Src/Crypter/crypter.exe /usr/share/windows-binaries/hyperion/crypter.exe                        #***!!! hardcoded path!
+    # wine ~/.wine/drive_c/MinGW/bin/g++.exe /usr/share/windows-binaries/hyperion/Src/Crypter/*.cpp \
+    # -o /usr/share/windows-binaries/hyperion.exe 2>&1 \
+    #   | grep -v 'If something goes wrong, please rerun with\|for more detailed debugging output'
+    #--- Add to path
+    file=/usr/local/bin/hyperion
+    cat <<EOF > "${file}" \
+  || echo -e "${RED}[!] Issue with writing file${RESET}" 1>&2
+ #!/bin/bash
+ ## Note: This is far from perfect...
+ CWD=\$(pwd)/
+ BWD="?"
+ ## Using full path?
+ [ -e "/\${1}" ] && BWD=""
+ ## Using relative path?
+ [ -e "./\${1}" ] && BWD="\${CWD}"
+ ## Can't find input file!
+ [[ "\${BWD}" == "?" ]] && printf "${RED}[!]${RESET} Cant find \$1. , input file? Quitting..." && exit
+ ## The magic!
+ cd /usr/share/windows-binaries/hyperion/
+ $(which wine) /usr/share/windows-binaries/hyperion/crypter.exe \${BWD}\${1} output.exe
+ ## Restore our path
+ cd \${CWD}/
+ sleep 1s
+ ## Move the output file
+ mv -f /usr/share/windows-binaries/hyperion/output.exe \${2} 2>/dev/null  \
+  || printf "${RED}[!] Issue with writing file, please indicate an input file ${RESET}" 1>&2
+ ## Generate file hashes
+for FILE in \${1} \${2}; do
+  echo "[i] \$(md5sum \${FILE})"
+done
+EOF
+  chmod +x "${file}"
+
+    else
+      unzip -q -o -d /usr/share/windows-binaries/ $(find /usr/share/windows-binaries/ -name "Hyperion-*.zip" -type f -print -quit)
+      #--- Compile
+      i686-w64-mingw32-g++ -static-libgcc -static-libstdc++ \
+        /usr/share/windows-binaries/Hyperion-1.0/Src/Crypter/*.cpp \
+        -o /usr/share/windows-binaries/Hyperion-1.0/Src/Crypter/bin/crypter.exe
+      ln -sf /usr/share/windows-binaries/Hyperion-1.0/Src/Crypter/bin/crypter.exe /usr/share/windows-binaries/Hyperion-1.0/crypter.exe                        #***!!! hardcoded path!
+      wine ~/.wine/drive_c/MinGW/bin/g++.exe /usr/share/windows-binaries/Hyperion-1.0/Src/Crypter/*.cpp \
+        -o /usr/share/windows-binaries/hyperion.exe 2>&1 \
+        | grep -v 'If something goes wrong, please rerun with\|for more detailed debugging output'
+      #--- Add to path
+      file=/usr/local/bin/hyperion
+      cat <<EOF > "${file}" \
+  || echo -e "${RED}[!] Issue with writing file${RESET}" 1>&2
+#!/bin/bash
+## Note: This is far from perfect...
+RED="\033[01;31m"
+RESET="\033[00m"
+CWD=\$(pwd)/
+BWD="?"
+## Using full path?
+[ -e "/\${1}" ] && BWD=""
+## Using relative path?
+[ -e "./\${1}" ] && BWD="\${CWD}"
+## Can't find input file!
+[[ "\${BWD}" == "?" ]] && echo -e " ${RED}[!]${RESET} Cant find \$1. , input file? Quitting..." && exit
+## The magic!
+cd /usr/share/windows-binaries/Hyperion-1.0/
+$(which wine) ./Src/Crypter/bin/crypter.exe \${BWD}\${1} output.exe
+## Restore our path
+cd \${CWD}/
+sleep 1s
+## Move the output file
+mv -f /usr/share/windows-binaries/Hyperion-1.0/output.exe \${2} 2>/dev/null  \
+ || printf "${RED}[!] Issue with writing file, please indicate an input file ${RESET}" 1>&2
+## Generate file hashes
+for FILE in \${1} \${2}; do
+  echo "[i] \$(md5sum \${FILE})"
+done
+EOF
+    chmod +x "${file}"
+  fi
+# We more steps added to avoid last minute work.
+pushd /usr/share/windows-binaries/hyperion
+cp -p /usr/lib/gcc/i686-w64-mingw32/7.2-win32/libstdc++-6.dll .
+cp -p /usr/lib/gcc/i686-w64-mingw32/7.2-win32/libgcc_s_sjlj-1.dll .
+popd
+
+
+
+else
+   (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Hyperion Already Installed ${ORANGE} Skipping.... ${RESET}"
+fi
+
+
+
+#### Install Backdoor Factory Proxy (BDFProxy)
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Backdoor Factory Proxy (BDFProxy) ${ORANGE} ~ Patches Binaries Files During a MITM ${RESET}"
+apt -y -qq install bdfproxy \
+  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+
+
+# #### Install BetterCap
+# (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing BetterCap ${ORANGE} ~ MITM Framework ${RESET} "
+# apt -y -qq install ruby-dev libpcap-dev \
+# || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+# git clone -q -b master https://github.com/evilsocket/bettercap.git /opt/bettercap-git/ \
+# || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
+# pushd /opt/bettercap-git/ >/dev/null
+# git pull -q
+# gem build bettercap.gemspec
+# gem install bettercap*.gem
+# popd >/dev/null
+
+
+#### Install mitmf
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing MITMf ${ORANGE} ~ Framework for MITM Attacks ${RESET}"
+apt -y -qq install mitmf \
+  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+
+
+#### Install seclist
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Seclist ${ORANGE} ~ Multiple Types of Word lists and similar ${RESET}"
+apt -y -qq install seclists \
+  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+#--- Link to others
+apt -y -qq install wordlists \
+  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+[ -e /usr/share/seclists ] \
+  && ln -sf /usr/share/seclists /usr/share/wordlists/seclists
+
+
+#### Update wordlists
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Updating Wordlists ${ORANGE} ~ Collection of Wordlists ${RESET}"
+apt -y -qq install wordlists \
+  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+#--- Extract rockyou wordlist
+[ -e /usr/share/wordlists/rockyou.txt.gz ] \
+  && gzip -dc < /usr/share/wordlists/rockyou.txt.gz > /usr/share/wordlists/rockyou.txt
+#--- Add 10,000 Top/Worst/Common Passwords
+mkdir -p /usr/share/wordlists/
+(curl --progress -k -L -f "http://xato.net/files/10k most common.zip" > /tmp/10kcommon.zip 2>/dev/null \
+  || curl --progress -k -L -f "http://download.g0tmi1k.com/wordlists/common-10k_most_common.zip" > /tmp/10kcommon.zip 2>/dev/null) \
+  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading 10kcommon.zip" 1>&2
+unzip -q -o -d /usr/share/wordlists/ /tmp/10kcommon.zip 2>/dev/null   #***!!! hardcoded version! Need to manually check for updates
+mv -f /usr/share/wordlists/10k{\ most\ ,_most_}common.txt
+#--- Linking to more - folders
+[ -e /usr/share/dirb/wordlists ] \
+  && ln -sf /usr/share/dirb/wordlists /usr/share/wordlists/dirb
+#--- Extract sqlmap wordlist
+unzip -o -d /usr/share/sqlmap/txt/ /usr/share/sqlmap/txt/wordlist.zip
+ln -sf /usr/share/sqlmap/txt/wordlist.txt /usr/share/wordlists/sqlmap.txt
+#--- Not enough? Want more? Check below!
+#apt search wordlist
+#find / \( -iname '*wordlist*' -or -iname '*passwords*' \) #-exec ls -l {} \;
+
+
+#### Install Babel scripts
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing Babel Scripts ${ORANGE} ~ Post Exploitation Scripts ${RESET}"
+git clone -q -b master https://github.com/attackdebris/babel-sf.git /opt/babel-sf-git/ \
+  || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
+pushd /opt/babel-sf-git/ >/dev/null
+git pull -q
+popd >/dev/null
+
+#### Install smbspider
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing smbspider ${ORANGE} ~ Search Network Shares - SMB ${RESET}"
+git clone -q -b master https://github.com/T-S-A/smbspider.git /opt/smbspider-git/ \
+  || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
+pushd /opt/smbspider-git/ >/dev/null
+git pull -q
+popd >/dev/null
+
+#### Install CrackMapExec
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing CrackMapExec ${ORANGE} ~ Swiss Army Knife for Windows Environments ${RESET}"
+git clone -q -b master https://github.com/byt3bl33d3r/CrackMapExec.git /opt/crackmapexec-git/ \
+  || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
+pushd /opt/crackmapexec-git/ >/dev/null
+git pull -q
+popd >/dev/null
+
+
+#### Install credcrack
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing credcrack  ${ORANGE} ~ Credential Harvester Via Samba ${RESET}"
+git clone -q -b master https://github.com/gojhonny/CredCrack.git /opt/credcrack-git/ \
+  || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
+pushd /opt/credcrack-git/ >/dev/null
+git pull -q
+popd >/dev/null
+
+
+#### Install Empire
+if ! foobar_loc="$(type -p "empire-git")" || [ -z "$foobar_loc" ]; then
+  (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Empire ${ORANGE} ~ PowerShell Post-Exploitation Tool ${RESET}"
+  git clone -q -b master https://github.com/PowerShellEmpire/Empire.git /opt/empire-git/ \
+    || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
+  pushd /opt/empire-git/ >/dev/null
+  git pull -q
+  popd >/dev/null
+  #--- Add to path
+  file=/usr/local/bin/empire-git
+cat <<EOF > "${file}" \
+  || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
+#!/bin/bash
+cd /opt/empire-git/ && python empire-git "\$@"
+EOF
+chmod +x "${file}"
+echo -e " ${YELLOW}[i]${ORANGE} Don't forget to run:  ${BOLD}${YELLOW}/opt/empire-git/setup/install.sh ${RESET}***"
+# pushd /opt/empire-git/setup/ >/dev/null
+# ./install.sh
+# popd >/dev/null
+else
+  (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Empire Already Installed ${ORANGE} Pulling from github .... ${RESET}"
+  pushd /opt/empire-git/ >/dev/null
+  git pull -q
+  popd >/dev/null
+
+fi
+
+#### Install wig (https://bugs.kali.org/view.php?id=1932)
+if ! foobar_loc="$(type -p "wig-git")" || [ -z "$foobar_loc" ]; then
+  (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Wig ${ORANGE} ~ Web Application Detection ${RESET}"
+  git clone -q -b master https://github.com/EmpireProject/Empire.git /opt/wig-git/ \
+    || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
+  pushd /opt/wig-git/ >/dev/null
+  git pull -q
+  popd >/dev/null
+  #--- Add to path
+  file=/usr/local/bin/wig-git;
+cat <<EOF > "${file}" \
+  || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
+#!/bin/bash
+cd /opt/wig-git/ && python wig.py "\$@"
+EOF
+chmod +x "${file}"
+
+else
+  (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} WIG Already Installed ${ORANGE} Pulling from github .... ${RESET}"
+  pushd /opt/wig-git/ >/dev/null
+  git pull -q
+  popd >/dev/null
+fi
+
+
+#### Install CMSmap --  CMS detection
+if ! foobar_loc="$(type -p "cmsmap-git")" || [ -z "$foobar_loc" ]; then
+  (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing CMSmap ${ORANGE} ~ CMS Detection ${RESET}"
+  git clone -q -b master https://github.com/Dionach/CMSmap.git /opt/cmsmap-git/ \
+    || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
+  pushd /opt/cmsmap-git/ >/dev/null
+  git pull -q
+  popd >/dev/null
+  #--- Add to path
+  file=/usr/local/bin/cmsmap-git;
+cat <<EOF > "${file}" \
+  || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
+#!/bin/bash
+cd /opt/cmsmap-git/ && python cmsmap.py "\$@"
+EOF
+chmod +x "${file}"
+else
+  (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} CMSmap-git Already Installed ${ORANGE} Pulling from github .... ${RESET}"
+  pushd /opt/cmsmap-git/ >/dev/null
+  git pull -q
+  popd >/dev/null
+fi
+
+
+#### Install droopescan
+if ! foobar_loc="$(type -p "droopescan-git")" || [ -z "$foobar_loc" ]; then
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing DroopeScan ${ORANGE} ~ Drupal Vulnerability Scanner ${RESET}"
+git clone -q -b master https://github.com/droope/droopescan.git /opt/droopescan-git/ \
+  || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
+pushd /opt/droopescan-git/ >/dev/null
+git pull -q
+popd >/dev/null
+#--- Add to path
+file=/usr/local/bin/droopescan-git
+cat <<EOF > "${file}" \
+  || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
+#!/bin/bash
+cd /opt/droopescan-git/ && python droopescan "\$@"
+EOF
+chmod +x "${file}"
+else
+  (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Droopscan-git Already Installed ${ORANGE} Pulling from github .... ${RESET}"
+  pushd /opt/droopescan-git/ >/dev/null
+  git pull -q
+  pip install -r requirements.txt
+  popd >/dev/null
+fi
+
+
+#### Install Crowbar -- brute force"
+if ! foobar_loc="$(type -p "crowbar-git")" || [ -z "$foobar_loc" ]; then
+  (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing crowbar ${ORANGE} ~ Brute Force Tool ${RESET}"
+  apt -y -qq install freerdp-x11 tigervnc-viewer \
+    || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+  git clone -q -b master https://github.com/galkan/crowbar.git /opt/crowbar-git/ \
+    || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
+  pushd /opt/crowbar-git/ >/dev/null
+  git pull -q
+  popd >/dev/null
+  #--- Add to path
+  mkdir -p /usr/local/bin/
+  file=/usr/local/bin/crowbar-git
+  cat <<EOF > "${file}" \
+    || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
+  #!/bin/bash
+  cd /opt/crowbar-git/ && python crowbar.py "\$@"
+EOF
+  chmod +x "${file}"
+
+else
+  (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Crowbar-git Already Installed ${ORANGE} Pulling from github .... ${RESET}"
+  pushd /opt/crowbar-git/ >/dev/null
+  git pull -q
+  popd >/dev/null
+
+fi
+
+
+#### Install xprobe  -- OS fingerprinting
+if ! foobar_loc="$(type -p "xprobe2")" || [ -z "$foobar_loc" ]; then
+  (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing xprobe2 ${ORANGE} ~ OS Fingerprinting ${RESET}"
+  apt -y -qq install xprobe \
+    || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+else
+  (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Xprobe2 Already Installed ${ORANGE} Skipping.... ${RESET}"
+fi
+
+
+
+#### Install UACScript
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing UACScript ${ORANGE} ~ UAC Bypass for Windows 7 ${RESET}"
+git clone -q -b master https://github.com/Vozzie/uacscript.git /opt/uacscript-git/ \
+  || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
+pushd /opt/uacscript-git/ >/dev/null
+git pull -q
+popd >/dev/null
+ln -sf /usr/share/windows-binaries/uac-win7 /opt/uacscript-git/
+
+
+#### Install virtualenvwrapper
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing Virtualenvwrapper ${ORANGE} ~ Virtual Environment Wrapper ${RESET}"
+apt -y -qq install virtualenvwrapper \
+  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+
+
+#### Install go
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Go ${ORANGE} ~ Programming Language ${RESET}"
+apt -y -qq install golang \
+  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+
+#### Install gitg
+if ! foobar_loc="$(type -p "gitg")" || [ -z "$foobar_loc" ]; then
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Gitg ${ORANGE} ~ GUI Git Client ${RESET}"
+apt -y -qq install gitg \
+  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+else
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Gitg Already Installed ${ORANGE} Skipping.... ${RESET}"
+fi
+
+
+#### Install Gnmap-Parser (fork)
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Gnmap-Parser (fork) ${ORANGE} ~ Parse Nmap Exports into various plain-text formats ${RESET}"
+git clone -q -b master https://github.com/nullmode/gnmap-parser.git /opt/gnmap-parser-git/ \
+  || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
+pushd /opt/gnmap-parser-git/ >/dev/null
+git pull -q
+popd >/dev/null
+#--- Add to path
+chmod +x /opt/gnmap-parser-git/gnmap-parser.sh
+mkdir -p /usr/local/bin/
+ln -sf /opt/gnmap-parser-git/gnmap-parser.sh /usr/local/bin/gnmap-parser-git
+
+
+#### Install udp-proto-scanner
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing UDP-Proto-Scanner ${ORANGE} ~ Common UDP Port Scanner ${RESET}"
+timeout 300 curl --progress -k -L -f "https://labs.portcullis.co.uk/download/udp-proto-scanner-1.1.tar.gz" -o /tmp/udp-proto-scanner.tar.gz \
+  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading udp-proto-scanner.tar.gz" 1>&2
+gunzip /tmp/udp-proto-scanner.tar.gz
+tar -xf /tmp/udp-proto-scanner.tar -C /opt/
+mv -f /opt/udp-proto-scanner{-1.1,}
+#--- Add to path
+mkdir -p /usr/local/bin/
+file=/usr/local/bin/udp-proto-scanner
+cat <<EOF > "${file}" \
+  || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
+#!/bin/bash
+cd /opt/udp-proto-scanner/ && perl udp-proto-scanner.pl "\$@"
+EOF
+chmod +x "${file}"
+
+
+#### Install clusterd
+if ! foobar_loc="$(type -p "clusterd")" || [ -z "$foobar_loc" ]; then
+  (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Clusterd ${ORANGE} ~ Clustered Attack Toolkit (JBoss, ColdFusion, WebLogic, Tomcat etc) ${RESET}"
+  apt -y -qq install clusterd \
+    || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+else
+  echo -e "\n\n ${ORANGE}[i]${RESET} ${GREEN} Cluster is already installed.... ${YELLOW} Skipping  ${RESET}"
+fi
+
+
+#### Install webhandler
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Webhandler ${ORANGE} ~ Shell TTY Handler ${RESET}"
+apt -y -qq install webhandler \
+  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+#--- Add to path
+mkdir -p /usr/local/bin/
+ln -sf /usr/bin/webhandler /usr/local/bin/wh
+
+
+#### Install Azazel
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Azazel ${ORANGE} ~ Linux Userland Rootkit ${RESET}"
+git clone -q -b master https://github.com/chokepoint/azazel.git /opt/azazel-git/ \
+  || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
+pushd /opt/azazel-git/ >/dev/null
+git pull -q
+popd >/dev/null
+
+#### Install gobuster
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Gobuster ${ORANGE} ~ Directory/File/DNS Busting tool ${RESET}"
+apt -y -qq install gobuster \
+  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+
+
+#### Install reGeorg
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing ReGeorg ${ORANGE} ~ Pivot Via Web Shells ${RESET}"
+git clone -q -b master https://github.com/sensepost/reGeorg.git /opt/regeorg-git \
+  || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
+pushd /opt/regeorg-git/ >/dev/null
+git pull -q
+popd >/dev/null
+#---
+ln -sf /opt/regeorg-git /usr/share/webshells/reGeorg
+#--- Link to others
+apt -y -qq install webshells \
+  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+
+
+#### Install Subterfuge  - GIT
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Subterfuge ${ORANGE} ~ MITM ${RESET}"
+git clone -q -b master https://github.com/Subterfuge-Framework/Subterfuge.git /opt/subterfuge-git \
+  || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
+# hardcoded value....
+curl --progress -k -L -f "https://raw.githubusercontent.com/kawaxi/Kali-Setup/master/lib/subterfurge-setup.py" > /opt/subterfuge-git/setup.py \
+  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading setup.py" 1>&2            #***!!! hardcoded version! Need to manually check for updates
+python /opt/subterfuge-git/setup.py \
+  || echo -e ' '${RED}'[!] Issue whith setup script'${RESET} 1>&2
+ ## If you have any issues , try this other option.
+#git clone https://github.com/Subterfuge-Framework/Subterfuge.git
+#cd Subterfuge
+#git checkout git-setup
+#python setup.py
+
+#### Install Bettercap
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Bettarcap ${ORANGE} ~ MITM  ${RESET}"
+apt-get -y -q install bettercap  \
+  || echo -e ' '${RED}'[!] Issue with apt install'${RESET} 1>&2
+
+#### Install patator (GIT)
+if ! foobar_loc="$(type -p "patator-git")" || [ -z "$foobar_loc" ]; then
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing Patator  (GIT) ${ORANGE} ~ Brute Forcer ${RESET}"
+git clone -q -b master https://github.com/lanjelot/patator.git /opt/patator-git/ \
+  || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
+pushd /opt/patator-git/ >/dev/null
+git pull -q
+popd >/dev/null
+#--- Add to path
+mkdir -p /usr/local/bin/
+file=/usr/local/bin/patator-git
+cat <<EOF > "${file}" \
+  || echo -e ' '${RED}'[!] Issue with writing file'${RESET} 1>&2
+#!/bin/bash
+cd /opt/patator-git/ && python patator.py "\$@"
+EOF
+chmod +x "${file}"
+else
+  (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN} Patator Already Installed ${ORANGE} Pulling from github .... ${RESET}"
+  pushd /opt/patator-git/ >/dev/null
+  git pull -q
+  popd >/dev/null
+
+fi
+
+#### Install Gophish, hardcoded please check for updates
+file=/tmp/gophish.zip
+#--- Using x64?
+if [[ "$(uname -m)" == 'x86_64' ]]; then
+  (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing${GREEN}Gophish x64 ${ORANGE} ~  Phishing Toolkit ${RESET}"
+  timeout 300 curl --progress -k -L -f  "https://github.com/gophish/gophish/releases/download/v0.4.0/gophish-v0.4-linux-64bit.zip" > ${file} \
+    || echo -e ' '${RED}'[!]'${RESET}" Issue downloading sublime.deb" 1>&2
+else
+  (( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL}) ${GREEN}Installing${GREEN}Gophish x32 ${ORANGE} ~  Phishing Toolkit ${RESET}"
+  timeout 300 curl --progress -k -L -f "https://github.com/gophish/gophish/releases/download/v0.4.0/gophish-v0.4-linux-32bit.zip" > ${file} \
+    || echo -e ' '${RED}'[!]'${RESET}" Issue downloading sublime.deb" 1>&2
+fi
+7z x -aoa -y "${file}" -o/opt/gophish/
+pushd /opt/gophish/* > /dev/null
+## Moving files to an up directory and delecting the current Directory
+cp -rf * ../ && rm -rf -- "$(pwd -P)" && cd ..
+popd > /dev/null
+#--- Add to path (with a 'better' name)
+file=/usr/local/bin/gophish
+cat <<EOF > "${file}" \
+  || echo -e "${RED}[!] Issue with writing file${RESET}" 1>&2
+#!/bin/bash
+cd /opt/gophish/ && ./gophish "\$@"
+EOF
+chmod +x "${file}"
+
+
+####Installing fuzzbunch
+
+(( STAGE++ )); echo -e "\n\n ${GREEN}[*]${RESET} (${STAGE}/${TOTAL})${GREEN} Installing fuzzbunch  ${ORANGE} ~ NSA tools ${RESET}"
+
+WINEPREFIX="$HOME/.wine-fuzzbunch" WINEARCH=win32 wine wineboot
+
+cd $HOME/.wine-fuzzbunch/drive_c
+git clone https://github.com/mdiazcl/fuzzbunch-debian.git \
+  || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
+
+echo -e "\n ${ORANGE}[*]${ORANGE} Modifying windows registry ${RESET} \n"
+
+export WINEPREFIX=$HOME/.wine-fuzzbunch
+grep -q '^"PATH"=.*C:\\\\Python26' ~/.wine-fuzzbunch/system.reg \
+|| sed -i '/^"PATH"=/ s_"$_;C:\\\\Python26"_' ~/.wine-fuzzbunch/system.reg
+
+grep -q '^"PATH"=.*C:\\\\fuzzbunch-debian\\\\windows\\\\fuzzbunch' ~/.wine-fuzzbunch/system.reg \
+|| sed -i '/^"PATH"=/ s_"$_;C:\\\\fuzzbunch-debian\\\\windows\\\\fuzzbunch"_' ~/.wine-fuzzbunch/system.reg
+
+#### Method 1 , this one is more efficient.
+echo -e "\n ${ORANGE}[*]${ORANGE} Installing using first method ${RESET}"
+
+export WINEPREFIX=$HOME/.wine-fuzzbunch
+cd $HOME/.wine-fuzzbunch/drive_c/fuzzbunch-debian/installers
+
+nohup wine 'cmd.exe ' &
+sleep 2s
+msiexec /a python-2.6.msi & HEXPID=$!
+sleep 2s
+
+echo -e "${YELLOW} [i]${ORANGE}  Our PID for Python is:${RESET} $HEXPID "
+sleep 2s
+#
+HEXWINID=$(xdotool search --any --pid ${HEXPID} --name "Python 2.6.2" | tail -1 )
+echo -e "${YELLOW} [i]${ORANGE} We found our window ID for Python PID :${RESET} $HEXWINID \n"
+
+xdotool windowactivate --sync ${HEXWINID} key --clearmodifiers Return
+sleep 1s
+HEXWINID=$(xdotool search --any --pid ${HEXPID} --name "Python 2.6.2" | tail -1 )
+xdotool windowactivate --sync ${HEXWINID} key --clearmodifiers Return
+sleep 1s
+
+HEXWINID=$(xdotool search --any --pid ${HEXPID} --name "Python 2.6.2" | tail -1 )
+xdotool windowactivate --sync ${HEXWINID} key --clearmodifiers Return
+sleep 8s
+HEXWINID=$(xdotool search --any --pid ${HEXPID} --name "Python 2.6.2" | tail -1 )
+xdotool windowactivate --sync ${HEXWINID} key --clearmodifiers Return
+
+
+export WINEPREFIX=$HOME/.wine-fuzzbunch
+cd $HOME/.wine-fuzzbunch/drive_c/fuzzbunch-debian/installers
+wine "pywin32-219.win32-py2.6.exe" & HEXPID=$!
+#wine "Z:\root\.wine-fuzzbunch\drive_c\fuzzbunch-debian\installers\pywin32-219.win32-py2.6.exe" & HEXPID=$!
+
+echo -e "${YELLOW} [i]${ORANGE}  Our PID for Python is:${RESET}$HEXPID ${RESET} "
+sleep 2s
+HEXWINID=$(xdotool search --any --pid ${HEXPID} --name "Setuyp pywin32-219" | tail -1 )
+echo -e "${YELLOW}[i]${ORANGE} We found our window ID for Python:${RESET} $HEXWINID ${RESET} \n"
+
+xdotool windowactivate --sync ${HEXWINID} key --clearmodifiers Return
+xdotool windowactivate --sync ${HEXWINID} key --clearmodifiers Return
+xdotool windowactivate --sync ${HEXWINID} key --clearmodifiers Return
+sleep 7s
+xdotool windowactivate --sync ${HEXWINID} key --clearmodifiers --delay 100 alt+F4
+
+echo -e "${YELLOW} [i]${ORANGE} is the PATH correct?  ${YELLOW}  "
+#Possible error in here.
+echo -e " $(cat ~/.wine-fuzzbunch/system.reg | grep PATH) ${RESET}"
+
+#--- Setup alias
+file=~/.bash_aliases; [ -e "${file}" ] && cp -n $file{,.bkup}   #/etc/bash.bash_aliases
+([[ -e "${file}" && "$(tail -c 1 ${file})" != "" ]]) && echo >> "${file}"
+grep -q '^## fuzzbunch' "${file}" 2>/dev/null \
+  || echo -e '## fuzzbunch\nalias fuzzbunch="cd ~/.wine-fuzzbunch/drive_c/fuzzbunch-debian/windows; wine cmd.exe"\n' >> "${file}"
+#--- Apply new alias
+source "${file}" || source ~/.zshrc
+echo -e " ${YELLOW}[i]${ORANGE} Now you can run fuzzbunch-debian with ${BOLD}${ORANGE}fuzzbunch${RESET}***"
+
+
+
+
+#### WineTricks METHOD
+# export WINEPREFIX=$HOME/.wine-fuzzbunch
+# nohup winetricks python26 & HEXPID=$!
+# #--- Initiating Hexchat and saving the pid.
+# sleep 30s
+# echo -e "${ORANGE} [i]${ORANGE} Our PID for Python is:$HEXPID "
+#
+#
+# HEXWINID=$(xdotool search --any --pid ${HEXPID} --name "Python 2.6.2" | tail -1 )
+# echo -e "${ORANGE} [i]${ORANGE} We found our window ID for Python PID : $HEXWINID \n"
+#
+#
+# xdotool windowactivate --sync ${HEXWINID} key --clearmodifiers Return
+# sleep 1s
+# HEXWINID=$(xdotool search --any --pid ${HEXPID} --name "Python 2.6.2" | tail -1 )
+# xdotool windowactivate --sync ${HEXWINID} key --clearmodifiers Return
+# sleep 1s
+# HEXWINID=$(xdotool search --any --pid ${HEXPID} --name "Python 2.6.2" | tail -1 )
+# xdotool windowactivate --sync ${HEXWINID} key --clearmodifiers Return
+# sleep 10s
+# HEXWINID=$(xdotool search --any --pid ${HEXPID} --name "Python 2.6.2" | tail -1 )
+# xdotool windowactivate --sync ${HEXWINID} key --clearmodifiers Return
+#
+#
+# sleep 7s
+# xdotool key --clearmodifiers Return
+#
+# xdotool key --clearmodifiers Return
+#
+# xdotool key --clearmodifiers Return
+# sleep 9s
+# xdotool key --clearmodifiers --delay 100 alt+F4
+#
+# cat ~/.wine-fuzzbunch/system.reg | grep PATH
+#
+
+#--- Installing Imsonia Shell
+curl --progress -k -L -f "https://www.insomniasec.com/downloads/tools/InsomniaShell.zip" > /tmp/imsonia.zip 2>/dev/null \
+  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading InsomniaShell.zip" 1>&2
+unzip -q -o -d /usr/share/webshells/aspx/ /tmp/imsonia.zip 2>/dev/null
+
+#--- Installing JSWebMeter Shell
+git clone -q -b master https://github.com/Cn33liz/JSMeter.git /usr/share/webshells/JSWebMeter/ \
+  || echo -e ' '${RED}'[!] Issue when git cloning'${RESET} 1>&2
+pushd /usr/share/webshells/JSWebMeter/ >/dev/null
+git pull -q
+popd >/dev/null
+
+#--- Installing from https://webshell.co/
+#--- Pouya Shell
+curl --progress -k -L -f "https://webshell.co/shells/asp/zip/pouyashell.zip" > /tmp/shell.zip 2>/dev/null \
+  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading PouyaShell" 1>&2
+7z e -ppass /tmp/shell.zip -o/usr/share/webshells/asp/ 1>/dev/null
+#--- kacakshell
+curl --progress -k -L -f "https://webshell.co/shells/asp/zip/kacakshell.zip" > /tmp/shell.zip 2>/dev/null \
+  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading Shell" 1>&2
+7z e -ppass /tmp/shell.zip -o/usr/share/webshells/asp/ 1>/dev/null
+#--- c99
+curl --progress -k -L -f "https://webshell.co/shells/php/zip/c99shell.zip" > /tmp/shell.zip 2>/dev/null \
+  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading Shell" 1>&2
+7z e -ppass /tmp/shell.zip -o/usr/share/webshells/php/ 1>/dev/null
+#--- b374kshell
+curl --progress -k -L -f "https://webshell.co/shells/php/zip/b374kshell.zip" > /tmp/shell.zip 2>/dev/null \
+  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading Shell" 1>&2
+7z e -ppass /tmp/shell.zip -o/usr/share/webshells/php/ 1>/dev/null
+#--- r57shell
+curl --progress -k -L -f "https://webshell.co/shells/php/zip/r57shell.zip" > /tmp/shell.zip 2>/dev/null \
+  || echo -e ' '${RED}'[!]'${RESET}" Issue downloading Shell" 1>&2
+7z e -ppass /tmp/shell.zip -o/usr/share/webshells/php/ 1>/dev/null
+
+
+
+}
